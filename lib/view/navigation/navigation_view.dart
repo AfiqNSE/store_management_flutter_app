@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:store_management_system/view/account_view/account_view.dart';
-import 'package:store_management_system/view/home_view/home_view.dart';
-import 'package:store_management_system/view/pallet_list_view/pallet_view.dart';
+import 'package:store_management_system/view/account/account_view.dart';
+import 'package:store_management_system/view/pallet/pallet_form.dart';
+import 'package:store_management_system/view/home/home_view.dart';
 
 class NavigationTabView extends StatefulWidget {
   const NavigationTabView({super.key});
@@ -14,12 +14,12 @@ class NavigationTabView extends StatefulWidget {
 class _NavigationTabViewState extends State<NavigationTabView>
     with TickerProviderStateMixin {
   late final TabController _tabController;
-  int _currentIndex = 1;
+  int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
     _tabController.addListener(_handleTabSelection);
   }
 
@@ -43,8 +43,8 @@ class _NavigationTabViewState extends State<NavigationTabView>
       body: TabBarView(
         controller: _tabController,
         children: const <Widget>[
-          PalletListView(),
           HomeView(),
+          PalletFormView(),
           AccountView(),
         ],
       ),
@@ -71,15 +71,15 @@ class _NavigationTabViewState extends State<NavigationTabView>
               padding: const EdgeInsets.all(11),
               tabs: [
                 GButton(
-                  icon: Icons.format_list_bulleted,
-                  text: 'Pallet List',
+                  icon: Icons.home,
+                  text: 'Home',
                   onPressed: () {
-                    _tabController.animateTo(1);
+                    _tabController.animateTo(0);
                   },
                 ),
                 GButton(
-                  icon: Icons.home,
-                  text: 'Home',
+                  icon: Icons.edit_document,
+                  text: 'Pallet Form',
                   onPressed: () {
                     _tabController.animateTo(1);
                   },

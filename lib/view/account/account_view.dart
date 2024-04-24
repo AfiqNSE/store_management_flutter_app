@@ -12,21 +12,7 @@ class _AccountViewState extends State<AccountView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: appBarTitle('My Account'),
-        backgroundColor: const Color.fromRGBO(245, 254, 253, 1),
-        centerTitle: true,
-        elevation: 0.0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.logout_sharp),
-            ),
-          )
-        ],
-      ),
+      appBar: customAppBar('My Account'),
       backgroundColor: const Color.fromRGBO(245, 254, 253, 1),
       body: SingleChildScrollView(
         child: Column(
@@ -45,7 +31,7 @@ class _AccountViewState extends State<AccountView> {
                     ),
                   ),
                   Divider(
-                    color: Colors.grey.shade300,
+                    color: Colors.grey.shade200,
                   ),
                   ListTile(
                     visualDensity: const VisualDensity(vertical: -4),
@@ -67,7 +53,7 @@ class _AccountViewState extends State<AccountView> {
                     onTap: () {},
                   ),
                   Divider(
-                    color: Colors.grey.shade300,
+                    color: Colors.grey.shade200,
                   ),
                   ListTile(
                     visualDensity: const VisualDensity(vertical: -4),
@@ -89,7 +75,7 @@ class _AccountViewState extends State<AccountView> {
                     onTap: () {},
                   ),
                   Divider(
-                    color: Colors.grey.shade300,
+                    color: Colors.grey.shade200,
                   ),
                   const SizedBox(height: 30),
                   const Text(
@@ -101,7 +87,7 @@ class _AccountViewState extends State<AccountView> {
                     ),
                   ),
                   Divider(
-                    color: Colors.grey.shade300,
+                    color: Colors.grey.shade200,
                   ),
                   ListTile(
                     visualDensity: const VisualDensity(vertical: -4),
@@ -123,7 +109,7 @@ class _AccountViewState extends State<AccountView> {
                     onTap: () {},
                   ),
                   Divider(
-                    color: Colors.grey.shade300,
+                    color: Colors.grey.shade200,
                   ),
                   ListTile(
                     visualDensity: const VisualDensity(vertical: -4),
@@ -145,7 +131,7 @@ class _AccountViewState extends State<AccountView> {
                     onTap: () {},
                   ),
                   Divider(
-                    color: Colors.grey.shade300,
+                    color: Colors.grey.shade200,
                   ),
                   ListTile(
                     visualDensity: const VisualDensity(vertical: -4),
@@ -167,7 +153,7 @@ class _AccountViewState extends State<AccountView> {
                     onTap: () {},
                   ),
                   Divider(
-                    color: Colors.grey.shade300,
+                    color: Colors.grey.shade200,
                   ),
                   const SizedBox(height: 30),
                   const Text(
@@ -179,7 +165,7 @@ class _AccountViewState extends State<AccountView> {
                     ),
                   ),
                   Divider(
-                    color: Colors.grey.shade300,
+                    color: Colors.grey.shade200,
                   ),
                   ListTile(
                     visualDensity: const VisualDensity(vertical: -4),
@@ -201,7 +187,7 @@ class _AccountViewState extends State<AccountView> {
                     onTap: () {},
                   ),
                   Divider(
-                    color: Colors.grey.shade300,
+                    color: Colors.grey.shade200,
                   ),
                   ListTile(
                     visualDensity: const VisualDensity(vertical: -4),
@@ -223,7 +209,7 @@ class _AccountViewState extends State<AccountView> {
                     onTap: () {},
                   ),
                   Divider(
-                    color: Colors.grey.shade300,
+                    color: Colors.grey.shade200,
                   ),
                 ],
               ),

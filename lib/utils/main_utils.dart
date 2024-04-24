@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 
-Widget appBarTitle(
+AppBar customAppBar(
   String title,
 ) {
-  return Text(title,
+  return AppBar(
+    title: Text(
+      title,
       style: const TextStyle(
+        color: Color.fromRGBO(40, 40, 43, 1),
         fontSize: 20,
-        fontWeight: FontWeight.w400,
-      ));
+        fontWeight: FontWeight.w500,
+      ),
+    ),
+    elevation: 0.0,
+    centerTitle: true,
+    backgroundColor: const Color.fromRGBO(245, 254, 253, 1),
+  );
 }
 
 class SlideRoute extends PageRouteBuilder {

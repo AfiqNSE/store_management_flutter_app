@@ -33,7 +33,7 @@ class _PalletFormViewState extends State<PalletFormView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: customAppBar('Open Pallet Form'),
-      backgroundColor: const Color.fromRGBO(245, 254, 253, 1),
+      backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
         child: SingleChildScrollView(
@@ -41,10 +41,9 @@ class _PalletFormViewState extends State<PalletFormView> {
             children: [
               Container(
                 alignment: Alignment.topCenter,
-                height: 440,
+                height: 520,
                 decoration: BoxDecoration(
-                  color:
-                      const Color.fromRGBO(102, 153, 204, 1).withOpacity(0.5),
+                  color: const Color.fromRGBO(237, 237, 237, 1),
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
@@ -63,15 +62,22 @@ class _PalletFormViewState extends State<PalletFormView> {
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 5, 0, 20),
-                      child: SizedBox(
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Color.fromRGBO(252, 252, 252, 1),
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
                         height: 35,
                         child: TextField(
                           cursorHeight: 22,
                           style: const TextStyle(
                             fontSize: 16,
+                            color: Color.fromRGBO(40, 40, 43, 1),
                           ),
-                          textAlign: TextAlign.start,
+                          textAlign: TextAlign.center,
                           decoration: InputDecoration(
+                            hintText: 'Enter Pallet Number',
+                            hintStyle: const TextStyle(fontSize: 14),
                             contentPadding:
                                 const EdgeInsets.fromLTRB(10, 12, 0, 0),
                             border: OutlineInputBorder(
@@ -129,15 +135,22 @@ class _PalletFormViewState extends State<PalletFormView> {
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 5, 0, 20),
-                      child: SizedBox(
+                      child: Container(
                         height: 35,
+                        decoration: const BoxDecoration(
+                          color: Color.fromRGBO(252, 252, 252, 1),
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
                         child: TextField(
                           cursorHeight: 22,
                           style: const TextStyle(
                             fontSize: 16,
+                            color: Color.fromRGBO(40, 40, 43, 1),
                           ),
-                          textAlign: TextAlign.start,
+                          textAlign: TextAlign.center,
                           decoration: InputDecoration(
+                            hintText: 'Enter Lorry Number',
+                            hintStyle: const TextStyle(fontSize: 14),
                             contentPadding:
                                 const EdgeInsets.fromLTRB(10, 12, 0, 0),
                             border: OutlineInputBorder(
@@ -148,14 +161,44 @@ class _PalletFormViewState extends State<PalletFormView> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(top: 20),
-                      child: Center(
-                        child: SizedBox(
-                          width: double.maxFinite,
-                          child: ElevatedButton(
+                      padding: const EdgeInsets.fromLTRB(8, 10, 8, 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
                             style: ButtonStyle(
+                              shape: MaterialStateProperty.all<OutlinedBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: const BorderSide(
+                                    color: Color.fromRGBO(102, 153, 204, 1),
+                                    width: 1.3,
+                                  ),
+                                ),
+                              ),
                               backgroundColor: MaterialStateProperty.all<Color>(
-                                const Color.fromRGBO(102, 153, 204, 1),
+                                const Color.fromRGBO(245, 254, 253, 1),
+                              ),
+                            ),
+                            onPressed: () {},
+                            child: Text(
+                              'Clear Form',
+                              style: TextStyle(
+                                color: Colors.blue.shade600,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                          ElevatedButton(
+                            style: ButtonStyle(
+                              shape: MaterialStateProperty.all<OutlinedBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                const Color.fromRGBO(31, 48, 94, 1),
                               ),
                             ),
                             onPressed: () {},
@@ -163,14 +206,14 @@ class _PalletFormViewState extends State<PalletFormView> {
                               'Open Pallet',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 20,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -203,7 +246,7 @@ class _PalletFormViewState extends State<PalletFormView> {
       color: const Color.fromRGBO(40, 40, 43, 1),
       constraints: const BoxConstraints(
         minHeight: 40.0,
-        minWidth: 80.0,
+        minWidth: 100.0,
       ),
       isSelected: selected,
       children: items,
@@ -214,14 +257,9 @@ class _PalletFormViewState extends State<PalletFormView> {
     return DropdownButtonHideUnderline(
       child: DropdownButton2<String>(
         isExpanded: true,
-        hint: const Row(
+        hint: Row(
           children: [
-            Icon(
-              Icons.list,
-              size: 16,
-              color: Color.fromRGBO(40, 40, 43, 1),
-            ),
-            SizedBox(
+            const SizedBox(
               width: 4,
             ),
             Expanded(
@@ -230,7 +268,7 @@ class _PalletFormViewState extends State<PalletFormView> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color.fromRGBO(40, 40, 43, 1),
+                  color: Colors.grey.shade700,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -258,30 +296,21 @@ class _PalletFormViewState extends State<PalletFormView> {
           });
         },
         buttonStyleData: ButtonStyleData(
-          height: 30,
-          width: 300,
+          height: 35,
+          width: 200,
           padding: const EdgeInsets.only(left: 14, right: 14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: const Color.fromRGBO(245, 254, 253, 1),
+            color: const Color.fromRGBO(252, 252, 252, 1),
           ),
-        ),
-        iconStyleData: const IconStyleData(
-          icon: Icon(
-            Icons.arrow_forward_ios_outlined,
-          ),
-          iconSize: 14,
-          iconEnabledColor: Color.fromRGBO(40, 40, 43, 1),
-          iconDisabledColor: Colors.grey,
         ),
         dropdownStyleData: DropdownStyleData(
           maxHeight: 200,
-          width: 300,
+          width: 200,
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 237, 247, 245),
+            color: const Color.fromRGBO(252, 252, 252, 1),
             borderRadius: BorderRadius.circular(14),
           ),
-          offset: const Offset(-20, 0),
           scrollbarTheme: ScrollbarThemeData(
             radius: const Radius.circular(40),
             thickness: MaterialStateProperty.all<double>(6),

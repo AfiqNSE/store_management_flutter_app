@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 AppBar customAppBar(
@@ -9,13 +11,25 @@ AppBar customAppBar(
       style: const TextStyle(
         color: Color.fromRGBO(40, 40, 43, 1),
         fontSize: 20,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w600,
       ),
     ),
     elevation: 0.0,
     centerTitle: true,
-    backgroundColor: const Color.fromRGBO(245, 254, 253, 1),
+    backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
   );
+}
+
+Color customCardColor(String text) {
+  switch (text) {
+    case "InBound":
+      return const Color.fromRGBO(211, 211, 211, 1);
+    case "OutBound":
+      return const Color.fromRGBO(249, 205, 82, 1);
+    case "Pallet":
+    default:
+      return const Color.fromRGBO(252, 252, 252, 1);
+  }
 }
 
 class SlideRoute extends PageRouteBuilder {

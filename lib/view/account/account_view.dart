@@ -13,7 +13,7 @@ class _AccountViewState extends State<AccountView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: customAppBar('My Account'),
-      backgroundColor: const Color.fromRGBO(245, 254, 253, 1),
+      backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -25,8 +25,8 @@ class _AccountViewState extends State<AccountView> {
                   const Text(
                     "Manage Your Account",
                     style: TextStyle(
-                      color: Color.fromRGBO(0, 102, 178, 1),
-                      fontSize: 14,
+                      color: Color.fromRGBO(0, 66, 140, 1),
+                      fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -43,7 +43,7 @@ class _AccountViewState extends State<AccountView> {
                       "Account Information",
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 13,
+                        fontSize: 15,
                       ),
                     ),
                     trailing: const Icon(
@@ -65,7 +65,7 @@ class _AccountViewState extends State<AccountView> {
                       "Account Management",
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 13,
+                        fontSize: 15,
                       ),
                     ),
                     trailing: const Icon(
@@ -81,8 +81,8 @@ class _AccountViewState extends State<AccountView> {
                   const Text(
                     "Need Help?",
                     style: TextStyle(
-                      color: Color.fromRGBO(0, 102, 178, 1),
-                      fontSize: 14,
+                      color: Color.fromRGBO(0, 66, 140, 1),
+                      fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -99,7 +99,7 @@ class _AccountViewState extends State<AccountView> {
                       "FAQ",
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 13,
+                        fontSize: 15,
                       ),
                     ),
                     trailing: const Icon(
@@ -121,7 +121,7 @@ class _AccountViewState extends State<AccountView> {
                       "Application Manual",
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 13,
+                        fontSize: 15,
                       ),
                     ),
                     trailing: const Icon(
@@ -143,7 +143,7 @@ class _AccountViewState extends State<AccountView> {
                       "Feedback",
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 13,
+                        fontSize: 15,
                       ),
                     ),
                     trailing: const Icon(
@@ -159,8 +159,8 @@ class _AccountViewState extends State<AccountView> {
                   const Text(
                     "Application Info",
                     style: TextStyle(
-                      color: Color.fromRGBO(0, 102, 178, 1),
-                      fontSize: 14,
+                      color: Color.fromRGBO(0, 66, 140, 1),
+                      fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -177,29 +177,7 @@ class _AccountViewState extends State<AccountView> {
                       "Version Info",
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 13,
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios_outlined,
-                      size: 16,
-                    ),
-                    onTap: () {},
-                  ),
-                  Divider(
-                    color: Colors.grey.shade200,
-                  ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -4),
-                    leading: const Icon(
-                      Icons.policy_outlined,
-                      size: 25,
-                    ),
-                    title: const Text(
-                      "Privacy Policy",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 13,
+                        fontSize: 15,
                       ),
                     ),
                     trailing: const Icon(

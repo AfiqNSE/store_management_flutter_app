@@ -1,7 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:store_management_system/view/navigation_view/navigation_view.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:store_management_system/view/navigation/navigation_view.dart';
 
 void main() {
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('google_fonts/OFL.txt');
+    yield LicenseEntryWithLineBreaks(['google_fonts'], license);
+  });
   runApp(
     const RootApp(),
   );
@@ -17,13 +24,10 @@ class RootApp extends StatefulWidget {
 class _RootAppState extends State<RootApp> {
   @override
   Widget build(BuildContext context) {
-    // final textTheme = Theme.of(context).textTheme.apply(
-    //       bodyColor: const Color.fromRGBO(0, 102, 178, 1),
-    //       displayColor: const Color.fromRGBO(0, 102, 178, 1),
-    //     );
+    var baseTheme = ThemeData(brightness: Brightness.dark);
     ThemeData themeData = ThemeData(
       primarySwatch: Colors.blue,
-      // textTheme: textTheme,
+      textTheme: GoogleFonts.latoTextTheme(baseTheme.textTheme),
       useMaterial3: true,
       fontFamily: 'Montserrat',
     );

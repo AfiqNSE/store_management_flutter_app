@@ -1,7 +1,8 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:store_management_system/view/pallet/pallet_view.dart';
 import 'package:store_management_system/view/account/account_view.dart';
-import 'package:store_management_system/view/pallet/pallet_form.dart';
 import 'package:store_management_system/view/home/home_view.dart';
 
 class NavigationTabView extends StatefulWidget {
@@ -44,7 +45,7 @@ class _NavigationTabViewState extends State<NavigationTabView>
         controller: _tabController,
         children: const <Widget>[
           HomeView(),
-          PalletFormView(),
+          SearchPalletView(),
           AccountView(),
         ],
       ),
@@ -53,7 +54,7 @@ class _NavigationTabViewState extends State<NavigationTabView>
         child: Container(
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(25)),
-            color: Color.fromRGBO(102, 153, 204, 1),
+            color: Color.fromRGBO(31, 48, 94, 1),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(
@@ -78,14 +79,14 @@ class _NavigationTabViewState extends State<NavigationTabView>
                   },
                 ),
                 GButton(
-                  icon: Icons.edit_document,
-                  text: 'Pallet Form',
+                  icon: Icons.format_list_bulleted_outlined,
+                  text: 'Pallets',
                   onPressed: () {
                     _tabController.animateTo(1);
                   },
                 ),
                 GButton(
-                  icon: Icons.account_circle_outlined,
+                  icon: FluentIcons.person_accounts_24_filled,
                   text: 'Account',
                   onPressed: () {
                     _tabController.animateTo(2);

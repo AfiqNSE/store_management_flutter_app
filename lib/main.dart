@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:store_management_system/components/firebase_components.dart';
+import 'package:store_management_system/firebase_options.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/login/login_view.dart';
 

@@ -22,6 +22,10 @@ Future showPalletItemsInfo(
                 const Color.fromRGBO(237, 237, 237, 1).withOpacity(0.9),
             shadowColor: Colors.black,
             elevation: 3.0,
+            shape: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: BorderSide.none,
+            ),
             title: const Center(
               child: Text(
                 "Pallet Items",
@@ -100,10 +104,6 @@ Future showPalletItemsInfo(
                 ),
               ),
             ],
-            shape: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16.0),
-              borderSide: BorderSide.none,
-            ),
           ),
         ),
       );
@@ -139,6 +139,10 @@ Future showPalletPICInfo(
             backgroundColor:
                 const Color.fromRGBO(237, 237, 237, 1).withOpacity(0.9),
             elevation: 3.0,
+            shape: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: BorderSide.none,
+            ),
             title: const Center(
               child: Text(
                 "Person In Charge",
@@ -344,10 +348,6 @@ Future showPalletPICInfo(
                 ),
               ),
             ],
-            shape: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16.0),
-              borderSide: BorderSide.none,
-            ),
           ),
         ),
       );
@@ -381,7 +381,7 @@ Widget createPalletDetails(String detail, String value, {int flex = 2}) => Row(
             style: const TextStyle(
               color: Color.fromRGBO(40, 40, 43, 1),
               fontWeight: FontWeight.w600,
-              fontSize: 16,
+              fontSize: 17,
             ),
           ),
         ),

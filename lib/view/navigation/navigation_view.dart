@@ -4,6 +4,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:store_management_system/view/pallet/pallet_view.dart';
 import 'package:store_management_system/view/account/account_view.dart';
 import 'package:store_management_system/view/home/home_view.dart';
+import 'package:store_management_system/view/search_history/search_history_view.dart';
 
 class NavigationTabView extends StatefulWidget {
   const NavigationTabView({super.key});
@@ -20,7 +21,7 @@ class _NavigationTabViewState extends State<NavigationTabView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
+    _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
     _tabController.addListener(_handleTabSelection);
   }
 
@@ -42,10 +43,12 @@ class _NavigationTabViewState extends State<NavigationTabView>
       backgroundColor: const Color.fromRGBO(245, 254, 253, 1),
       extendBody: true,
       body: TabBarView(
+        physics: const NeverScrollableScrollPhysics(),
         controller: _tabController,
         children: const <Widget>[
           HomeView(),
-          SearchPalletView(),
+          PalletView(),
+          PalletHistoryView(),
           AccountView(),
         ],
       ),
@@ -86,10 +89,17 @@ class _NavigationTabViewState extends State<NavigationTabView>
                   },
                 ),
                 GButton(
+                  icon: FluentIcons.search_24_filled,
+                  text: 'Search',
+                  onPressed: () {
+                    _tabController.animateTo(2);
+                  },
+                ),
+                GButton(
                   icon: FluentIcons.person_accounts_24_filled,
                   text: 'Account',
                   onPressed: () {
-                    _tabController.animateTo(2);
+                    _tabController.animateTo(3);
                   },
                 ),
               ],

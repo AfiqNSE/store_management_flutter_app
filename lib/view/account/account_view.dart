@@ -1,5 +1,6 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:store_management_system/utils/main_utils.dart';
+import 'package:store_management_system/view/login/login_view.dart';
 
 class AccountView extends StatefulWidget {
   const AccountView({super.key});
@@ -12,7 +13,31 @@ class _AccountViewState extends State<AccountView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: customAppBar('My Account'),
+      appBar: AppBar(
+        title: const Text(
+          'My Account',
+          style: TextStyle(
+            color: Color.fromRGBO(40, 40, 43, 1),
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0.0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 25.0),
+            child: IconButton(
+              color: const Color.fromRGBO(40, 40, 43, 1),
+              onPressed: () => _logout(),
+              icon: const Icon(
+                FluentIcons.sign_out_24_filled,
+                size: 28,
+              ),
+            ),
+          ),
+        ],
+      ),
       backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
       body: SingleChildScrollView(
         child: Column(
@@ -196,5 +221,14 @@ class _AccountViewState extends State<AccountView> {
         ),
       ),
     );
+  }
+
+  void _logout() async {
+    if (mounted) {
+      Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginView()),
+        (route) => false,
+      );
+    }
   }
 }

@@ -1,8 +1,10 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:store_management_system/view/account_view/account_view.dart';
-import 'package:store_management_system/view/home_view/home_view.dart';
-import 'package:store_management_system/view/pallet_list_view/pallet_view.dart';
+import 'package:store_management_system/view/pallet/pallet_view.dart';
+import 'package:store_management_system/view/account/account_view.dart';
+import 'package:store_management_system/view/home/home_view.dart';
+import 'package:store_management_system/view/search_history/search_history_view.dart';
 
 class NavigationTabView extends StatefulWidget {
   const NavigationTabView({super.key});
@@ -14,12 +16,12 @@ class NavigationTabView extends StatefulWidget {
 class _NavigationTabViewState extends State<NavigationTabView>
     with TickerProviderStateMixin {
   late final TabController _tabController;
-  int _currentIndex = 1;
+  int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+    _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
     _tabController.addListener(_handleTabSelection);
   }
 
@@ -41,10 +43,12 @@ class _NavigationTabViewState extends State<NavigationTabView>
       backgroundColor: const Color.fromRGBO(245, 254, 253, 1),
       extendBody: true,
       body: TabBarView(
+        physics: const NeverScrollableScrollPhysics(),
         controller: _tabController,
         children: const <Widget>[
-          PalletListView(),
           HomeView(),
+          PalletView(),
+          PalletHistoryView(),
           AccountView(),
         ],
       ),
@@ -53,7 +57,7 @@ class _NavigationTabViewState extends State<NavigationTabView>
         child: Container(
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(25)),
-            color: Color.fromRGBO(102, 153, 204, 1),
+            color: Color.fromRGBO(31, 48, 94, 1),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(
@@ -71,24 +75,31 @@ class _NavigationTabViewState extends State<NavigationTabView>
               padding: const EdgeInsets.all(11),
               tabs: [
                 GButton(
-                  icon: Icons.format_list_bulleted,
-                  text: 'Pallet List',
-                  onPressed: () {
-                    _tabController.animateTo(1);
-                  },
-                ),
-                GButton(
                   icon: Icons.home,
                   text: 'Home',
                   onPressed: () {
+                    _tabController.animateTo(0);
+                  },
+                ),
+                GButton(
+                  icon: Icons.format_list_bulleted_outlined,
+                  text: 'Pallets',
+                  onPressed: () {
                     _tabController.animateTo(1);
                   },
                 ),
                 GButton(
-                  icon: Icons.account_circle_outlined,
-                  text: 'Account',
+                  icon: FluentIcons.search_24_filled,
+                  text: 'Search',
                   onPressed: () {
                     _tabController.animateTo(2);
+                  },
+                ),
+                GButton(
+                  icon: FluentIcons.person_accounts_24_filled,
+                  text: 'Account',
+                  onPressed: () {
+                    _tabController.animateTo(3);
                   },
                 ),
               ],

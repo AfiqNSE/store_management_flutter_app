@@ -1,13 +1,39 @@
 import 'package:flutter/material.dart';
 
-Widget appBarTitle(
+AppBar customAppBar(
   String title,
 ) {
-  return Text(title,
+  return AppBar(
+    title: Text(
+      title,
       style: const TextStyle(
+        color: Color.fromRGBO(40, 40, 43, 1),
         fontSize: 20,
-        fontWeight: FontWeight.w400,
-      ));
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    elevation: 0.0,
+    centerTitle: true,
+    backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
+  );
+}
+
+double getScreenWidth(BuildContext context) =>
+    MediaQuery.of(context).size.width;
+
+double getScreenHeight(BuildContext context) =>
+    MediaQuery.of(context).size.height;
+
+Color customCardColor(String text) {
+  switch (text) {
+    case "InBound":
+      return const Color.fromRGBO(211, 211, 211, 1);
+    case "OutBound":
+      return const Color.fromRGBO(249, 205, 82, 1);
+    case "Pallet":
+    default:
+      return const Color.fromRGBO(252, 252, 252, 1);
+  }
 }
 
 class SlideRoute extends PageRouteBuilder {

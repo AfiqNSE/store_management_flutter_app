@@ -38,6 +38,20 @@ dependencies:
   google_nav_bar: ^5.0.6
   carousel_slider: ^4.2.1
   dots_indicator: ^3.0.0
+  dropdown_button2: ^2.3.9
+  dio: ^5.4.3+1
+  flutter_dotenv: ^5.1.0
+  fluentui_system_icons: ^1.1.236
+  google_fonts: 6.1.0
+  qr_code_scanner: ^1.0.1
+  intl: ^0.19.0
+  syncfusion_flutter_signaturepad: ^25.1.41
+  flutter_barcode_scanner: ^2.0.0
+  firebase_core: ^2.27.0
+  firebase_messaging: ^14.7.19
+  flutter_session_manager: ^1.0.3
+  flutter_secure_storage: ^9.0.0
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +79,10 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+  assets:
+      - google_fonts/
+      - assets/images/
+      - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

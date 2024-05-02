@@ -1,8 +1,13 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/utils/main_utils.dart';
-import 'package:store_management_system/view/pallet/components.dart';
+import 'package:store_management_system/components/pallet_components.dart';
+import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
 class PalletDetailsView extends StatefulWidget {
   const PalletDetailsView({super.key});
@@ -14,6 +19,7 @@ class PalletDetailsView extends StatefulWidget {
 class _PalletDetailsViewState extends State<PalletDetailsView> {
   late int total;
   String? _selectedDriver;
+  bool _withSignature = false;
 
   final List<Item> _items = [
     Item('Toshiba', 10),
@@ -45,110 +51,15 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
       backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(15, 20, 15, 0),
-          child: Stack(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+          child: Column(
             children: [
-              Container(
-                alignment: Alignment.topCenter,
-                height: 520,
-                decoration: BoxDecoration(
-                  color: const Color.fromRGBO(237, 237, 237, 1),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(15),
-                child: Column(
-                  children: [
-                    const Row(
-                      children: [
-                        Text(
-                          'Pallet No:',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Text(
-                      'PTN0001',
-                      style: TextStyle(
-                        fontSize: 40,
-                        color: Color.fromRGBO(0, 102, 178, 1),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Divider(
-                      color: Colors.grey.shade400,
-                      indent: 8,
-                      endIndent: 8,
-                    ),
-                    Row(
-                      children: [
-                        const Text(
-                          'Status: ',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const Text(
-                          'In Process',
-                          style: TextStyle(
-                            color: Color.fromRGBO(0, 102, 178, 1),
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () async {
-                            await showPalletPICInfo(
-                              context,
-                              "John Doe",
-                              "2024-04-22, 3:00 p.m",
-                              "Jane Smith",
-                              "2024-04-23, 3:00 p.m",
-                              "Alice Johnson",
-                              "2024-04-24, 3:00 p.m",
-                              "Bob Brown",
-                              "2024-04-25, 3:00 p.m",
-                              "Ali Bin Abu",
-                            );
-                          },
-                          icon: const Icon(
-                            Icons.info_outline,
-                            color: Color.fromRGBO(0, 102, 178, 1),
-                          ),
-                        )
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    _palletInfo,
-                    const SizedBox(height: 20),
-                    ExpansionTile(
-                      collapsedBackgroundColor:
-                          const Color.fromRGBO(168, 199, 230, 1),
-                      title: const Text(
-                        'Pallet Items:',
-                        style: TextStyle(
-                          color: Color.fromRGBO(40, 40, 43, 1),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      children: [
-                        _palletItems(),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    _displayButton(),
-                    const SizedBox(height: 30),
-                  ],
-                ),
-              ),
+              const SizedBox(height: 10),
+              _palletDetails(),
+              const SizedBox(height: 10),
+              _palletItemsArea(),
+              const SizedBox(height: 20),
+              _displayButton(),
             ],
           ),
         ),
@@ -156,20 +67,123 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     );
   }
 
-  final Widget _palletInfo = Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      createPalletDetails('Type', 'Palletise'),
-      const SizedBox(height: 5),
-      createPalletDetails('Destination', 'Kuantan'),
-      const SizedBox(height: 5),
-      createPalletDetails('Lorry No', 'ABC 1234'),
-      const SizedBox(height: 5),
-      createPalletDetails('Forklift Driver', 'Ali Bin Abu'),
-      const SizedBox(height: 5),
-    ],
-  );
+  // Create section for pallet general info
+  Widget _palletDetails() => Stack(
+        children: [
+          Container(
+            alignment: Alignment.topCenter,
+            height: 310,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color.fromRGBO(237, 237, 237, 1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                const Row(
+                  children: [
+                    Text(
+                      'Pallet No:',
+                      style: TextStyle(
+                        color: Color.fromRGBO(40, 40, 43, 1),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const Text(
+                  'PTN0001',
+                  style: TextStyle(
+                    fontSize: 40,
+                    color: Color.fromRGBO(0, 102, 178, 1),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Divider(
+                  color: Colors.grey.shade400,
+                  indent: 8,
+                  endIndent: 8,
+                ),
+                Row(
+                  children: [
+                    const Text(
+                      'Status: ',
+                      style: TextStyle(
+                        color: Color.fromRGBO(40, 40, 43, 1),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Text(
+                      'In Process',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Color.fromRGBO(0, 102, 178, 1),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        await showPalletPICInfo(
+                          context,
+                          "John Doe",
+                          "2024-04-22, 3:00 p.m",
+                          "Jane Smith",
+                          "2024-04-23, 3:00 p.m",
+                          "Alice Johnson",
+                          "2024-04-24, 3:00 p.m",
+                          "Bob Brown",
+                          "2024-04-25, 3:00 p.m",
+                          "Ali Bin Abu",
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.info_outline,
+                        color: Color.fromRGBO(0, 102, 178, 1),
+                      ),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 10),
+                createPalletDetails('Type', 'Palletise'),
+                const SizedBox(height: 5),
+                createPalletDetails('Destination', 'Kuantan'),
+                const SizedBox(height: 5),
+                createPalletDetails('Lorry No', 'ABC 1234'),
+                const SizedBox(height: 5),
+                createPalletDetails('Forklift Driver', 'Ali Bin Abu'),
+                const SizedBox(height: 5),
+              ],
+            ),
+          ),
+        ],
+      );
 
+  // Create expansion tile for pallet item
+  Widget _palletItemsArea() => ExpansionTile(
+        collapsedBackgroundColor: const Color.fromRGBO(237, 237, 237, 1),
+        collapsedShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        title: const Text(
+          'Pallet Items:',
+          style: TextStyle(
+            color: Color.fromRGBO(40, 40, 43, 1),
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        children: [
+          _palletItems(),
+          const SizedBox(height: 20),
+        ],
+      );
+
+  // Create table for pallet items
   Widget _palletItems() {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
@@ -276,6 +290,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     );
   }
 
+  // Create display button area
   Widget _displayButton() {
     return Column(
       children: [
@@ -295,7 +310,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 ),
                 elevation: MaterialStateProperty.all(3),
               ),
-              onPressed: () {},
+              onPressed: _movePallet,
               icon: const Icon(
                 Icons.compare_arrows_sharp,
                 color: Colors.white,
@@ -322,9 +337,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 ),
                 elevation: MaterialStateProperty.all(3),
               ),
-              onPressed: () => _assignJob(),
+              onPressed: _assignJob,
               icon: const Icon(
-                Icons.compare_arrows_sharp,
+                FluentIcons.person_add_24_filled,
                 color: Colors.white,
               ),
               label: const Text(
@@ -355,9 +370,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 ),
                 elevation: MaterialStateProperty.all(3),
               ),
-              onPressed: () {},
+              onPressed: _signatureBox,
               icon: const Icon(
-                Icons.mode_edit_outline_outlined,
+                FluentIcons.signature_24_filled,
                 color: Colors.white,
               ),
               label: const Text(
@@ -402,9 +417,133 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     );
   }
 
+  void _movePallet() => showGeneralDialog(
+        context: context,
+        barrierDismissible: true,
+        barrierLabel: '',
+        pageBuilder: (context, animation1, animation2) {
+          return Container();
+        },
+        transitionBuilder: (context, a1, a2, widget) {
+          return ScaleTransition(
+            scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
+            child: FadeTransition(
+              opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
+              child: AlertDialog(
+                elevation: 3.0,
+                backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10),
+                  ),
+                ),
+                title: const Center(
+                  child: Text(
+                    'Move Pallet',
+                    style: TextStyle(
+                      color: Color.fromRGBO(40, 40, 43, 1),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                contentPadding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                content: Container(
+                  alignment: Alignment.center,
+                  height: 80,
+                  width: double.maxFinite,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: const TextSpan(children: <InlineSpan>[
+                        TextSpan(
+                          text: 'Confirm to move this pallet from ',
+                          style: TextStyle(
+                            color: Color.fromRGBO(40, 40, 43, 1),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'INBOUND ',
+                          style: TextStyle(
+                            color: Color.fromRGBO(40, 40, 43, 1),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 19,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'to ',
+                          style: TextStyle(
+                            color: Color.fromRGBO(40, 40, 43, 1),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'OUTBOUND',
+                          style: TextStyle(
+                            color: Color.fromRGBO(40, 40, 43, 1),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 19,
+                          ),
+                        ),
+                      ]),
+                    ),
+                  ),
+                ),
+                actionsPadding: const EdgeInsets.only(top: 8, bottom: 5),
+                actions: [
+                  ListTile(
+                    title: Text(
+                      "Move Pallet",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.blue.shade500,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  Divider(
+                    thickness: 2.0,
+                    indent: 20.0,
+                    endIndent: 20.0,
+                    height: 0.1,
+                    color: Colors.grey.shade300,
+                  ),
+                  ListTile(
+                    title: const Text(
+                      "Cancel",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
   void _assignJob() => showGeneralDialog(
         context: context,
-        barrierDismissible: false,
+        barrierDismissible: true,
         barrierLabel: '',
         pageBuilder: (context, animation1, animation2) {
           return Container();
@@ -417,13 +556,17 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
               child: AlertDialog(
                 backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
                 elevation: 3.0,
+                shape: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide.none,
+                ),
                 title: const Center(
                   child: Text(
                     "Assign Job",
                     style: TextStyle(
                       color: Color.fromRGBO(40, 40, 43, 1),
+                      fontWeight: FontWeight.w600,
                       fontSize: 18,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -508,13 +651,13 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 actionsPadding: const EdgeInsets.only(top: 8, bottom: 5),
                 actions: [
                   ListTile(
-                    title: const Text(
-                      "Submit",
+                    title: Text(
+                      "Assign Job",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
-                        color: Colors.blue,
+                        color: Colors.blue.shade500,
                       ),
                     ),
                     onTap: () {
@@ -534,8 +677,8 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
+                        color: Colors.black87,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black54,
                       ),
                     ),
                     onTap: () {
@@ -543,10 +686,6 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     },
                   ),
                 ],
-                shape: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16.0),
-                  borderSide: BorderSide.none,
-                ),
               ),
             ),
           );
@@ -622,6 +761,142 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
           height: 40,
         ),
       ),
+    );
+  }
+
+  // Create Signature pop up box
+  Future<void> _signatureBox() {
+    GlobalKey<SfSignaturePadState> signaturePadKey = GlobalKey();
+
+    return showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      pageBuilder: (context, animation1, animation2) {
+        return Container();
+      },
+      transitionBuilder: (context, a1, a2, widget) {
+        return ScaleTransition(
+          scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
+          child: FadeTransition(
+            opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
+            child: AlertDialog(
+              elevation: 3.0,
+              backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10),
+                ),
+              ),
+              title: const Center(
+                child: Text(
+                  'Pallet Signature',
+                  style: TextStyle(
+                    color: Color.fromRGBO(40, 40, 43, 1),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+              content: SizedBox(
+                height: 280,
+                width: double.maxFinite,
+                child: SfSignaturePad(
+                  key: signaturePadKey,
+                  minimumStrokeWidth: 1,
+                  maximumStrokeWidth: 3,
+                  strokeColor: Colors.blue,
+                  backgroundColor: Colors.white,
+                  onDrawEnd: () {
+                    _withSignature = true;
+                  },
+                ),
+              ),
+              actions: <Widget>[
+                Column(
+                  children: [
+                    ListTile(
+                      title: Text('Clear Signature',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.blue.shade500,
+                            fontWeight: FontWeight.w600,
+                          )),
+                      onTap: () {
+                        _withSignature = false;
+                        signaturePadKey.currentState!.clear();
+                      },
+                    ),
+                    Divider(
+                      thickness: 2.0,
+                      indent: 20.0,
+                      endIndent: 20.0,
+                      height: 0.1,
+                      color: Colors.grey.shade300,
+                    ),
+                    ListTile(
+                      title: Text(
+                        'Submit Signature',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 17,
+                          color: Colors.blue.shade500,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      onTap: () async {
+                        if (_withSignature) {
+                          // Save the signature as a file
+                          // ui.Image signature =
+                          //     await signaturePadKey.currentState!.toImage();
+
+                          // ByteData? byteData = await signature.toByteData(
+                          //     format: ui.ImageByteFormat.png);
+                          // Uint8List signatureBytes =
+                          //     byteData!.buffer.asUint8List();
+
+                          // Create temporary directory to store the signature image
+                          // final tempDir = await getTemporaryDirectory();
+                          // File signatureFile = File(
+                          //     '${tempDir.path}/${widget.docket.jobNo}-signature.jpeg');
+                          // await signatureFile.writeAsBytes(signatureBytes);
+
+                          Navigator.of(context).pop();
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                    Divider(
+                      thickness: 2.0,
+                      indent: 20.0,
+                      endIndent: 20.0,
+                      height: 0.1,
+                      color: Colors.grey.shade300,
+                    ),
+                    ListTile(
+                      title: const Text(
+                        'Cancel',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _withSignature = false;
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -1,18 +1,18 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:store_management_system/models/pallet_model.dart';
-import 'package:store_management_system/utils/main_utils.dart';
-import 'package:store_management_system/view/pallet/components.dart';
+import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 
-class SearchPalletView extends StatefulWidget {
-  const SearchPalletView({super.key});
+class PalletView extends StatefulWidget {
+  const PalletView({super.key});
 
   @override
-  State<SearchPalletView> createState() => _SearchPalletViewState();
+  State<PalletView> createState() => _PalletViewState();
 }
 
-class _SearchPalletViewState extends State<SearchPalletView> {
+class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
+  late TabController _tabController;
   late int total;
 
   final List<Item> _items = [
@@ -25,6 +25,7 @@ class _SearchPalletViewState extends State<SearchPalletView> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
     total = _calculateTotal();
   }
 
@@ -33,25 +34,141 @@ class _SearchPalletViewState extends State<SearchPalletView> {
   }
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: customAppBar('Pallets List'),
       backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
-      body: Container(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(15, 20, 15, 0),
-          child: ListView.builder(
-            itemCount: 6,
-            itemBuilder: ((context, index) => Padding(
-                  padding: const EdgeInsets.only(bottom: 5),
-                  child: createPalletCard(index),
-                )),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            child: palletCategories(),
           ),
+        ],
+      ),
+    );
+  }
+
+  // Create Tab categories; All, InBound, OutBound
+  Widget palletCategories() {
+    return DefaultTabController(
+      initialIndex: 0,
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Padding(
+            padding: EdgeInsets.only(left: 5.0),
+            child: Text(
+              "Today's Pallet List",
+              style: TextStyle(
+                color: Color.fromRGBO(40, 40, 43, 1),
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
+          actions: const [
+            Padding(
+              padding: EdgeInsets.only(right: 25.0),
+              child: Icon(
+                FluentIcons.search_24_filled,
+                size: 28,
+                color: Color.fromRGBO(40, 40, 43, 1),
+              ),
+            ),
+          ],
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const <Widget>[
+              Tab(
+                child: Text(
+                  'All',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: Color.fromRGBO(40, 40, 43, 1),
+                  ),
+                ),
+              ),
+              Tab(
+                child: Text(
+                  'InBound',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: Color.fromRGBO(40, 40, 43, 1),
+                  ),
+                ),
+              ),
+              Tab(
+                child: Text(
+                  'OutBound',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: Color.fromRGBO(40, 40, 43, 1),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          physics: const NeverScrollableScrollPhysics(),
+          children: <Widget>[
+            Container(
+              color: const Color.fromRGBO(252, 252, 252, 1),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15, 20, 15, 0),
+                child: ListView.builder(
+                  itemCount: 6,
+                  itemBuilder: ((context, index) => Padding(
+                        padding: const EdgeInsets.only(bottom: 5),
+                        child: createPalletCard(index),
+                      )),
+                ),
+              ),
+            ),
+            Container(
+              color: const Color.fromRGBO(252, 252, 252, 1),
+              child: const Center(
+                child: Text(
+                  "InBound Pallets",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    color: Color.fromRGBO(40, 40, 43, 1),
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              color: const Color.fromRGBO(252, 252, 252, 1),
+              child: const Center(
+                child: Text(
+                  "OutBound Pallets",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    color: Color.fromRGBO(40, 40, 43, 1),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
+  //  Create a card for each pallet in the list
   Widget createPalletCard(index) {
     return Card(
       elevation: 5,
@@ -81,8 +198,8 @@ class _SearchPalletViewState extends State<SearchPalletView> {
                       Text(
                         'PTN00$index',
                         style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 25,
                           color: Color.fromRGBO(40, 40, 43, 1),
                         ),
                       ),
@@ -139,7 +256,7 @@ class _SearchPalletViewState extends State<SearchPalletView> {
                               'OutBound',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 15,
+                                fontSize: 16,
                                 color: Color.fromRGBO(40, 40, 43, 1),
                               ),
                             )
@@ -147,30 +264,56 @@ class _SearchPalletViewState extends State<SearchPalletView> {
                               'InBound',
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 15,
+                                fontSize: 16,
                                 color: Color.fromRGBO(40, 40, 43, 1),
                               ),
                             ),
                     ],
                   ),
                   index == 0
-                      ? const Text(
-                          'Load Job Confirm',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                      ? const Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Kuantan',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 17,
+                                color: Color.fromRGBO(40, 40, 43, 1),
+                              ),
+                            ),
+                            Text(
+                              'Load Job Confirm',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                color: Color.fromRGBO(40, 40, 43, 1),
+                              ),
+                            ),
+                          ],
                         )
                       : const SizedBox.shrink(),
                   index == 1
-                      ? const Text(
-                          'Load Job Pending',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                      ? const Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Kuantan',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 17,
+                                color: Color.fromRGBO(40, 40, 43, 1),
+                              ),
+                            ),
+                            Text(
+                              'Load Job Pending',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                color: Color.fromRGBO(40, 40, 43, 1),
+                              ),
+                            ),
+                          ],
                         )
                       : const SizedBox.shrink(),
                 ],

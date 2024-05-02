@@ -13,6 +13,7 @@ class _PalletFormViewState extends State<PalletFormView> {
   String? selectedValue;
   final List<bool> _selectedPalletLocation = <bool>[false, false];
   final List<bool> _selectedPalletType = <bool>[false, false];
+
   final List<String> items = [
     'Destination 1',
     'Destination 2',
@@ -68,7 +69,7 @@ class _PalletFormViewState extends State<PalletFormView> {
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
                         height: 35,
-                        child: TextField(
+                        child: TextFormField(
                           cursorHeight: 22,
                           style: const TextStyle(
                             fontSize: 16,
@@ -141,7 +142,7 @@ class _PalletFormViewState extends State<PalletFormView> {
                           color: Color.fromRGBO(252, 252, 252, 1),
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
-                        child: TextField(
+                        child: TextFormField(
                           cursorHeight: 22,
                           style: const TextStyle(
                             fontSize: 16,

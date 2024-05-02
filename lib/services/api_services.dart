@@ -2,13 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:store_management_system/services/api_user.dart';
 import 'package:store_management_system/utils/global_utils.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
 
 class ApiServices {
   // static String base = "http://103.230.124.241:8220"; // Test Server
-  static String base = "http://10.0.2.2:8220"; // Emulator
-  // static String base = "http://localhost:8220"; //
+  // static String base = "http://10.0.2.2:8220"; // Emulator
+  static String base = "http://localhost:8220";
+
+  static ApiUser user = ApiUser();
 }
 
 Future<Map<String, String>> getHeaders({bool isAccess = true}) async {

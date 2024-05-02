@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Storage {
+  static Storage instance = Storage();
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  String _username = "";
 
   static Future<String?> get guid async {
     return _storage.read(key: "guid");
@@ -20,10 +23,6 @@ class Storage {
     return _storage.read(key: "user");
   }
 
-  static Future<String?> get password async {
-    return _storage.read(key: "password");
-  }
-
   static Future<String?> get fcmToken async {
     return _storage.read(key: "fcmToken");
   }
@@ -37,7 +36,6 @@ class Storage {
     accessToken = "",
     refreshToken = "",
     user = "",
-    password = "",
     fcmToken = "",
   }) async {
     if (guid != "") {
@@ -54,10 +52,6 @@ class Storage {
 
     if (user != "") {
       await _storage.write(key: "user", value: user);
-    }
-
-    if (password != "") {
-      await _storage.write(key: "password", value: password);
     }
 
     if (fcmToken != "") {
@@ -78,5 +72,24 @@ class Storage {
     await _storage.delete(key: "guid");
     await _storage.delete(key: "access-token");
     await _storage.delete(key: "refresh-token");
+  }
+
+  void setUsername(String username) {
+    _username = username;
+    _storage.write(key: "username", value: username);
+  }
+
+  Future<String> getUsername() async {
+    if (_username != "") return _username;
+
+    return (await _storage.read(key: "username")) ?? "";
+  }
+
+  void setPassword(String password) {
+    _storage.write(key: "password", value: password);
+  }
+
+  Future<String> getPassword() async {
+    return (await _storage.read(key: "password")) ?? "";
   }
 }

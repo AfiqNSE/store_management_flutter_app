@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:store_management_system/services/api_services.dart';
+import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/navigation/navigation_view.dart';
 
 class LoginView extends StatefulWidget {
@@ -13,217 +16,355 @@ class _LoginViewState extends State<LoginView> {
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
 
+  bool loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    autofill();
+  }
+
+  autofill() async {
+    username.text = await Storage.instance.getUsername();
+    password.text = await Storage.instance.getPassword();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          color: const Color.fromRGBO(252, 252, 252, 1),
-          height: MediaQuery.of(context).size.height,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Company image/logo
-              backgroundImage(),
-              // Login Form
-              loginForm(),
-              // Bottom Component
-              bottomLogin(),
-            ],
+    // Background image with custom style
+    Widget backgroundImage = SizedBox(
+      height: 240,
+      width: MediaQuery.of(context).size.width,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.elliptical(300, 70),
+        ),
+        child: Image.asset(
+          'assets/images/login-background.jpeg',
+          scale: 1,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+
+    Form loginForm = Form(
+      key: _formKey,
+      child: Expanded(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(35, 40, 35, 0),
+          child: AutofillGroup(
+            child: Column(children: [
+              const Text(
+                'Welcome Back',
+                style: TextStyle(
+                  fontSize: 35,
+                  color: Color.fromRGBO(40, 40, 43, 1),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Text(
+                'Login to your account',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Color.fromRGBO(40, 40, 43, 1),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 60),
+              TextFormField(
+                controller: username,
+                style: const TextStyle(
+                  color: Color.fromRGBO(40, 40, 43, 1),
+                  fontSize: 14,
+                ),
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  labelStyle: const TextStyle(
+                    fontSize: 18,
+                    color: Color.fromRGBO(31, 48, 94, 1),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  hintText: 'Enter your username',
+                  hintStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Color.fromRGBO(31, 48, 94, 1),
+                      width: 2.0,
+                    ),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+                autocorrect: false,
+                inputFormatters: [
+                  FilteringTextInputFormatter.deny(RegExp(" "))
+                ],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your username';
+                  }
+
+                  return null;
+                },
+                enabled: !loading,
+                autofillHints: const [AutofillHints.username],
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+              ),
+              const SizedBox(height: 15),
+              TextFormField(
+                controller: password,
+                style: const TextStyle(
+                  color: Color.fromRGBO(40, 40, 43, 1),
+                  fontSize: 14,
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  labelStyle: const TextStyle(
+                    fontSize: 18,
+                    color: Color.fromRGBO(31, 48, 94, 1),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  hintText: 'Enter your password',
+                  hintStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                      color: Color.fromRGBO(31, 48, 94, 1),
+                      width: 2.0,
+                    ),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+                obscureText: true,
+                enableSuggestions: false,
+                autocorrect: false,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+
+                  return null;
+                },
+                enabled: !loading,
+                autofillHints: const [AutofillHints.password],
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                onFieldSubmitted: (value) => submit(),
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+
+    // Bottom component: Login button, app name & version
+    Widget bottomLogin = Padding(
+      padding: const EdgeInsets.fromLTRB(35, 0, 35, 15),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Column(children: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                minimumSize: const Size(120, 50),
+                backgroundColor: const Color.fromRGBO(31, 48, 94, 1),
+                disabledBackgroundColor: const Color.fromRGBO(31, 48, 94, .5),
+                elevation: 3,
+              ),
+              onPressed: (loading) ? null : () => submit(),
+              child: const Text(
+                'Login',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 15),
+          Text(
+            "Store Management Application",
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.grey.shade700,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Text(
+            "v1.0.0",
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade700,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ]),
+      ),
+    );
+
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: Container(
+            color: const Color.fromRGBO(252, 252, 252, 1),
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Company image/logo
+                backgroundImage,
+                // Login Form
+                loginForm,
+                // Bottom Component
+                bottomLogin,
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  // Background image with custom style
-  Widget backgroundImage() => Container(
-        height: 240,
-        width: MediaQuery.of(context).size.width,
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(
-            bottom: Radius.elliptical(300, 70),
-          ),
-          child: Image.asset(
-            'assets/images/login-background.jpeg',
-            scale: 1,
-            fit: BoxFit.cover,
-          ),
-        ),
-      );
+  void submit() {
+    ScaffoldMessengerState sm = ScaffoldMessenger.of(context);
+    setState(() {
+      loading = true;
+    });
 
-  Form loginForm() => Form(
-        key: _formKey,
-        child: Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(35, 40, 35, 0),
-            child: Column(
-              children: [
-                const Text(
-                  'Welcome Back',
-                  style: TextStyle(
-                    fontSize: 35,
-                    color: Color.fromRGBO(40, 40, 43, 1),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const Text(
-                  'Login to your account',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Color.fromRGBO(40, 40, 43, 1),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 60),
-                TextFormField(
-                  controller: username,
-                  style: const TextStyle(
-                    color: Color.fromRGBO(40, 40, 43, 1),
-                    fontSize: 14,
-                  ),
-                  textInputAction: TextInputAction.next,
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    labelStyle: const TextStyle(
-                      fontSize: 18,
-                      color: Color.fromRGBO(31, 48, 94, 1),
-                      fontWeight: FontWeight.w600,
-                    ),
-                    hintText: 'Enter your username',
-                    hintStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Color.fromRGBO(31, 48, 94, 1),
-                        width: 2.0,
-                      ),
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                  autocorrect: false,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your username';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 15),
-                TextFormField(
-                  controller: password,
-                  style: const TextStyle(
-                    color: Color.fromRGBO(40, 40, 43, 1),
-                    fontSize: 14,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    labelStyle: const TextStyle(
-                      fontSize: 18,
-                      color: Color.fromRGBO(31, 48, 94, 1),
-                      fontWeight: FontWeight.w600,
-                    ),
-                    hintText: 'Enter your password',
-                    hintStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Color.fromRGBO(31, 48, 94, 1),
-                        width: 2.0,
-                      ),
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    return null;
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
+    if (!_formKey.currentState!.validate()) {
+      sm.clearSnackBars();
+      sm
+          .showSnackBar(const SnackBar(
+            content: Text("Make sure all fields are not empty"),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ))
+          .closed
+          .then((value) => setState(() => loading = false));
 
-  // Bottom component: Login button, app name & version
-  Widget bottomLogin() => Padding(
-        padding: const EdgeInsets.fromLTRB(35, 0, 35, 15),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Column(
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    shape: MaterialStateProperty.all<OutlinedBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                    minimumSize: MaterialStateProperty.all(const Size(120, 50)),
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                      const Color.fromRGBO(31, 48, 94, 1),
-                    ),
-                    elevation: MaterialStateProperty.all(3),
-                  ),
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // ScaffoldMessenger.of(context).showSnackBar(
-                      //   const SnackBar(content: Text('Processing Data')),
-                      // );
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const NavigationTabView()),
-                        (route) => false,
-                      );
-                    }
-                  },
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              Text(
-                "Store Management Application",
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.grey.shade700,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                "v1.0.0",
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade700,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ),
+      return;
+    }
+
+    sm.clearSnackBars();
+    sm.showSnackBar(const SnackBar(
+      content: Text("Logging in..."),
+      backgroundColor: Colors.blue,
+      duration: Duration(seconds: 2),
+    ));
+
+    login().then((value) {
+      // If return value is greater than 0 means there is an error
+      if (value > 1) {
+        sm.clearSnackBars();
+        sm
+            .showSnackBar(const SnackBar(
+              content: Text("Server error, please try again later"),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 2),
+            ))
+            .closed
+            .then((value) => setState(() => loading = false));
+
+        return;
+      } else if (value == 1) {
+        sm.clearSnackBars();
+        sm
+            .showSnackBar(const SnackBar(
+              content: Text("Wrong username or password"),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 2),
+            ))
+            .closed
+            .then((value) => setState(() => loading = false));
+
+        return;
+      }
+
+      sm.clearSnackBars();
+      sm
+          .showSnackBar(const SnackBar(
+            content: Text("Logged in"),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ))
+          .closed
+          .then(
+        (value) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const NavigationTabView()),
+            (route) => false,
+          );
+        },
       );
+    });
+  }
+
+  Future<int> login() async {
+    Map<dynamic, dynamic> res = await ApiServices.user.login(
+      username.text,
+      password.text,
+    );
+
+    if (res.containsKey("err")) {
+      return res["err"];
+    }
+
+    TextInput.finishAutofillContext();
+    Storage.instance.setUsername(username.text);
+    Storage.instance.setPassword(password.text);
+
+    return 0;
+
+    // var guid = res["user"]["guid"];
+    // var user = jsonEncode(res["user"]);
+    // var token = Token.fromMap(res["token"]);
+
+    // await Storage.set(
+    //   guid: guid,
+    //   user: user,
+    //   accessToken: token.access,
+    //   refreshToken: token.refresh,
+    //   password: passwd.text,
+    // );
+
+    // if (mounted) {
+    //   TextInput.finishAutofillContext();
+
+    //   Global.instance.isLoggedIn = true;
+    //   Global.instance.role = res["user"]["role"] ?? 0;
+    //   Global.instance.isSuperAdmin = res["user"]["isSuperAdmin"] ?? false;
+    //   Global.instance.isAdmin = res["user"]["isAdmin"] ?? false;
+
+    // if (Platform.isAndroid && !(await isUpdated())) {
+    //   setState(() => loading = false);
+
+    //   sm.hideCurrentSnackBar();
+    //   if (mounted) showDownloadPrompt(context);
+    // } else if (mounted) {
+    //   goToHome(context, sm, successMsg);
+    // }
+    // goToHome(context, sm, successMsg);
+    // }
+
+    // setState(() => loading = false);
+  }
 }

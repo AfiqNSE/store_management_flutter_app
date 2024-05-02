@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 AppBar customAppBar(
@@ -19,6 +17,12 @@ AppBar customAppBar(
     backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
   );
 }
+
+double getScreenWidth(BuildContext context) =>
+    MediaQuery.of(context).size.width;
+
+double getScreenHeight(BuildContext context) =>
+    MediaQuery.of(context).size.height;
 
 Color customCardColor(String text) {
   switch (text) {

@@ -1,8 +1,34 @@
+import 'dart:io';
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:store_management_system/view/navigation/navigation_view.dart';
+import 'package:store_management_system/components/firebase_components.dart';
+import 'package:store_management_system/utils/storage_utils.dart';
+import 'package:store_management_system/view/login/login_view.dart';
+
+Future<void> firebaseSetup() async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  if (Platform.isIOS) {
+    Storage.set(fcmToken: await FirebaseMessaging.instance.getAPNSToken());
+  } else {
+    Storage.set(fcmToken: await FirebaseMessaging.instance.getToken());
+  }
+
+  FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) async {
+    await Storage.set(fcmToken: fcmToken);
+  }).onError((err) {
+    debugPrint("[FirebaseMessaging] Error: ${err.toString()}");
+  });
+
+  await FirebaseMessaging.instance.requestPermission();
+  // Handle notification message when on background
+  // FirebaseMessaging.onBackgroundMessage(_handleMessage);
+}
 
 void main() {
   LicenseRegistry.addLicense(() async* {
@@ -27,15 +53,17 @@ class _RootAppState extends State<RootApp> {
     var baseTheme = ThemeData(brightness: Brightness.dark);
     ThemeData themeData = ThemeData(
       primarySwatch: Colors.blue,
-      textTheme: GoogleFonts.latoTextTheme(baseTheme.textTheme),
+      textTheme: GoogleFonts.latoTextTheme(baseTheme.textTheme).apply(
+        bodyColor: const Color.fromRGBO(40, 40, 43, 1),
+        displayColor: const Color.fromRGBO(40, 40, 43, 1),
+      ),
       useMaterial3: true,
-      fontFamily: 'Montserrat',
     );
 
     return MaterialApp(
-      title: 'Store Management System',
+      title: 'Store Management Application',
       theme: themeData,
-      home: const NavigationTabView(),
+      home: const LoginView(),
     );
   }
 }

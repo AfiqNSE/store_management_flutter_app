@@ -43,6 +43,15 @@ dependencies:
   flutter_dotenv: ^5.1.0
   fluentui_system_icons: ^1.1.236
   google_fonts: 6.1.0
+  qr_code_scanner: ^1.0.1
+  intl: ^0.19.0
+  syncfusion_flutter_signaturepad: ^25.1.41
+  flutter_barcode_scanner: ^2.0.0
+  firebase_core: ^2.27.0
+  firebase_messaging: ^14.7.19
+  flutter_session_manager: ^1.0.3
+  flutter_secure_storage: ^9.0.0
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,194 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
+import 'package:store_management_system/utils/main_utils.dart';
+import 'package:store_management_system/view/pallet/pallet_details.dart';
+
+class Constant {
+  final List<Widget> palletLocation = [
+    const Text('Inbound'),
+    const Text('Outbound'),
+  ];
+
+  final List<Widget> palletType = [
+    const Text('Palletise'),
+    const Text('Loose'),
+  ];
+
+  final List<String> destination = [
+    '--Select Destination--',
+    'Destination 1',
+    'Destination 2',
+    'Destination 3'
+  ];
+
+  final List<Item> _items = [
+    Item('Toshiba', 10),
+    Item('Sharp', 10),
+    Item('Daikin', 10),
+    Item('Delfi', 10),
+  ];
+
+  final List<String> forkliftDriver = [
+    '--Select Forklift Driver--',
+    'InBound Forklift Driver',
+    'OutBound Forklif Driver',
+  ];
+}
+
+Widget customTextLabel(String text) => Padding(
+      padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: AppColor().matteBlack,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+
+InputDecoration customTextFormFieldDeco(String hintText) => InputDecoration(
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 8,
+      ),
+      hintText: hintText,
+      hintStyle: const TextStyle(fontSize: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: Colors.blue.shade600,
+          width: 1.7,
+        ),
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+    );
+
+Widget createPalletCrad(
+  BuildContext context,
+  String palletNo,
+  String lorryNo,
+  String openPalletLocation,
+  String destination,
+  String palletStatus,
+) {
+  return Card(
+    elevation: 5,
+    color: customCardColor(openPalletLocation),
+    shadowColor: Colors.black,
+    child: InkWell(
+      onTap: () {
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const PalletDetailsView()));
+      },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(10.0, 0, 10, 0),
+        child: SizedBox(
+          height: 125,
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      palletNo,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 25,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () async {
+                            await showPalletItemsInfo(
+                                context, Constant()._items);
+                          },
+                          child: const Icon(
+                            FluentIcons.clipboard_task_list_ltr_24_filled,
+                            size: 30,
+                          ),
+                        ),
+                        const SizedBox(width: 18),
+                        GestureDetector(
+                          onTap: () => showPalletPICInfo(
+                            context,
+                            "John Doe",
+                            "2024-04-22, 3:00 p.m",
+                            "Jane Smith",
+                            "2024-04-23, 3:00 p.m",
+                            "Alice Johnson",
+                            "2024-04-24, 3:00 p.m",
+                            "Bob Brown",
+                            "2024-04-25, 3:00 p.m",
+                            "Ali Bin Abu",
+                          ),
+                          child: const Icon(
+                            FluentIcons.person_clock_24_filled,
+                            size: 30,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      lorryNo,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 17,
+                      ),
+                    ),
+                    Text(
+                      openPalletLocation,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    )
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      destination,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 17,
+                      ),
+                    ),
+                    Text(
+                      palletStatus,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
 
 Future showPalletItemsInfo(
   BuildContext context,
@@ -18,8 +207,7 @@ Future showPalletItemsInfo(
         child: FadeTransition(
           opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
           child: AlertDialog(
-            backgroundColor:
-                const Color.fromRGBO(237, 237, 237, 1).withOpacity(0.9),
+            backgroundColor: AppColor().milkWhite.withOpacity(0.9),
             shadowColor: Colors.black,
             elevation: 3.0,
             shape: OutlineInputBorder(
@@ -30,7 +218,6 @@ Future showPalletItemsInfo(
               child: Text(
                 "Pallet Items",
                 style: TextStyle(
-                  color: Color.fromRGBO(40, 40, 43, 1),
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                 ),
@@ -63,7 +250,6 @@ Future showPalletItemsInfo(
                                   Text(
                                     "> ${items[index].name}",
                                     style: const TextStyle(
-                                      color: Color.fromRGBO(40, 40, 43, 1),
                                       fontSize: 17,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -71,7 +257,6 @@ Future showPalletItemsInfo(
                                   Text(
                                     "Qty: ${items[index].quantity}",
                                     style: const TextStyle(
-                                      color: Color.fromRGBO(40, 40, 43, 1),
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -94,12 +279,12 @@ Future showPalletItemsInfo(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text(
+                child: Text(
                   'Close',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color.fromRGBO(114, 160, 193, 1),
+                    color: AppColor().yaleBlue,
                   ),
                 ),
               ),
@@ -136,8 +321,7 @@ Future showPalletPICInfo(
         child: FadeTransition(
           opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
           child: AlertDialog(
-            backgroundColor:
-                const Color.fromRGBO(237, 237, 237, 1).withOpacity(0.9),
+            backgroundColor: AppColor().milkWhite.withOpacity(0.9),
             elevation: 3.0,
             shape: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.0),
@@ -147,7 +331,6 @@ Future showPalletPICInfo(
               child: Text(
                 "Person In Charge",
                 style: TextStyle(
-                  color: Color.fromRGBO(40, 40, 43, 1),
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -171,15 +354,11 @@ Future showPalletPICInfo(
                       children: [
                         const Text(
                           'Open By:',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: TextStyle(),
                         ),
                         Text(
                           openBy,
-                          style: const TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: const TextStyle(),
                         ),
                       ],
                     ),
@@ -188,15 +367,11 @@ Future showPalletPICInfo(
                       children: [
                         const Text(
                           'Open On:',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: TextStyle(),
                         ),
                         Text(
                           openOn,
-                          style: const TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: const TextStyle(),
                         ),
                       ],
                     ),
@@ -208,15 +383,11 @@ Future showPalletPICInfo(
                       children: [
                         const Text(
                           'Move By:',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: TextStyle(),
                         ),
                         Text(
                           moveBy,
-                          style: const TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: const TextStyle(),
                         ),
                       ],
                     ),
@@ -225,15 +396,11 @@ Future showPalletPICInfo(
                       children: [
                         const Text(
                           'Move On:',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: TextStyle(),
                         ),
                         Text(
                           moveOn,
-                          style: const TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: const TextStyle(),
                         ),
                       ],
                     ),
@@ -245,15 +412,11 @@ Future showPalletPICInfo(
                       children: [
                         const Text(
                           'Assign By:',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: TextStyle(),
                         ),
                         Text(
                           assignBy,
-                          style: const TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: const TextStyle(),
                         ),
                       ],
                     ),
@@ -262,15 +425,11 @@ Future showPalletPICInfo(
                       children: [
                         const Text(
                           'Assign On:',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: TextStyle(),
                         ),
                         Text(
                           assignOn,
-                          style: const TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: const TextStyle(),
                         ),
                       ],
                     ),
@@ -282,15 +441,11 @@ Future showPalletPICInfo(
                       children: [
                         const Text(
                           'Load By:',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: TextStyle(),
                         ),
                         Text(
                           loadBy,
-                          style: const TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: const TextStyle(),
                         ),
                       ],
                     ),
@@ -299,15 +454,11 @@ Future showPalletPICInfo(
                       children: [
                         const Text(
                           'Load On:',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: TextStyle(),
                         ),
                         Text(
                           loadOn,
-                          style: const TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                          ),
+                          style: const TextStyle(),
                         ),
                       ],
                     ),
@@ -317,15 +468,11 @@ Future showPalletPICInfo(
                     const SizedBox(height: 16),
                     const Text(
                       'Received & Signed by: ',
-                      style: TextStyle(
-                        color: Color.fromRGBO(40, 40, 43, 1),
-                      ),
+                      style: TextStyle(),
                     ),
                     Text(
                       driverName,
-                      style: const TextStyle(
-                        color: Color.fromRGBO(40, 40, 43, 1),
-                      ),
+                      style: const TextStyle(),
                     ),
                     const SizedBox(height: 5),
                   ],
@@ -338,12 +485,12 @@ Future showPalletPICInfo(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text(
+                child: Text(
                   'Close',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color.fromRGBO(114, 160, 193, 1),
+                    color: AppColor().yaleBlue,
                   ),
                 ),
               ),
@@ -361,16 +508,15 @@ Widget createPalletDetails(String detail, String value, {int flex = 2}) => Row(
         Expanded(
           flex: 1,
           child: Text(detail,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
-                color: Color.fromRGBO(0, 102, 178, 1),
+                color: AppColor().tealBlue,
                 fontWeight: FontWeight.w600,
               )),
         ),
         const Text(
           ": ",
           style: TextStyle(
-            color: Color.fromRGBO(40, 40, 43, 1),
             fontSize: 15,
           ),
         ),
@@ -379,7 +525,6 @@ Widget createPalletDetails(String detail, String value, {int flex = 2}) => Row(
           child: Text(
             value,
             style: const TextStyle(
-              color: Color.fromRGBO(40, 40, 43, 1),
               fontWeight: FontWeight.w600,
               fontSize: 17,
             ),

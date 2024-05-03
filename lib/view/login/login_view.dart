@@ -4,6 +4,8 @@ import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/navigation/navigation_view.dart';
 
+// TODO: add autofills for ios
+
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 

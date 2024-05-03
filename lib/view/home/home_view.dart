@@ -10,6 +10,8 @@ import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/home/notification_view.dart';
 import 'package:store_management_system/view/pallet/pallet_form.dart';
 
+// TODO: change snackbars to something else
+
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
@@ -91,6 +93,43 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
+    Widget quickBar = Padding(
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+      child: SizedBox(
+        height: 110,
+        child: GridView.count(
+          padding: const EdgeInsets.all(8),
+          mainAxisSpacing: 10,
+          scrollDirection: Axis.horizontal,
+          crossAxisCount: 1,
+          children: <Widget>[
+            createFeaturesGrid(
+              'Open Forms',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (contex) => const PalletFormView(),
+              )),
+              icon: FluentIcons.form_new_24_filled,
+            ),
+            createFeaturesGrid(
+              'Scan Pallet',
+              onTap: scanPallet,
+              icon: FluentIcons.barcode_scanner_24_filled,
+            ),
+            createFeaturesGrid(
+              'Language',
+              onTap: () {},
+              icon: Icons.language_outlined,
+            ),
+            createFeaturesGrid(
+              'More',
+              onTap: () {},
+              icon: FluentIcons.grid_dots_24_filled,
+            ),
+          ],
+        ),
+      ),
+    );
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(31, 48, 94, 1),
@@ -166,46 +205,7 @@ class _HomeViewState extends State<HomeView> {
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                        child: SizedBox(
-                          height: 110,
-                          child: GridView.count(
-                            padding: const EdgeInsets.all(8),
-                            mainAxisSpacing: 10,
-                            scrollDirection: Axis.horizontal,
-                            crossAxisCount: 1,
-                            children: <Widget>[
-                              createFeaturesGrid(
-                                'Open Forms',
-                                onTap: () => {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (contex) =>
-                                            const PalletFormView()),
-                                  )
-                                },
-                                icon: FluentIcons.form_new_24_filled,
-                              ),
-                              createFeaturesGrid(
-                                'Scan Pallet',
-                                onTap: scanPallet,
-                                icon: FluentIcons.barcode_scanner_24_filled,
-                              ),
-                              createFeaturesGrid(
-                                'Language',
-                                onTap: () {},
-                                icon: Icons.language_outlined,
-                              ),
-                              createFeaturesGrid(
-                                'More',
-                                onTap: () {},
-                                icon: FluentIcons.grid_dots_24_filled,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      quickBar,
                       Divider(
                         color: Colors.grey.shade400,
                         indent: 8,
@@ -262,9 +262,7 @@ class _HomeViewState extends State<HomeView> {
     required IconData icon,
   }) {
     return Material(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       elevation: 3.0,
       clipBehavior: Clip.hardEdge,
       child: InkWell(
@@ -281,11 +279,7 @@ class _HomeViewState extends State<HomeView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 28,
-                color: Colors.grey.shade800,
-              ),
+              Icon(icon, size: 28, color: Colors.grey.shade800),
               const SizedBox(height: 10),
               Text(
                 text,

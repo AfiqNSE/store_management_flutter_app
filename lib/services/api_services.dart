@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart';
 import 'package:flutter/material.dart';
+import 'package:store_management_system/services/api_other.dart';
 import 'package:store_management_system/services/api_pallet.dart';
 import 'package:store_management_system/services/api_user.dart';
 import 'package:store_management_system/utils/global_utils.dart';
@@ -16,6 +17,7 @@ class ApiServices {
 
   static ApiUser user = ApiUser();
   static ApiPallet pallet = ApiPallet();
+  static ApiOther other = ApiOther();
 
   static Future<Map<String, String>> getHeaders({bool isAccess = true}) async {
     Map<String, String> headers = {"Content-Type": "application/json"};

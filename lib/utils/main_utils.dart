@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:store_management_system/models/color_model.dart';
 
 AppBar customAppBar(
   String title,
@@ -7,14 +8,13 @@ AppBar customAppBar(
     title: Text(
       title,
       style: const TextStyle(
-        color: Color.fromRGBO(40, 40, 43, 1),
         fontSize: 20,
         fontWeight: FontWeight.w600,
       ),
     ),
     elevation: 0.0,
     centerTitle: true,
-    backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
+    backgroundColor: AppColor().milkWhite,
   );
 }
 
@@ -24,15 +24,15 @@ double getScreenWidth(BuildContext context) =>
 double getScreenHeight(BuildContext context) =>
     MediaQuery.of(context).size.height;
 
-Color customCardColor(String text) {
-  switch (text) {
+Color customCardColor(String openPalletLocation) {
+  switch (openPalletLocation) {
     case "InBound":
-      return const Color.fromRGBO(211, 211, 211, 1);
+      return AppColor().greyGoose;
     case "OutBound":
-      return const Color.fromRGBO(249, 205, 82, 1);
+      return AppColor().lightMustard;
     case "Pallet":
     default:
-      return const Color.fromRGBO(252, 252, 252, 1);
+      return AppColor().milkWhite;
   }
 }
 

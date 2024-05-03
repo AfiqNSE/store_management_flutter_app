@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/components/pallet_components.dart';
@@ -17,8 +18,10 @@ class PalletDetailsView extends StatefulWidget {
 }
 
 class _PalletDetailsViewState extends State<PalletDetailsView> {
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController lorryNo = TextEditingController();
+  String? _selectedForkliftDriver = '--Select Forklift Driver--';
   late int total;
-  String? _selectedDriver;
   bool _withSignature = false;
 
   final List<Item> _items = [
@@ -26,12 +29,6 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     Item('Sharp', 10),
     Item('Daikin', 10),
     Item('Delfi', 10),
-  ];
-
-  final List<String> driver = [
-    'Driver A',
-    'Driver B',
-    'Driver C',
   ];
 
   @override
@@ -48,18 +45,24 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: customAppBar("Pallet Details"),
-      backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
+      backgroundColor: AppColor().milkWhite,
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
           child: Column(
             children: [
               const SizedBox(height: 10),
+              // Show pallet general info
               _palletDetails(),
+
               const SizedBox(height: 10),
+              // Show pallet item table info
               _palletItemsArea(),
+
               const SizedBox(height: 20),
+              // Show function button info
               _displayButton(),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -75,7 +78,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
             height: 310,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: const Color.fromRGBO(237, 237, 237, 1),
+              color: AppColor().milkWhite,
               borderRadius: BorderRadius.circular(10),
             ),
           ),
@@ -88,18 +91,17 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     Text(
                       'Pallet No:',
                       style: TextStyle(
-                        color: Color.fromRGBO(40, 40, 43, 1),
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
-                const Text(
+                Text(
                   'PTN0001',
                   style: TextStyle(
                     fontSize: 40,
-                    color: Color.fromRGBO(0, 102, 178, 1),
+                    color: AppColor().tealBlue,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -113,16 +115,15 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     const Text(
                       'Status: ',
                       style: TextStyle(
-                        color: Color.fromRGBO(40, 40, 43, 1),
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const Text(
+                    Text(
                       'In Process',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Color.fromRGBO(0, 102, 178, 1),
+                        color: AppColor().tealBlue,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -141,9 +142,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                           "Ali Bin Abu",
                         );
                       },
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.info_outline,
-                        color: Color.fromRGBO(0, 102, 178, 1),
+                        color: AppColor().tealBlue,
                       ),
                     )
                   ],
@@ -165,14 +166,13 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
 
   // Create expansion tile for pallet item
   Widget _palletItemsArea() => ExpansionTile(
-        collapsedBackgroundColor: const Color.fromRGBO(237, 237, 237, 1),
+        collapsedBackgroundColor: AppColor().greyGoose,
         collapsedShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
         title: const Text(
           'Pallet Items:',
           style: TextStyle(
-            color: Color.fromRGBO(40, 40, 43, 1),
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -195,23 +195,17 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
           DataColumn(
               label: Text(
             'Name',
-            style: TextStyle(
-              color: Color.fromRGBO(40, 40, 43, 1),
-            ),
+            style: TextStyle(),
           )),
           DataColumn(
               label: Text(
             'Quantity',
-            style: TextStyle(
-              color: Color.fromRGBO(40, 40, 43, 1),
-            ),
+            style: TextStyle(),
           )),
           DataColumn(
               label: Text(
             'Actions',
-            style: TextStyle(
-              color: Color.fromRGBO(40, 40, 43, 1),
-            ),
+            style: TextStyle(),
           )),
         ],
         rows: [
@@ -223,9 +217,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                         children: [
                           Text(
                             item.name,
-                            style: const TextStyle(
-                              color: Color.fromRGBO(40, 40, 43, 1),
-                            ),
+                            style: const TextStyle(),
                           ),
                         ],
                       ),
@@ -236,9 +228,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                         children: [
                           Text(
                             item.quantity.toString(),
-                            style: const TextStyle(
-                              color: Color.fromRGBO(40, 40, 43, 1),
-                            ),
+                            style: const TextStyle(),
                           ),
                         ],
                       ),
@@ -266,9 +256,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
               children: [
                 Text(
                   'Total',
-                  style: TextStyle(
-                    color: Color.fromRGBO(40, 40, 43, 1),
-                  ),
+                  style: TextStyle(),
                 ),
               ],
             )), // Empty cell
@@ -277,9 +265,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
               children: [
                 Text(
                   total.toString(),
-                  style: const TextStyle(
-                    color: Color.fromRGBO(40, 40, 43, 1),
-                  ),
+                  style: const TextStyle(),
                 ),
               ],
             )),
@@ -306,7 +292,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 ),
                 minimumSize: MaterialStateProperty.all(const Size(160, 50)),
                 backgroundColor: MaterialStateProperty.all<Color>(
-                  const Color.fromRGBO(31, 48, 94, 1),
+                  AppColor().blueZodiac,
                 ),
                 elevation: MaterialStateProperty.all(3),
               ),
@@ -333,7 +319,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 ),
                 minimumSize: MaterialStateProperty.all(const Size(160, 50)),
                 backgroundColor: MaterialStateProperty.all<Color>(
-                  const Color.fromRGBO(31, 48, 94, 1),
+                  AppColor().blueZodiac,
                 ),
                 elevation: MaterialStateProperty.all(3),
               ),
@@ -366,7 +352,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 ),
                 minimumSize: MaterialStateProperty.all(const Size(150, 50)),
                 backgroundColor: MaterialStateProperty.all<Color>(
-                  const Color.fromRGBO(31, 48, 94, 1),
+                  AppColor().blueZodiac,
                 ),
                 elevation: MaterialStateProperty.all(3),
               ),
@@ -393,7 +379,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 ),
                 minimumSize: MaterialStateProperty.all(const Size(160, 50)),
                 backgroundColor: MaterialStateProperty.all<Color>(
-                  const Color.fromRGBO(31, 48, 94, 1),
+                  AppColor().blueZodiac,
                 ),
                 elevation: MaterialStateProperty.all(3),
               ),
@@ -431,7 +417,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
               opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
               child: AlertDialog(
                 elevation: 3.0,
-                backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
+                backgroundColor: AppColor().milkWhite,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(
                     Radius.circular(10),
@@ -441,7 +427,6 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   child: Text(
                     'Move Pallet',
                     style: TextStyle(
-                      color: Color.fromRGBO(40, 40, 43, 1),
                       fontWeight: FontWeight.w600,
                       fontSize: 18,
                     ),
@@ -460,11 +445,11 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     padding: const EdgeInsets.all(10),
                     child: RichText(
                       textAlign: TextAlign.center,
-                      text: const TextSpan(children: <InlineSpan>[
+                      text: TextSpan(children: <InlineSpan>[
                         TextSpan(
                           text: 'Confirm to move this pallet from ',
                           style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
+                            color: AppColor().matteBlack,
                             fontWeight: FontWeight.w400,
                             fontSize: 16,
                           ),
@@ -472,7 +457,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                         TextSpan(
                           text: 'INBOUND ',
                           style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
+                            color: AppColor().matteBlack,
                             fontWeight: FontWeight.w600,
                             fontSize: 19,
                           ),
@@ -480,7 +465,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                         TextSpan(
                           text: 'to ',
                           style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
+                            color: AppColor().matteBlack,
                             fontWeight: FontWeight.w400,
                             fontSize: 16,
                           ),
@@ -488,7 +473,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                         TextSpan(
                           text: 'OUTBOUND',
                           style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
+                            color: AppColor().matteBlack,
                             fontWeight: FontWeight.w600,
                             fontSize: 19,
                           ),
@@ -554,7 +539,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
             child: FadeTransition(
               opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
               child: AlertDialog(
-                backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
+                backgroundColor: AppColor().milkWhite,
                 elevation: 3.0,
                 shape: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
@@ -564,7 +549,6 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   child: Text(
                     "Assign Job",
                     style: TextStyle(
-                      color: Color.fromRGBO(40, 40, 43, 1),
                       fontWeight: FontWeight.w600,
                       fontSize: 18,
                     ),
@@ -580,69 +564,49 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                         color: Colors.white,
                       ),
                       width: double.maxFinite,
-                      height: 210,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Text(
-                                  'Forklift Driver: ',
-                                  style: TextStyle(
-                                    color: Color.fromRGBO(40, 40, 43, 1),
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
-                              child: forklifDriverDropDown(),
-                            ),
-                            const Row(
-                              children: [
-                                Text(
-                                  'Lorry No. : ',
-                                  style: TextStyle(
-                                    color: Color.fromRGBO(40, 40, 43, 1),
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
-                              child: Container(
-                                height: 35,
-                                decoration: const BoxDecoration(
-                                  color: Color.fromRGBO(252, 252, 252, 1),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
-                                ),
-                                child: TextField(
+                        padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  customTextLabel('Forklift Driver:'),
+                                ],
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(0, 10, 0, 20),
+                                child: forklifDriverDropDown(),
+                              ),
+                              Row(
+                                children: [
+                                  customTextLabel('Lorry No.:'),
+                                ],
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(0, 10, 0, 20),
+                                child: TextFormField(
                                   cursorHeight: 22,
                                   style: const TextStyle(
                                     fontSize: 16,
-                                    color: Color.fromRGBO(40, 40, 43, 1),
                                   ),
                                   textAlign: TextAlign.center,
-                                  decoration: InputDecoration(
-                                    hintText: 'Enter Lorry Number',
-                                    hintStyle: const TextStyle(fontSize: 14),
-                                    contentPadding:
-                                        const EdgeInsets.fromLTRB(10, 12, 0, 0),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                  ),
+                                  decoration: customTextFormFieldDeco(
+                                      'Enter Lorry Number'),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter lorry number';
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -661,7 +625,28 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                       ),
                     ),
                     onTap: () {
-                      Navigator.pop(context);
+                      if (_formKey.currentState!.validate() &&
+                          _selectedForkliftDriver !=
+                              Constant().forkliftDriver[0]) {
+                        Navigator.pop(context);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Successfully assign job.'),
+                            backgroundColor: Colors.green.shade300,
+                            duration: const Duration(seconds: 5),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text(
+                                'Please complete the details needed.'),
+                            backgroundColor: Colors.red.shade300,
+                            duration: const Duration(seconds: 5),
+                          ),
+                        );
+                      }
                     },
                   ),
                   Divider(
@@ -698,21 +683,22 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         isExpanded: true,
         hint: Row(
           children: [
-            const SizedBox(
-              width: 10,
-            ),
-            Text(
-              'Select Forklift Driver',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey.shade700,
+            Padding(
+              padding: const EdgeInsets.only(left: 10.0),
+              child: Text(
+                Constant().forkliftDriver[0],
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey.shade700,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
-        items: driver
+        items: Constant()
+            .forkliftDriver
             .map((String item) => DropdownMenuItem<String>(
                   value: item,
                   child: Padding(
@@ -722,33 +708,32 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Color.fromRGBO(40, 40, 43, 1),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ))
             .toList(),
-        value: _selectedDriver,
-        onChanged: (String? driver) {
+        value: _selectedForkliftDriver,
+        onChanged: (String? value) {
           setState(() {
-            _selectedDriver = driver;
+            _selectedForkliftDriver = value;
           });
         },
         buttonStyleData: ButtonStyleData(
           height: 35,
-          width: 180,
+          width: 210,
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(10),
-            color: const Color.fromRGBO(252, 252, 252, 1),
+            color: AppColor().milkWhite,
           ),
         ),
         dropdownStyleData: DropdownStyleData(
           maxHeight: 200,
-          width: 180,
+          width: 210,
           decoration: BoxDecoration(
-            color: const Color.fromRGBO(252, 252, 252, 1),
+            color: AppColor().milkWhite,
             borderRadius: BorderRadius.circular(14),
           ),
           scrollbarTheme: ScrollbarThemeData(
@@ -782,7 +767,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
             opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
             child: AlertDialog(
               elevation: 3.0,
-              backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
+              backgroundColor: AppColor().milkWhite,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(
                   Radius.circular(10),
@@ -792,7 +777,6 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 child: Text(
                   'Pallet Signature',
                   style: TextStyle(
-                    color: Color.fromRGBO(40, 40, 43, 1),
                     fontWeight: FontWeight.w600,
                     fontSize: 18,
                   ),
@@ -863,8 +847,23 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                           // await signatureFile.writeAsBytes(signatureBytes);
 
                           Navigator.of(context).pop();
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('Successfully sign pallet.'),
+                              backgroundColor: Colors.green.shade300,
+                              duration: const Duration(seconds: 5),
+                            ),
+                          );
                         } else {
-                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text(
+                                  'Please sign the pallet before submit.'),
+                              backgroundColor: Colors.red.shade300,
+                              duration: const Duration(seconds: 5),
+                            ),
+                          );
                         }
                       },
                     ),

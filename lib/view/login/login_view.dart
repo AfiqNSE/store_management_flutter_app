@@ -252,21 +252,24 @@ class _LoginViewState extends State<LoginView> {
       ),
     );
 
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          color: AppColor().milkWhite,
-          height: MediaQuery.of(context).size.height,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Company image/logo
-              backgroundImage,
-              // Login Form
-              loginForm,
-              // Bottom Component
-              bottomComponent,
-            ],
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: Container(
+            color: AppColor().milkWhite,
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Company image/logo
+                backgroundImage,
+                // Login Form
+                loginForm,
+                // Bottom Component
+                bottomComponent,
+              ],
+            ),
           ),
         ),
       ),

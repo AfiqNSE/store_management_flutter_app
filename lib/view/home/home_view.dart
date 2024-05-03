@@ -5,6 +5,7 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:store_management_system/utils/main_utils.dart';
+import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/home/notification_view.dart';
 import 'package:store_management_system/view/pallet/pallet_form.dart';
 
@@ -17,7 +18,7 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   late String formattedDate;
-  late String greetingMessage = '';
+  String greetingMessage = "";
 
   @override
   void initState() {
@@ -32,15 +33,29 @@ class _HomeViewState extends State<HomeView> {
     formattedDate = dateFormatter.format(now);
   }
 
-  void _greetingMeesage() {
+  void _greetingMeesage() async {
     var timeNow = DateTime.now().hour;
     if (timeNow <= 11.59) {
-      greetingMessage = 'Good Morning, Staff!';
+      greetingMessage = 'Good Morning,';
     } else if (timeNow > 12 && timeNow <= 16) {
-      greetingMessage = 'Good Afternoon, Staff!';
+      greetingMessage = 'Good Afternoon,';
     } else if (timeNow > 16) {
-      greetingMessage = 'Good Evening, Staff!';
+      greetingMessage = 'Good Evening,';
     }
+
+    String name = await Storage.instance.getDisplayName();
+    if (name == "") {
+      greetingMessage = "$greetingMessage Staff!";
+    } else {
+      int index = name.indexOf(" ");
+      if (index > 0) {
+        name = name.substring(0, index);
+      }
+
+      greetingMessage = "$greetingMessage ${name.capitalize()}!";
+    }
+
+    setState(() {});
   }
 
   @override
@@ -48,180 +63,178 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(31, 48, 94, 1),
-        elevation: 0.0,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 20.0),
             child: IconButton(
               color: Colors.white,
               onPressed: () {
-                Navigator.push(context,
-                    SlideRoute(page: const NotificationView(), toRight: false));
+                Navigator.of(context).push(
+                  SlideRoute(page: const NotificationView(), toRight: false),
+                );
               },
-              icon: const Icon(
-                Icons.notifications_active_outlined,
-                size: 28,
-              ),
+              icon: const Icon(Icons.notifications_active_outlined, size: 28),
             ),
           ),
         ],
       ),
       extendBody: true,
       backgroundColor: const Color.fromRGBO(31, 48, 94, 1),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 30, 0, 40),
-            child: Column(
-              children: [
-                Text(
-                  formattedDate,
-                  style: const TextStyle(
-                    color: Color.fromRGBO(252, 252, 252, 1),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Text(greetingMessage,
-                    style: GoogleFonts.lora(
-                      textStyle: const TextStyle(
-                        color: Color.fromRGBO(255, 164, 57, 1),
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    )),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
+      body: Column(children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
+          child: Column(children: [
+            Text(
+              formattedDate,
+              style: const TextStyle(
                 color: Color.fromRGBO(252, 252, 252, 1),
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(30.0),
-                ),
-                border: Border.fromBorderSide(BorderSide(
-                  color: Color.fromRGBO(31, 48, 94, 1),
-                )),
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
               ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 30, 10, 0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
-                        child: Row(
-                          children: [
-                            Text(
-                              'What would you like to do today?',
-                              style: TextStyle(
-                                color: Color.fromRGBO(40, 40, 43, 1),
-                                fontSize: 17,
-                                fontWeight: FontWeight.w500,
-                              ),
+            ),
+            Text(
+              greetingMessage,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.lora(
+                textStyle: const TextStyle(
+                  color: Color.fromRGBO(255, 164, 57, 1),
+                  fontSize: 30,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ]),
+        ),
+        Expanded(
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Color.fromRGBO(252, 252, 252, 1),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(30.0),
+              ),
+              border: Border.fromBorderSide(BorderSide(
+                color: Color.fromRGBO(31, 48, 94, 1),
+              )),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 30, 10, 0),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      child: Row(
+                        children: [
+                          Text(
+                            'What would you like to do today?',
+                            style: TextStyle(
+                              color: Color.fromRGBO(40, 40, 43, 1),
+                              fontSize: 17,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                      child: SizedBox(
+                        height: 110,
+                        child: GridView.count(
+                          padding: const EdgeInsets.all(8),
+                          mainAxisSpacing: 10,
+                          scrollDirection: Axis.horizontal,
+                          crossAxisCount: 1,
+                          children: <Widget>[
+                            createFeaturesGrid(
+                              'Open Forms',
+                              onTap: () => {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      builder: (contex) =>
+                                          const PalletFormView()),
+                                )
+                              },
+                              icon: FluentIcons.form_new_24_filled,
+                            ),
+                            createFeaturesGrid(
+                              'Scan Pallet',
+                              onTap: scanPallet,
+                              icon: FluentIcons.barcode_scanner_24_filled,
+                            ),
+                            createFeaturesGrid(
+                              'Language',
+                              onTap: () {},
+                              icon: Icons.language_outlined,
+                            ),
+                            createFeaturesGrid(
+                              'More',
+                              onTap: () {},
+                              icon: FluentIcons.grid_dots_24_filled,
                             ),
                           ],
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                        child: SizedBox(
-                          height: 110,
-                          child: GridView.count(
-                            padding: const EdgeInsets.all(8),
-                            mainAxisSpacing: 10,
-                            scrollDirection: Axis.horizontal,
-                            crossAxisCount: 1,
-                            children: <Widget>[
-                              createFeaturesGrid(
-                                'Open Forms',
-                                onTap: () => {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (contex) =>
-                                            const PalletFormView()),
-                                  )
-                                },
-                                icon: FluentIcons.form_new_24_filled,
-                              ),
-                              createFeaturesGrid(
-                                'Scan Pallet',
-                                onTap: scanPallet,
-                                icon: FluentIcons.barcode_scanner_24_filled,
-                              ),
-                              createFeaturesGrid(
-                                'Language',
-                                onTap: () {},
-                                icon: Icons.language_outlined,
-                              ),
-                              createFeaturesGrid(
-                                'More',
-                                onTap: () {},
-                                icon: FluentIcons.grid_dots_24_filled,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Divider(
-                        color: Colors.grey.shade400,
-                        indent: 8,
-                        endIndent: 8,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 15, 8, 5),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Pallet's Summary",
-                              style: TextStyle(
-                                color: Color.fromRGBO(40, 40, 43, 1),
-                                fontSize: 17,
-                                fontWeight: FontWeight.w500,
-                              ),
+                    ),
+                    Divider(
+                      color: Colors.grey.shade400,
+                      indent: 8,
+                      endIndent: 8,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 15, 8, 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Pallet's Summary",
+                            style: TextStyle(
+                              color: Color.fromRGBO(40, 40, 43, 1),
+                              fontSize: 17,
+                              fontWeight: FontWeight.w500,
                             ),
-                            IconButton(
-                              onPressed: () {},
-                              icon: const Icon(
-                                Icons.refresh_outlined,
-                                size: 30,
-                              ),
-                            )
+                          ),
+                          IconButton(
+                            onPressed: () {},
+                            icon: const Icon(
+                              Icons.refresh_outlined,
+                              size: 30,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 5, 8, 90),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            createSummaryCard(
+                              "Pallets",
+                              100,
+                            ),
+                            createSummaryCard(
+                              "InBound",
+                              60,
+                            ),
+                            createSummaryCard(
+                              "OutBound",
+                              40,
+                            ),
                           ],
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 5, 8, 90),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              createSummaryCard(
-                                "Pallets",
-                                100,
-                              ),
-                              createSummaryCard(
-                                "InBound",
-                                60,
-                              ),
-                              createSummaryCard(
-                                "OutBound",
-                                40,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ]),
     );
   }
 

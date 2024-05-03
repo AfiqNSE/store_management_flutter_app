@@ -23,25 +23,15 @@ Future<Map<String, String>> getHeaders({bool isAccess = true}) async {
 }
 
 Future<Map<String, String>> getGuidHeader() async {
-  String guid = Storage.instance.guid;
-  if (guid == "") {
-    guid = await Storage.instance.getGuid();
-  }
-
-  return {"Guid": guid};
+  return {"Guid": await Storage.instance.getGuid()};
 }
 
 Future<Map<String, String>> getTokenHeaders({bool isAccess = true}) async {
-  String token =
-      isAccess ? Storage.instance.accessToken : Storage.instance.refreshToken;
-
-  if (token == "") {
-    token = isAccess
-        ? await Storage.instance.getAccessToken()
-        : await Storage.instance.getRefreshToken();
-  }
-
   String h = isAccess ? "access" : "refresh";
+
+  String token = isAccess
+      ? await Storage.instance.getAccessToken()
+      : await Storage.instance.getRefreshToken();
 
   return {"Authorization": "$h $token"};
 }

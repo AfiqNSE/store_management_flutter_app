@@ -32,15 +32,8 @@ class _LoginViewState extends State<LoginView> {
   }
 
   checklogin() async {
-    String guid = Storage.instance.guid;
-    if (guid == "") {
-      guid = await Storage.instance.getGuid();
-    }
-
-    String token = Storage.instance.refreshToken;
-    if (token == "") {
-      token = await Storage.instance.getRefreshToken();
-    }
+    String guid = await Storage.instance.getGuid();
+    String token = await Storage.instance.getRefreshToken();
 
     if (guid == "" || token == "") {
       debugPrint("[Login] User is NOT logged in: GUID or token does not exist");

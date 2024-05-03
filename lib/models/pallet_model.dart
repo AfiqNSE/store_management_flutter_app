@@ -1,52 +1,88 @@
 class Pallet {
+  int palletActivityId;
   int palletID;
   String palletNo;
-  int status;
-  DateTime createdOn;
-  String createdByUserName;
-  String modifiedOn;
-  String modifiedByUserName;
-  List<int> createdByUserGuid;
-  List<int> modifiedByUserGuid;
+  String lorryNo;
+  String palletType;
+  String destination;
+  String openPalletDateTime;
+  String openPalletLocation;
+  String openByUserName;
+  String movePalletDateTime;
+  String assignPalletDateTime;
+  String assignToUserGuid;
+  String assignByUserName;
+  String loadPalletDateTime;
+  String loadByUserName;
+  String status;
+  String palletLocation;
+  String items;
+  String signature;
 
   Pallet({
+    required this.palletActivityId,
     required this.palletID,
     required this.palletNo,
+    required this.lorryNo,
+    required this.palletType,
+    required this.destination,
+    required this.openPalletDateTime,
+    required this.openByUserName,
+    required this.movePalletDateTime,
+    required this.openPalletLocation,
+    required this.assignPalletDateTime,
+    required this.assignToUserGuid,
+    required this.assignByUserName,
+    required this.loadPalletDateTime,
+    required this.loadByUserName,
     required this.status,
-    required this.createdOn,
-    required this.createdByUserName,
-    required this.modifiedOn,
-    required this.modifiedByUserName,
-    required this.createdByUserGuid,
-    required this.modifiedByUserGuid,
+    required this.palletLocation,
+    required this.items,
+    required this.signature,
   });
 
-  factory Pallet.fromJson(Map<String, dynamic> json) => Pallet(
-        palletID: json["PalletID"],
-        palletNo: json["PalletNo"],
-        status: json["Status"],
-        createdOn: DateTime.parse(json["createdOn"]),
-        createdByUserName: json["CreatedByUserName"],
-        modifiedOn: json["ModifiedOn"],
-        modifiedByUserName: json["ModifiedByUserName"],
-        createdByUserGuid:
-            List<int>.from(json["createdByUserGuid"].map((x) => x)),
-        modifiedByUserGuid:
-            List<int>.from(json["CreatedByUserGuid"].map((x) => x)),
+  factory Pallet.fromJson(Map<String, dynamic> map) => Pallet(
+        palletActivityId: map["palletActivityId"],
+        palletID: map["palletId"],
+        palletNo: map["palletNo"],
+        lorryNo: map["lorryNo"],
+        palletType: map["palletType"],
+        destination: map["destination"],
+        openPalletDateTime: map["openPalletDateTime"],
+        openByUserName: map["openByUserName"],
+        movePalletDateTime: map["movePalletDateTime"],
+        openPalletLocation: map["moveByUserName"],
+        assignPalletDateTime: map["assignPalletDateTime"],
+        assignToUserGuid: map["assignToUserGuid"],
+        assignByUserName: map["assignToUserName"],
+        loadPalletDateTime: map["loadPalletDateTime"],
+        loadByUserName: map["loadByUserName"],
+        status: map["status"],
+        palletLocation: map["palletLocation"],
+        items: map["items"], // change to list
+        signature: map["signature"],
       );
 
   Map<String, dynamic> toJson() => {
-        "PalletID": palletID,
-        "PalletNo": palletNo,
-        "Status": status,
-        "CreatedOn": createdOn.toIso8601String(),
-        "CreatedByUserName": createdByUserName,
-        "ModifiedOn": modifiedOn,
-        "ModifiedByUserName": modifiedByUserName,
-        "CreatedByUserGuid":
-            List<dynamic>.from(createdByUserGuid.map((x) => x)),
-        "ModifiedByUserGuid":
-            List<dynamic>.from(modifiedByUserGuid.map((x) => x)),
+        "palletActivityId": palletActivityId,
+        "palletId": palletID,
+        "palletNo": palletNo,
+        "lorryNo": lorryNo,
+        "palletType": palletType,
+        "destination": destination,
+        "openPalletDateTime": openPalletDateTime,
+        "openByUserName": openByUserName,
+        "movePalletDateTime": movePalletDateTime,
+        "openPalletLocation": openPalletLocation,
+        "assignPalletDateTime": assignPalletDateTime,
+        "assignToUserGuid": assignToUserGuid,
+        "assignByUserName": assignByUserName,
+        "loadPalletDateTime": loadPalletDateTime,
+        "loadByUserName": loadByUserName,
+        "status": status,
+        "palletLocation": palletLocation,
+        "items": items, // change to list
+        "signature": signature
       };
 }
 

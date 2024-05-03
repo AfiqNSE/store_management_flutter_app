@@ -1,4 +1,4 @@
-import 'dart:io';
+// import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -7,23 +7,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:store_management_system/firebase_options.dart';
-import 'package:store_management_system/utils/storage_utils.dart';
+// import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/login/login_view.dart';
 
 Future<void> firebaseSetup() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  if (Platform.isIOS) {
-    Storage.set(fcmToken: await FirebaseMessaging.instance.getAPNSToken());
-  } else {
-    Storage.set(fcmToken: await FirebaseMessaging.instance.getToken());
-  }
+  // if (Platform.isIOS) {
+  //   Storage.set(fcmToken: await FirebaseMessaging.instance.getAPNSToken());
+  // } else {
+  //   Storage.set(fcmToken: await FirebaseMessaging.instance.getToken());
+  // }
 
-  FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) async {
-    await Storage.set(fcmToken: fcmToken);
-  }).onError((err) {
-    debugPrint("[FirebaseMessaging] Error: ${err.toString()}");
-  });
+  // FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) async {
+  //   await Storage.set(fcmToken: fcmToken);
+  // }).onError((err) {
+  //   debugPrint("[FirebaseMessaging] Error: ${err.toString()}");
+  // });
 
   await FirebaseMessaging.instance.requestPermission();
   // Handle notification message when on background

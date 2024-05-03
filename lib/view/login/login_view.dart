@@ -16,17 +16,69 @@ class _LoginViewState extends State<LoginView> {
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
 
-  bool loading = false;
+  bool loading = true;
 
   @override
   void initState() {
     super.initState();
+
     autofill();
+    checklogin();
   }
 
   autofill() async {
-    username.text = await Storage.instance.getUsername();
-    password.text = await Storage.instance.getPassword();
+    username.text = await Storage.instance.username;
+    password.text = await Storage.instance.password;
+  }
+
+  checklogin() async {
+    String guid = Storage.instance.guid;
+    if (guid == "") {
+      guid = await Storage.instance.getGuid();
+    }
+
+    String token = Storage.instance.refreshToken;
+    if (token == "") {
+      token = await Storage.instance.getRefreshToken();
+    }
+
+    if (guid == "" || token == "") {
+      debugPrint("[Login] User is NOT logged in: GUID or token does not exist");
+      setState(() {
+        loading = false;
+      });
+
+      return;
+    }
+
+    bool loggedin = false;
+    try {
+      loggedin = await ApiServices.user.authorized();
+    } catch (e) {
+      debugPrint("Error: [Login] ${e.toString()}");
+    }
+
+    if (!loggedin) {
+      debugPrint("[Login] User is NOT logged in");
+      setState(() {
+        loading = false;
+      });
+
+      return;
+    }
+
+    debugPrint("[Login] User is logged in");
+    if (mounted) {
+      setState(() {
+        loading = false;
+      });
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const NavigationTabView()),
+        (route) => false,
+      );
+    }
   }
 
   @override
@@ -329,42 +381,13 @@ class _LoginViewState extends State<LoginView> {
     }
 
     TextInput.finishAutofillContext();
+    Storage.instance.setGuid(res["user"]["guid"]);
     Storage.instance.setUsername(username.text);
     Storage.instance.setPassword(password.text);
+    Storage.instance.setDisplayName(res["user"]["displayName"]);
+    Storage.instance.setAccessToken(res["token"]["access"]);
+    Storage.instance.setRefreshToken(res["token"]["refresh"]);
 
     return 0;
-
-    // var guid = res["user"]["guid"];
-    // var user = jsonEncode(res["user"]);
-    // var token = Token.fromMap(res["token"]);
-
-    // await Storage.set(
-    //   guid: guid,
-    //   user: user,
-    //   accessToken: token.access,
-    //   refreshToken: token.refresh,
-    //   password: passwd.text,
-    // );
-
-    // if (mounted) {
-    //   TextInput.finishAutofillContext();
-
-    //   Global.instance.isLoggedIn = true;
-    //   Global.instance.role = res["user"]["role"] ?? 0;
-    //   Global.instance.isSuperAdmin = res["user"]["isSuperAdmin"] ?? false;
-    //   Global.instance.isAdmin = res["user"]["isAdmin"] ?? false;
-
-    // if (Platform.isAndroid && !(await isUpdated())) {
-    //   setState(() => loading = false);
-
-    //   sm.hideCurrentSnackBar();
-    //   if (mounted) showDownloadPrompt(context);
-    // } else if (mounted) {
-    //   goToHome(context, sm, successMsg);
-    // }
-    // goToHome(context, sm, successMsg);
-    // }
-
-    // setState(() => loading = false);
   }
 }

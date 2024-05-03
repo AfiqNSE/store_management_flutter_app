@@ -15,23 +15,35 @@ class ApiServices {
 }
 
 Future<Map<String, String>> getHeaders({bool isAccess = true}) async {
-  Map<String, String> ret = {"Content-Type": "application/json; charset=UTF-8"};
-  ret.addAll(await getGuidHeader());
-  ret.addAll(await getTokenHeaders(isAccess: isAccess));
-  return ret;
+  Map<String, String> headers = {"Content-Type": "application/json"};
+  headers.addAll(await getGuidHeader());
+  headers.addAll(await getTokenHeaders(isAccess: isAccess));
+
+  return headers;
 }
 
 Future<Map<String, String>> getGuidHeader() async {
-  return {"Guid": await Storage.guid ?? ""};
+  String guid = Storage.instance.guid;
+  if (guid == "") {
+    guid = await Storage.instance.getGuid();
+  }
+
+  return {"Guid": guid};
 }
 
 Future<Map<String, String>> getTokenHeaders({bool isAccess = true}) async {
-  return {
-    "Token": isAccess
-        ? await Storage.accessToken ?? ""
-        : await Storage.refreshToken ?? "",
-    "Type": isAccess ? "access" : "refresh"
-  };
+  String token =
+      isAccess ? Storage.instance.accessToken : Storage.instance.refreshToken;
+
+  if (token == "") {
+    token = isAccess
+        ? await Storage.instance.getAccessToken()
+        : await Storage.instance.getRefreshToken();
+  }
+
+  String h = isAccess ? "access" : "refresh";
+
+  return {"Authorization": "$h $token"};
 }
 
 Future<http.Response> apiCall(
@@ -44,7 +56,7 @@ Future<http.Response> apiCall(
   switch (response.statusCode) {
     case HttpStatus.ok:
       if (response.headers.containsKey('access')) {
-        Storage.set(accessToken: response.headers["access"].toString());
+        Storage.instance.setAccessToken(response.headers["access"].toString());
       }
 
       break;
@@ -61,10 +73,12 @@ Future<http.Response> apiCall(
         );
 
         if (refreshRes.headers.containsKey('access')) {
-          Storage.set(accessToken: refreshRes.headers["access"].toString());
+          Storage.instance
+              .setAccessToken(refreshRes.headers["access"].toString());
 
           if (refreshRes.headers.containsKey('refresh')) {
-            Storage.set(refreshToken: refreshRes.headers["refresh"].toString());
+            Storage.instance
+                .setRefreshToken(refreshRes.headers["refresh"].toString());
           }
         }
 
@@ -86,7 +100,9 @@ Future<http.Response> _apiRequest(
   bool isAccess = true,
   String body = "",
 }) async {
-  Map<String, String> headers = await getHeaders(isAccess: isAccess);
+  Map<String, String> headers = {"Content-Type": "application/json"};
+  headers.addAll(await getGuidHeader());
+  headers.addAll(await getTokenHeaders(isAccess: isAccess));
 
   try {
     if (isGet) {

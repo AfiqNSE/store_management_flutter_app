@@ -1,95 +1,65 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Storage {
   static Storage instance = Storage();
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
-  String _username = "";
+  String _guid = "";
+  String _displayName = "";
+  String _accessToken = "";
+  String _refreshToken = "";
 
-  static Future<String?> get guid async {
-    return _storage.read(key: "guid");
+  String get guid => _guid;
+
+  Future<String> get username async =>
+      (await _storage.read(key: "username")) ?? "";
+
+  Future<String> get password async =>
+      (await _storage.read(key: "password")) ?? "";
+
+  String get displayName => _displayName;
+
+  String get accessToken => _accessToken;
+
+  String get refreshToken => _refreshToken;
+
+  void setGuid(String guid) {
+    _guid = guid;
+    _storage.write(key: "guid", value: guid);
   }
 
-  static Future<String?> get accessToken async {
-    return _storage.read(key: "access-token");
+  Future<String> getGuid() async => (await _storage.read(key: "guid")) ?? "";
+
+  void setUsername(String username) =>
+      _storage.write(key: "username", value: username);
+
+  void setPassword(String password) =>
+      _storage.write(key: "password", value: password);
+
+  void setDisplayName(String displayName) {
+    _displayName = displayName;
+    _storage.write(key: "display-name", value: displayName);
   }
 
-  static Future<String?> get refreshToken async {
-    return _storage.read(key: "refresh-token");
+  // Get the stored display name in FlutterSecureStorage
+  Future<String> getDisplayName() async =>
+      (await _storage.read(key: "display-name")) ?? "";
+
+  void setAccessToken(String accessToken) {
+    _accessToken = accessToken;
+    _storage.write(key: "access-token", value: accessToken);
   }
 
-  static Future<String?> get user async {
-    return _storage.read(key: "user");
+  Future<String> getAccessToken() async =>
+      (await _storage.read(key: "access-token")) ?? "";
+
+  void setRefreshToken(String refreshToken) {
+    _refreshToken = refreshToken;
+    _storage.write(key: "refresh-token", value: refreshToken);
   }
 
-  static Future<String?> get fcmToken async {
-    return _storage.read(key: "fcmToken");
-  }
+  Future<String> getRefreshToken() async =>
+      (await _storage.read(key: "refresh-token")) ?? "";
 
-  static Future<String?> get fcmTokenOld async {
-    return _storage.read(key: "fcmTokenOld");
-  }
-
-  static set({
-    guid = "",
-    accessToken = "",
-    refreshToken = "",
-    user = "",
-    fcmToken = "",
-  }) async {
-    if (guid != "") {
-      await _storage.write(key: "guid", value: guid);
-    }
-
-    if (accessToken != "") {
-      await _storage.write(key: "access-token", value: accessToken);
-    }
-
-    if (refreshToken != "") {
-      await _storage.write(key: "refresh-token", value: refreshToken);
-    }
-
-    if (user != "") {
-      await _storage.write(key: "user", value: user);
-    }
-
-    if (fcmToken != "") {
-      var oldFcm = await _storage.read(key: "fcmToken");
-
-      if (oldFcm == null) {
-        debugPrint("[Storage] Add FCM Token: $fcmToken");
-        await _storage.write(key: "fcmToken", value: fcmToken);
-      } else if (oldFcm != fcmToken) {
-        debugPrint("[Storage] Replace FCM Token: $fcmToken");
-        await _storage.write(key: "fcmTokenOld", value: oldFcm);
-        await _storage.write(key: "fcmToken", value: fcmToken);
-      }
-    }
-  }
-
-  static removeAll() async {
-    await _storage.delete(key: "guid");
-    await _storage.delete(key: "access-token");
-    await _storage.delete(key: "refresh-token");
-  }
-
-  void setUsername(String username) {
-    _username = username;
-    _storage.write(key: "username", value: username);
-  }
-
-  Future<String> getUsername() async {
-    if (_username != "") return _username;
-
-    return (await _storage.read(key: "username")) ?? "";
-  }
-
-  void setPassword(String password) {
-    _storage.write(key: "password", value: password);
-  }
-
-  Future<String> getPassword() async {
-    return (await _storage.read(key: "password")) ?? "";
-  }
+  void removeAll() => _storage.deleteAll();
 }

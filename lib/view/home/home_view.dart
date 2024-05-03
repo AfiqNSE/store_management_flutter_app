@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/view/home/notification_view.dart';
 import 'package:store_management_system/view/pallet/pallet_form.dart';
@@ -47,7 +48,7 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(31, 48, 94, 1),
+        backgroundColor: AppColor().blueZodiac,
         elevation: 0.0,
         actions: [
           Padding(
@@ -67,7 +68,7 @@ class _HomeViewState extends State<HomeView> {
         ],
       ),
       extendBody: true,
-      backgroundColor: const Color.fromRGBO(31, 48, 94, 1),
+      backgroundColor: AppColor().blueZodiac,
       body: Column(
         children: [
           Padding(
@@ -76,16 +77,16 @@ class _HomeViewState extends State<HomeView> {
               children: [
                 Text(
                   formattedDate,
-                  style: const TextStyle(
-                    color: Color.fromRGBO(252, 252, 252, 1),
+                  style: TextStyle(
+                    color: AppColor().milkWhite,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(greetingMessage,
                     style: GoogleFonts.lora(
-                      textStyle: const TextStyle(
-                        color: Color.fromRGBO(255, 164, 57, 1),
+                      textStyle: TextStyle(
+                        color: AppColor().deepSaffron,
                         fontSize: 30,
                         fontWeight: FontWeight.w500,
                       ),
@@ -95,13 +96,13 @@ class _HomeViewState extends State<HomeView> {
           ),
           Expanded(
             child: Container(
-              decoration: const BoxDecoration(
-                color: Color.fromRGBO(252, 252, 252, 1),
-                borderRadius: BorderRadius.vertical(
+              decoration: BoxDecoration(
+                color: AppColor().milkWhite,
+                borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(30.0),
                 ),
                 border: Border.fromBorderSide(BorderSide(
-                  color: Color.fromRGBO(31, 48, 94, 1),
+                  color: AppColor().blueZodiac,
                 )),
               ),
               child: Padding(
@@ -116,7 +117,6 @@ class _HomeViewState extends State<HomeView> {
                             Text(
                               'What would you like to do today?',
                               style: TextStyle(
-                                color: Color.fromRGBO(40, 40, 43, 1),
                                 fontSize: 17,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -177,7 +177,6 @@ class _HomeViewState extends State<HomeView> {
                             const Text(
                               "Pallet's Summary",
                               style: TextStyle(
-                                color: Color.fromRGBO(40, 40, 43, 1),
                                 fontSize: 17,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -241,7 +240,7 @@ class _HomeViewState extends State<HomeView> {
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(
-              color: const Color.fromRGBO(211, 211, 211, 1),
+              color: AppColor().milkWhite,
               width: 1.2,
             ),
             borderRadius: BorderRadius.circular(15),
@@ -259,7 +258,6 @@ class _HomeViewState extends State<HomeView> {
               Text(
                 text,
                 style: const TextStyle(
-                  color: Color.fromRGBO(40, 40, 43, 1),
                   fontWeight: FontWeight.w500,
                   fontSize: 14,
                 ),
@@ -328,7 +326,7 @@ class _HomeViewState extends State<HomeView> {
           width: double.maxFinite,
           decoration: BoxDecoration(
             border: Border.all(
-              color: const Color.fromRGBO(211, 211, 211, 1),
+              color: AppColor().milkWhite,
               width: 0.7,
             ),
             borderRadius: BorderRadius.circular(10),
@@ -354,14 +352,12 @@ class _HomeViewState extends State<HomeView> {
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w500,
-                              color: Color.fromRGBO(40, 40, 43, 1),
                             )),
                       ]),
                 ),
                 Text(
                   '$value',
                   style: const TextStyle(
-                    color: Color.fromRGBO(40, 40, 43, 1),
                     fontWeight: FontWeight.w500,
                     fontSize: 35,
                   ),

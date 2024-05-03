@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/view/navigation/navigation_view.dart';
 
 class LoginView extends StatefulWidget {
@@ -18,7 +19,7 @@ class _LoginViewState extends State<LoginView> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          color: const Color.fromRGBO(252, 252, 252, 1),
+          color: AppColor().milkWhite,
           height: MediaQuery.of(context).size.height,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -27,8 +28,8 @@ class _LoginViewState extends State<LoginView> {
               backgroundImage(),
               // Login Form
               loginForm(),
-              // Bottom Component
-              bottomLogin(),
+              // Bottom Components: login button, app name and version
+              bottomComponent(),
             ],
           ),
         ),
@@ -52,6 +53,7 @@ class _LoginViewState extends State<LoginView> {
         ),
       );
 
+  // Login form
   Form loginForm() => Form(
         key: _formKey,
         child: Expanded(
@@ -63,7 +65,6 @@ class _LoginViewState extends State<LoginView> {
                   'Welcome Back',
                   style: TextStyle(
                     fontSize: 35,
-                    color: Color.fromRGBO(40, 40, 43, 1),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -71,7 +72,6 @@ class _LoginViewState extends State<LoginView> {
                   'Login to your account',
                   style: TextStyle(
                     fontSize: 15,
-                    color: Color.fromRGBO(40, 40, 43, 1),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -79,15 +79,14 @@ class _LoginViewState extends State<LoginView> {
                 TextFormField(
                   controller: username,
                   style: const TextStyle(
-                    color: Color.fromRGBO(40, 40, 43, 1),
                     fontSize: 14,
                   ),
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
                     labelText: 'Username',
-                    labelStyle: const TextStyle(
+                    labelStyle: TextStyle(
                       fontSize: 18,
-                      color: Color.fromRGBO(31, 48, 94, 1),
+                      color: AppColor().blueZodiac,
                       fontWeight: FontWeight.w600,
                     ),
                     hintText: 'Enter your username',
@@ -97,8 +96,8 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Color.fromRGBO(31, 48, 94, 1),
+                      borderSide: BorderSide(
+                        color: AppColor().blueZodiac,
                         width: 2.0,
                       ),
                       borderRadius: BorderRadius.circular(10.0),
@@ -119,14 +118,13 @@ class _LoginViewState extends State<LoginView> {
                 TextFormField(
                   controller: password,
                   style: const TextStyle(
-                    color: Color.fromRGBO(40, 40, 43, 1),
                     fontSize: 14,
                   ),
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    labelStyle: const TextStyle(
+                    labelStyle: TextStyle(
                       fontSize: 18,
-                      color: Color.fromRGBO(31, 48, 94, 1),
+                      color: AppColor().blueZodiac,
                       fontWeight: FontWeight.w600,
                     ),
                     hintText: 'Enter your password',
@@ -136,8 +134,8 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Color.fromRGBO(31, 48, 94, 1),
+                      borderSide: BorderSide(
+                        color: AppColor().blueZodiac,
                         width: 2.0,
                       ),
                       borderRadius: BorderRadius.circular(10.0),
@@ -161,7 +159,7 @@ class _LoginViewState extends State<LoginView> {
       );
 
   // Bottom component: Login button, app name & version
-  Widget bottomLogin() => Padding(
+  Widget bottomComponent() => Padding(
         padding: const EdgeInsets.fromLTRB(35, 0, 35, 15),
         child: Align(
           alignment: Alignment.bottomCenter,
@@ -178,7 +176,7 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     minimumSize: MaterialStateProperty.all(const Size(120, 50)),
                     backgroundColor: MaterialStateProperty.all<Color>(
-                      const Color.fromRGBO(31, 48, 94, 1),
+                      AppColor().blueZodiac,
                     ),
                     elevation: MaterialStateProperty.all(3),
                   ),

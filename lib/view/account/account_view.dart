@@ -1,5 +1,6 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/view/login/login_view.dart';
 
 class AccountView extends StatefulWidget {
@@ -17,7 +18,6 @@ class _AccountViewState extends State<AccountView> {
         title: const Text(
           'My Account',
           style: TextStyle(
-            color: Color.fromRGBO(40, 40, 43, 1),
             fontSize: 20,
             fontWeight: FontWeight.w600,
           ),
@@ -28,7 +28,6 @@ class _AccountViewState extends State<AccountView> {
           Padding(
             padding: const EdgeInsets.only(right: 25.0),
             child: IconButton(
-              color: const Color.fromRGBO(40, 40, 43, 1),
               onPressed: () => _logout(),
               icon: const Icon(
                 FluentIcons.sign_out_24_filled,
@@ -38,7 +37,7 @@ class _AccountViewState extends State<AccountView> {
           ),
         ],
       ),
-      backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
+      backgroundColor: AppColor().milkWhite,
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -47,10 +46,10 @@ class _AccountViewState extends State<AccountView> {
               padding: const EdgeInsets.fromLTRB(20, 30, 20, 0),
               child: ListBody(
                 children: [
-                  const Text(
+                  Text(
                     "Manage Your Account",
                     style: TextStyle(
-                      color: Color.fromRGBO(0, 66, 140, 1),
+                      color: AppColor().yaleBlue,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -103,10 +102,10 @@ class _AccountViewState extends State<AccountView> {
                     color: Colors.grey.shade200,
                   ),
                   const SizedBox(height: 30),
-                  const Text(
+                  Text(
                     "Need Help?",
                     style: TextStyle(
-                      color: Color.fromRGBO(0, 66, 140, 1),
+                      color: AppColor().yaleBlue,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -181,10 +180,10 @@ class _AccountViewState extends State<AccountView> {
                     color: Colors.grey.shade200,
                   ),
                   const SizedBox(height: 30),
-                  const Text(
+                  Text(
                     "Application Info",
                     style: TextStyle(
-                      color: Color.fromRGBO(0, 66, 140, 1),
+                      color: AppColor().yaleBlue,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),

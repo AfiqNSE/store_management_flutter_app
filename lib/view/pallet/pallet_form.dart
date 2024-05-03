@@ -1,5 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:store_management_system/components/pallet_components.dart';
+import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 
@@ -11,225 +13,199 @@ class PalletFormView extends StatefulWidget {
 }
 
 class _PalletFormViewState extends State<PalletFormView> {
-  String? selectedValue;
-  final List<bool> _selectedPalletLocation = <bool>[false, false];
-  final List<bool> _selectedPalletType = <bool>[false, false];
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController palletNo = TextEditingController();
+  TextEditingController lorryNo = TextEditingController();
+  List<bool> _selectedPalletLocation = <bool>[false, false];
+  List<bool> _selectedPalletType = <bool>[false, false];
+  String? _selectedDestination = Constant().destination[0];
 
-  final List<Widget> palletLocation = <Widget>[
-    const Text('Inbound'),
-    const Text('Outbound'),
-  ];
-
-  final List<Widget> palletType = <Widget>[
-    const Text('Palletise'),
-    const Text('Loose'),
-  ];
-
-  List<String> destinations = [];
-
-  @override
-  void initState() {
-    super.initState();
-    getZones();
-  }
-
-  getZones() async {
-    destinations = List<String>.from(await ApiServices.other.zones());
-    setState(() {});
+  void _resetForm() {
+    palletNo.clear();
+    lorryNo.clear();
+    setState(() {
+      _selectedPalletLocation = [false, false];
+      _selectedPalletType = [false, false];
+      _selectedDestination = Constant().destination[0];
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: customAppBar('Open Pallet Form'),
-      backgroundColor: const Color.fromRGBO(252, 252, 252, 1),
+      backgroundColor: AppColor().milkWhite,
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
+        padding: const EdgeInsets.fromLTRB(5, 10, 5, 0),
         child: SingleChildScrollView(
-          child: Stack(children: [
-            Container(
-              alignment: Alignment.topCenter,
-              height: 520,
-              decoration: BoxDecoration(
-                color: const Color.fromRGBO(237, 237, 237, 1),
-                borderRadius: BorderRadius.circular(15),
-              ),
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              children: [
+                // Pallet form area
+                palletForm(),
+                // Adding button for clear and submit form
+                formButton(),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Pallet Number: ',
-                    style: TextStyle(
-                      color: Color.fromRGBO(40, 40, 43, 1),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 5, 0, 20),
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Color.fromRGBO(252, 252, 252, 1),
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      height: 35,
-                      child: TextFormField(
-                        cursorHeight: 22,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Color.fromRGBO(40, 40, 43, 1),
-                        ),
-                        textAlign: TextAlign.center,
-                        decoration: InputDecoration(
-                          hintText: 'Enter Pallet Number',
-                          hintStyle: const TextStyle(fontSize: 14),
-                          contentPadding:
-                              const EdgeInsets.fromLTRB(10, 12, 0, 0),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    'Pallet Location: ',
-                    style: TextStyle(
-                      color: Color.fromRGBO(40, 40, 43, 1),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 5, 0, 20),
-                    child: customToggleButton(
-                        _selectedPalletLocation, palletLocation),
-                  ),
-                  const Text(
-                    'Pallet Type: ',
-                    style: TextStyle(
-                      color: Color.fromRGBO(40, 40, 43, 1),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 5, 0, 20),
-                    child: customToggleButton(_selectedPalletType, palletType),
-                  ),
-                  const Text(
-                    'Destination: ',
-                    style: TextStyle(
-                      color: Color.fromRGBO(40, 40, 43, 1),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 5, 0, 20),
-                    child: destinationDropDown(),
-                  ),
-                  const Text(
-                    'Lorry No: ',
-                    style: TextStyle(
-                      color: Color.fromRGBO(40, 40, 43, 1),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 5, 0, 20),
-                    child: Container(
-                      height: 35,
-                      decoration: const BoxDecoration(
-                        color: Color.fromRGBO(252, 252, 252, 1),
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      child: TextFormField(
-                        cursorHeight: 22,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Color.fromRGBO(40, 40, 43, 1),
-                        ),
-                        textAlign: TextAlign.center,
-                        decoration: InputDecoration(
-                          hintText: 'Enter Lorry Number',
-                          hintStyle: const TextStyle(fontSize: 14),
-                          contentPadding:
-                              const EdgeInsets.fromLTRB(10, 12, 0, 0),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 10, 8, 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton(
-                          style: ButtonStyle(
-                            shape: MaterialStateProperty.all<OutlinedBorder>(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                side: const BorderSide(
-                                  color: Color.fromRGBO(102, 153, 204, 1),
-                                  width: 1.3,
-                                ),
-                              ),
-                            ),
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                              const Color.fromRGBO(245, 254, 253, 1),
-                            ),
-                          ),
-                          onPressed: () {},
-                          child: Text(
-                            'Clear Form',
-                            style: TextStyle(
-                              color: Colors.blue.shade600,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                        ElevatedButton(
-                          style: ButtonStyle(
-                            shape: MaterialStateProperty.all<OutlinedBorder>(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                              const Color.fromRGBO(31, 48, 94, 1),
-                            ),
-                          ),
-                          onPressed: () {},
-                          child: const Text(
-                            'Open Pallet',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ]),
+          ),
         ),
       ),
     );
   }
 
+  Form palletForm() => Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            customTextLabel('Pallet Number: '),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
+              child: TextFormField(
+                controller: palletNo,
+                cursorHeight: 22,
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
+                decoration: customTextFormFieldDeco('Enter Pallet Number'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter pallet number';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            customTextLabel('Pallet Location: '),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
+              child: customToggleButton(
+                  _selectedPalletLocation, Constant().palletLocation),
+            ),
+            customTextLabel('Pallet Type: '),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
+              child: customToggleButton(
+                  _selectedPalletType, Constant().palletType),
+            ),
+            customTextLabel('Destination: '),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
+              child: destinationDropDown(),
+            ),
+            customTextLabel('Lorry No: '),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
+              child: TextFormField(
+                controller: lorryNo,
+                cursorHeight: 22,
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
+                decoration: customTextFormFieldDeco('Enter Lorry Number'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter lorry number';
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+
+  // Button to submit & clear the form data
+  Widget formButton() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 30, 0, 10),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          ElevatedButton(
+            style: ButtonStyle(
+              minimumSize:
+                  MaterialStateProperty.all(const Size(double.infinity, 40)),
+              shape: MaterialStateProperty.all<OutlinedBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              backgroundColor: MaterialStateProperty.all<Color>(
+                AppColor().blueZodiac,
+              ),
+            ),
+            onPressed: () {
+              if (_formKey.currentState!.validate() &&
+                  _selectedPalletLocation.contains(true) &&
+                  _selectedPalletType.contains(true) &&
+                  _selectedDestination != Constant().destination[0]) {
+                Navigator.pop(context);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Successfully open pallet.'),
+                    backgroundColor: Colors.green.shade300,
+                    duration: const Duration(seconds: 5),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Please complete the form.'),
+                    backgroundColor: Colors.red.shade300,
+                    duration: const Duration(seconds: 5),
+                  ),
+                );
+              }
+            },
+            child: Text(
+              'Open Pallet',
+              style: TextStyle(
+                color: AppColor().milkWhite,
+                fontSize: 18,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            style: ButtonStyle(
+              minimumSize:
+                  MaterialStateProperty.all(const Size(double.infinity, 40)),
+              shape: MaterialStateProperty.all<OutlinedBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: const BorderSide(
+                    color: Color.fromRGBO(102, 153, 204, 1),
+                    width: 1.3,
+                  ),
+                ),
+              ),
+              backgroundColor: MaterialStateProperty.all<Color>(
+                AppColor().milkWhite,
+              ),
+            ),
+            onPressed: () {
+              _resetForm();
+            },
+            child: Text(
+              'Clear Form',
+              style: TextStyle(
+                color: Colors.blue.shade600,
+                fontSize: 18,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  // Create toggle button for pallet location and type
   Widget customToggleButton(
     List<bool> selected,
     List<Widget> items,
@@ -238,18 +214,17 @@ class _PalletFormViewState extends State<PalletFormView> {
       textStyle: const TextStyle(fontWeight: FontWeight.w500),
       onPressed: (int index) {
         setState(() {
-          // The button that is tapped is set to true, and the others to false.
           for (int i = 0; i < selected.length; i++) {
             selected[i] = i == index;
           }
         });
       },
-      borderColor: Colors.white,
+      borderColor: Colors.grey,
       borderRadius: const BorderRadius.all(Radius.circular(8)),
+      borderWidth: 1.3,
       selectedBorderColor: Colors.green[700],
       selectedColor: Colors.white,
       fillColor: Colors.green[200],
-      color: const Color.fromRGBO(40, 40, 43, 1),
       constraints: const BoxConstraints(
         minHeight: 40.0,
         minWidth: 100.0,
@@ -265,12 +240,10 @@ class _PalletFormViewState extends State<PalletFormView> {
         isExpanded: true,
         hint: Row(
           children: [
-            const SizedBox(
-              width: 4,
-            ),
-            Expanded(
+            Padding(
+              padding: const EdgeInsets.only(left: 10.0),
               child: Text(
-                'Select Desination',
+                Constant().destination[0],
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -281,7 +254,8 @@ class _PalletFormViewState extends State<PalletFormView> {
             ),
           ],
         ),
-        items: destinations
+        items: Constant()
+            .destination
             .map((String item) => DropdownMenuItem<String>(
                   value: item,
                   child: Text(
@@ -289,16 +263,15 @@ class _PalletFormViewState extends State<PalletFormView> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Color.fromRGBO(40, 40, 43, 1),
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ))
             .toList(),
-        value: selectedValue,
+        value: _selectedDestination,
         onChanged: (String? value) {
           setState(() {
-            selectedValue = value;
+            _selectedDestination = value;
           });
         },
         buttonStyleData: ButtonStyleData(
@@ -306,15 +279,16 @@ class _PalletFormViewState extends State<PalletFormView> {
           width: 200,
           padding: const EdgeInsets.only(left: 14, right: 14),
           decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(10),
-            color: const Color.fromRGBO(252, 252, 252, 1),
+            color: AppColor().milkWhite,
           ),
         ),
         dropdownStyleData: DropdownStyleData(
           maxHeight: 200,
           width: 200,
           decoration: BoxDecoration(
-            color: const Color.fromRGBO(252, 252, 252, 1),
+            color: AppColor().milkWhite,
             borderRadius: BorderRadius.circular(14),
           ),
           scrollbarTheme: ScrollbarThemeData(

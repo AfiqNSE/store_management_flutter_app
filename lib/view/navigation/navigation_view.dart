@@ -1,6 +1,7 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/view/pallet/pallet_view.dart';
 import 'package:store_management_system/view/account/account_view.dart';
 import 'package:store_management_system/view/home/home_view.dart';
@@ -40,7 +41,7 @@ class _NavigationTabViewState extends State<NavigationTabView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(245, 254, 253, 1),
+      backgroundColor: AppColor().milkWhite,
       extendBody: true,
       body: TabBarView(
         physics: const NeverScrollableScrollPhysics(),
@@ -55,9 +56,9 @@ class _NavigationTabViewState extends State<NavigationTabView>
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Container(
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(25)),
-            color: Color.fromRGBO(31, 48, 94, 1),
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(25)),
+            color: AppColor().blueZodiac,
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(

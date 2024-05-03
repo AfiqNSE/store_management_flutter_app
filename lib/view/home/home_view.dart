@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
@@ -93,7 +94,7 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    Widget quickBar = Padding(
+    Widget quickbar = Padding(
       padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
       child: SizedBox(
         height: 110,
@@ -105,9 +106,11 @@ class _HomeViewState extends State<HomeView> {
           children: <Widget>[
             createFeaturesGrid(
               'Open Forms',
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (contex) => const PalletFormView(),
-              )),
+              onTap: () => {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (contex) => const PalletFormView(),
+                ))
+              },
               icon: FluentIcons.form_new_24_filled,
             ),
             createFeaturesGrid(
@@ -132,7 +135,7 @@ class _HomeViewState extends State<HomeView> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(31, 48, 94, 1),
+        backgroundColor: AppColor().blueZodiac,
         elevation: 0,
         scrolledUnderElevation: 0,
         actions: [
@@ -140,26 +143,24 @@ class _HomeViewState extends State<HomeView> {
             padding: const EdgeInsets.only(right: 20.0),
             child: IconButton(
               color: Colors.white,
-              onPressed: () {
-                Navigator.of(context).push(
-                  SlideRoute(page: const NotificationView(), toRight: false),
-                );
-              },
+              onPressed: () => Navigator.of(context).push(
+                SlideRoute(page: const NotificationView(), toRight: false),
+              ),
               icon: const Icon(Icons.notifications_active_outlined, size: 28),
             ),
           ),
         ],
       ),
       extendBody: true,
-      backgroundColor: const Color.fromRGBO(31, 48, 94, 1),
+      backgroundColor: AppColor().blueZodiac,
       body: Column(children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 0, 20),
           child: Column(children: [
             Text(
               formattedDate,
-              style: const TextStyle(
-                color: Color.fromRGBO(252, 252, 252, 1),
+              style: TextStyle(
+                color: AppColor().milkWhite,
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
               ),
@@ -168,8 +169,8 @@ class _HomeViewState extends State<HomeView> {
               greetingMessage,
               textAlign: TextAlign.center,
               style: GoogleFonts.lora(
-                textStyle: const TextStyle(
-                  color: Color.fromRGBO(255, 164, 57, 1),
+                textStyle: TextStyle(
+                  color: AppColor().deepSaffron,
                   fontSize: 30,
                   fontWeight: FontWeight.w500,
                 ),
@@ -179,75 +180,72 @@ class _HomeViewState extends State<HomeView> {
         ),
         Expanded(
           child: Container(
-            decoration: const BoxDecoration(
-              color: Color.fromRGBO(252, 252, 252, 1),
-              borderRadius: BorderRadius.vertical(
+            decoration: BoxDecoration(
+              color: AppColor().milkWhite,
+              borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(30.0),
               ),
               border: Border.fromBorderSide(BorderSide(
-                color: Color.fromRGBO(31, 48, 94, 1),
+                color: AppColor().blueZodiac,
               )),
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
               child: SingleChildScrollView(
                 child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
-                        child: Text(
-                          'What would you like to do today?',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                          ),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      child: Text(
+                        'What would you like to do today?',
+                        style: TextStyle(
+                          color: Color.fromRGBO(40, 40, 43, 1),
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      quickBar,
-                      Divider(
-                        color: Colors.grey.shade400,
-                        indent: 8,
-                        endIndent: 8,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Pallet's Summary",
-                              style: TextStyle(
-                                color: Color.fromRGBO(40, 40, 43, 1),
-                                fontSize: 17,
-                                fontWeight: FontWeight.w500,
-                              ),
+                    ),
+                    quickbar,
+                    Divider(
+                      color: Colors.grey.shade400,
+                      indent: 8,
+                      endIndent: 8,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Pallet's Summary",
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w500,
                             ),
-                            IconButton(
-                              onPressed: refreshSummary,
-                              icon: const Icon(
-                                Icons.refresh_outlined,
-                                size: 30,
-                              ),
-                            )
+                          ),
+                          IconButton(
+                            onPressed: refreshSummary,
+                            icon: const Icon(Icons.refresh_outlined, size: 30),
+                          )
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 5, 8, 90),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            createSummaryCard("Pallets", total),
+                            createSummaryCard("InBound", inBound),
+                            createSummaryCard("OutBound", outBound),
                           ],
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 5, 8, 90),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              createSummaryCard("Pallets", total),
-                              createSummaryCard("InBound", inBound),
-                              createSummaryCard("OutBound", outBound),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ]),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -270,7 +268,7 @@ class _HomeViewState extends State<HomeView> {
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(
-              color: const Color.fromRGBO(211, 211, 211, 1),
+              color: AppColor().milkWhite,
               width: 1.2,
             ),
             borderRadius: BorderRadius.circular(15),
@@ -284,7 +282,6 @@ class _HomeViewState extends State<HomeView> {
               Text(
                 text,
                 style: const TextStyle(
-                  color: Color.fromRGBO(40, 40, 43, 1),
                   fontWeight: FontWeight.w500,
                   fontSize: 14,
                 ),
@@ -350,7 +347,7 @@ class _HomeViewState extends State<HomeView> {
           width: double.maxFinite,
           decoration: BoxDecoration(
             border: Border.all(
-              color: const Color.fromRGBO(211, 211, 211, 1),
+              color: AppColor().milkWhite,
               width: 0.7,
             ),
             borderRadius: BorderRadius.circular(10),
@@ -364,28 +361,24 @@ class _HomeViewState extends State<HomeView> {
               children: [
                 RichText(
                   text: TextSpan(
-                    text: 'Total:\n',
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: Colors.grey.shade800,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: text,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w500,
-                          color: Color.fromRGBO(40, 40, 43, 1),
-                        ),
+                      text: 'Total:\n',
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: Colors.grey.shade800,
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
-                  ),
+                      children: <TextSpan>[
+                        TextSpan(
+                            text: text,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w500,
+                            )),
+                      ]),
                 ),
                 Text(
                   '$value',
                   style: const TextStyle(
-                    color: Color.fromRGBO(40, 40, 43, 1),
                     fontWeight: FontWeight.w500,
                     fontSize: 35,
                   ),

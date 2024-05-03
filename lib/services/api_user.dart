@@ -39,7 +39,7 @@ class ApiUser {
   Future<bool> authorized() async {
     Response response = await head(
       Uri.parse("${ApiServices.base}/authorized"),
-      headers: await getHeaders(isAccess: false),
+      headers: await ApiServices.getHeaders(isAccess: false),
     );
 
     if (response.statusCode != HttpStatus.ok) {

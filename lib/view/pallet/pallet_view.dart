@@ -163,13 +163,9 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                         itemCount: allPallet.length,
                         itemBuilder: ((context, index) => Padding(
                               padding: const EdgeInsets.only(bottom: 5),
-                              child: createPalletCrad(
+                              child: createPalletCard(
                                 context,
-                                allPallet[index].palletNo,
-                                allPallet[index].lorryNo,
-                                allPallet[index].openPalletLocation,
-                                allPallet[index].destination,
-                                'OutBound',
+                                allPallet[index],
                               ),
                             )),
                       ),
@@ -187,13 +183,9 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                         itemCount: inBoundPallet.length,
                         itemBuilder: ((context, index) => Padding(
                               padding: const EdgeInsets.only(bottom: 5),
-                              child: createPalletCrad(
+                              child: createPalletCard(
                                 context,
-                                inBoundPallet[index].palletNo,
-                                inBoundPallet[index].lorryNo,
-                                inBoundPallet[index].openPalletLocation,
-                                inBoundPallet[index].destination,
-                                'InBound',
+                                inBoundPallet[index],
                               ),
                             )),
                       ),
@@ -211,13 +203,9 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                         itemCount: outBoundPallet.length,
                         itemBuilder: ((context, index) => Padding(
                               padding: const EdgeInsets.only(bottom: 5),
-                              child: createPalletCrad(
+                              child: createPalletCard(
                                 context,
-                                outBoundPallet[index].palletNo,
-                                outBoundPallet[index].lorryNo,
-                                outBoundPallet[index].openPalletLocation,
-                                outBoundPallet[index].destination,
-                                'OutBound',
+                                outBoundPallet[index],
                               ),
                             )),
                       ),

@@ -69,22 +69,20 @@ InputDecoration customTextFormFieldDeco(String hintText) => InputDecoration(
       ),
     );
 
-Widget createPalletCrad(
+Widget createPalletCard(
   BuildContext context,
-  String palletNo,
-  String lorryNo,
-  String openPalletLocation,
-  String destination,
-  String palletStatus,
+  Pallet pallet,
 ) {
   return Card(
     elevation: 5,
-    color: customCardColor(openPalletLocation),
+    color: customCardColor(pallet.openPalletLocation),
     shadowColor: Colors.black,
     child: InkWell(
       onTap: () {
-        Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const PalletDetailsView()));
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => PalletDetailsView(
+                  pallet: pallet,
+                )));
       },
       child: Padding(
         padding: const EdgeInsets.fromLTRB(10.0, 0, 10, 0),
@@ -101,7 +99,7 @@ Widget createPalletCrad(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      palletNo,
+                      pallet.palletNo,
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 25,
@@ -147,14 +145,14 @@ Widget createPalletCrad(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      lorryNo,
+                      pallet.lorryNo,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 17,
                       ),
                     ),
                     Text(
-                      openPalletLocation,
+                      pallet.openPalletLocation,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
@@ -166,14 +164,14 @@ Widget createPalletCrad(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      destination,
+                      pallet.destination,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 17,
                       ),
                     ),
                     Text(
-                      palletStatus,
+                      pallet.status,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
@@ -207,7 +205,7 @@ Future showPalletItemsInfo(
         child: FadeTransition(
           opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
           child: AlertDialog(
-            backgroundColor: AppColor().milkWhite.withOpacity(0.9),
+            backgroundColor: AppColor().milkWhite,
             shadowColor: Colors.black,
             elevation: 3.0,
             shape: OutlineInputBorder(
@@ -321,7 +319,7 @@ Future showPalletPICInfo(
         child: FadeTransition(
           opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
           child: AlertDialog(
-            backgroundColor: AppColor().milkWhite.withOpacity(0.9),
+            backgroundColor: AppColor().milkWhite,
             elevation: 3.0,
             shape: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.0),

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:store_management_system/firebase_options.dart';
+import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/login/login_view.dart';
 
@@ -54,8 +55,8 @@ class _RootAppState extends State<RootApp> {
     ThemeData themeData = ThemeData(
       primarySwatch: Colors.blue,
       textTheme: GoogleFonts.latoTextTheme(baseTheme.textTheme).apply(
-        bodyColor: const Color.fromRGBO(40, 40, 43, 1),
-        displayColor: const Color.fromRGBO(40, 40, 43, 1),
+        bodyColor: AppColor().matteBlack,
+        displayColor: AppColor().matteBlack,
       ),
       useMaterial3: true,
     );

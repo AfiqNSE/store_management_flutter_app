@@ -11,7 +11,8 @@ import 'package:store_management_system/components/pallet_components.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
 class PalletDetailsView extends StatefulWidget {
-  const PalletDetailsView({super.key});
+  final Pallet pallet;
+  const PalletDetailsView({super.key, required this.pallet});
 
   @override
   State<PalletDetailsView> createState() => _PalletDetailsViewState();
@@ -98,7 +99,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   ],
                 ),
                 Text(
-                  'PTN0001',
+                  widget.pallet.palletNo,
                   style: TextStyle(
                     fontSize: 40,
                     color: AppColor().tealBlue,
@@ -150,11 +151,11 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                createPalletDetails('Type', 'Palletise'),
+                createPalletDetails('Type', widget.pallet.palletType),
                 const SizedBox(height: 5),
-                createPalletDetails('Destination', 'Kuantan'),
+                createPalletDetails('Destination', widget.pallet.destination),
                 const SizedBox(height: 5),
-                createPalletDetails('Lorry No', 'ABC 1234'),
+                createPalletDetails('Lorry No', widget.pallet.lorryNo),
                 const SizedBox(height: 5),
                 createPalletDetails('Forklift Driver', 'Ali Bin Abu'),
                 const SizedBox(height: 5),

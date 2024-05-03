@@ -349,7 +349,8 @@ class _HomeViewState extends State<HomeView> {
                       children: <TextSpan>[
                         TextSpan(
                             text: text,
-                            style: const TextStyle(
+                            style: TextStyle(
+                              color: AppColor().matteBlack,
                               fontSize: 24,
                               fontWeight: FontWeight.w500,
                             )),

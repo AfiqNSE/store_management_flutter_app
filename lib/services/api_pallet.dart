@@ -19,4 +19,30 @@ class ApiPallet {
 
     return json.decode(res.body);
   }
+
+  Future<int> open(
+    String palletNo,
+    String palletLocation,
+    String palletType,
+    String destination,
+  ) async {
+    Response res = await ApiServices.call(
+      Method.post,
+      Uri.parse("$path/open"),
+      body: jsonEncode({
+        "palletNo": palletNo,
+        "openPalletLocation": palletLocation,
+        "palletType": palletType,
+        "destination": destination,
+      }),
+    );
+
+    if (res.statusCode != HttpStatus.created) {
+      Map data = json.decode(res.body);
+      if (data["code"] == "pallet.full") return 1;
+      return 2;
+    }
+
+    return 0;
+  }
 }

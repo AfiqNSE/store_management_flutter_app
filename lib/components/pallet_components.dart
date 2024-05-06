@@ -6,22 +6,8 @@ import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 
 class Constant {
-  final List<Widget> palletLocation = [
-    const Text('Inbound'),
-    const Text('Outbound'),
-  ];
-
-  final List<Widget> palletType = [
-    const Text('Palletise'),
-    const Text('Loose'),
-  ];
-
-  final List<String> destination = [
-    '--Select Destination--',
-    'Destination 1',
-    'Destination 2',
-    'Destination 3'
-  ];
+  static List<String> palletLocations = ['Inbound', 'Outbound'];
+  static List<String> palletTypes = ['Palletise', 'Loose'];
 
   final List<Item> _items = [
     Item('Toshiba', 10),
@@ -46,6 +32,14 @@ Widget customTextLabel(String text) => Padding(
           fontSize: 15,
           fontWeight: FontWeight.w600,
         ),
+      ),
+    );
+
+Widget customTextErr(String text) => Padding(
+      padding: const EdgeInsets.only(left: 15, bottom: 5),
+      child: Text(
+        text,
+        style: TextStyle(color: Colors.red.shade900, fontSize: 12),
       ),
     );
 

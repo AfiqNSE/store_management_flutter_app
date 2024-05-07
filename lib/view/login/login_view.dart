@@ -64,11 +64,11 @@ class _LoginViewState extends State<LoginView> {
     }
 
     debugPrint("[Login] User is logged in");
-    if (mounted) {
-      setState(() {
-        loading = false;
-      });
+    setState(() {
+      loading = false;
+    });
 
+    if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const NavigationTabView()),

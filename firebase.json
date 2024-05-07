@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"nse-mobile-apps","appId":"1:123539563303:android:275a3076fe011ea8717f02","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"nse-mobile-apps","configurations":{"android":"1:123539563303:android:275a3076fe011ea8717f02","ios":"1:123539563303:ios:e0f694312056bb3b717f02"}}}}}}

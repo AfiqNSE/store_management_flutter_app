@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -24,6 +25,34 @@ class _NavigationTabViewState extends State<NavigationTabView>
     super.initState();
     _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
     _tabController.addListener(_handleTabSelection);
+    // Run code required to handle interacted messages
+    setupInteractedMessage();
+  }
+
+  // Handle notification interaction
+  Future<void> setupInteractedMessage() async {
+    // Get any messages which caused the application to open from
+    // a terminated state.
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+
+    if (initialMessage != null) {
+      _handleMessage(initialMessage);
+    }
+
+    // Also handle any interaction when the app is in the background via a
+    // Stream listener
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+  }
+
+  // Handle the data property of the message
+  void _handleMessage(RemoteMessage message) {
+    debugPrint(message.toString());
+    // if (message.data['type'] == 'chat') {
+    //   Navigator.pushNamed(context, '/chat',
+    //     arguments: ChatArguments(message),
+    //   );
+    // }
   }
 
   @override

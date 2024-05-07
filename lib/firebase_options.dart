@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDlgkc5I_JcaqkS6O7ycEwxLXsz-TS2mTY',
-    appId: '1:123539563303:android:8f32a52e24d665a7717f02',
+    appId: '1:123539563303:android:275a3076fe011ea8717f02',
     messagingSenderId: '123539563303',
     projectId: 'nse-mobile-apps',
     storageBucket: 'nse-mobile-apps.appspot.com',
@@ -59,10 +59,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyD7kyVXaU2HKAON3pdhZQU3oSf52GzPkHA',
-    appId: '1:123539563303:ios:c88391aa146b7767717f02',
+    appId: '1:123539563303:ios:e0f694312056bb3b717f02',
     messagingSenderId: '123539563303',
     projectId: 'nse-mobile-apps',
     storageBucket: 'nse-mobile-apps.appspot.com',
-    iosBundleId: 'com.nse.project.nse-driver-flutter-app',
+    iosBundleId: 'com.example.storeManagementSystem',
   );
+
 }

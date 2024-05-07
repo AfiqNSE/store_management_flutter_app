@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "123539563303",
+    "project_id": "nse-mobile-apps",
+    "storage_bucket": "nse-mobile-apps.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123539563303:android:275a3076fe011ea8717f02",
+        "android_client_info": {
+          "package_name": "com.example.store_management_system"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlgkc5I_JcaqkS6O7ycEwxLXsz-TS2mTY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123539563303:android:8f32a52e24d665a7717f02",
+        "android_client_info": {
+          "package_name": "com.nse.nse_driver_flutter_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlgkc5I_JcaqkS6O7ycEwxLXsz-TS2mTY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

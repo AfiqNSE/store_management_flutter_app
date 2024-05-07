@@ -11,7 +11,8 @@ import 'package:store_management_system/components/pallet_components.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
 class PalletDetailsView extends StatefulWidget {
-  const PalletDetailsView({super.key});
+  final Pallet pallet;
+  const PalletDetailsView({super.key, required this.pallet});
 
   @override
   State<PalletDetailsView> createState() => _PalletDetailsViewState();
@@ -20,25 +21,38 @@ class PalletDetailsView extends StatefulWidget {
 class _PalletDetailsViewState extends State<PalletDetailsView> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController lorryNo = TextEditingController();
-  String? _selectedForkliftDriver = '--Select Forklift Driver--';
-  late int total;
-  bool _withSignature = false;
 
-  final List<Item> _items = [
-    Item('Toshiba', 10),
-    Item('Sharp', 10),
-    Item('Daikin', 10),
-    Item('Delfi', 10),
+  late int total;
+
+  String forkliftDriverErr = "";
+  String? _selectedForkliftDriver;
+
+  bool _withSignature = false;
+  bool loading = false;
+  bool isOutBound = false;
+
+  final List<PalletItem> _items = [
+    PalletItem('Toshiba', 10),
+    PalletItem('Sharp', 10),
+    PalletItem('Daikin', 10),
+    PalletItem('Delfi', 10),
   ];
 
   @override
   void initState() {
     super.initState();
+    checkPalletLocation();
     total = _calculateTotal();
   }
 
   int _calculateTotal() {
     return _items.fold(0, (sum, item) => sum + item.quantity);
+  }
+
+  checkPalletLocation() {
+    if (widget.pallet.palletLocation != 'inbound') {
+      isOutBound = true;
+    }
   }
 
   @override
@@ -98,7 +112,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   ],
                 ),
                 Text(
-                  'PTN0001',
+                  widget.pallet.palletNo,
                   style: TextStyle(
                     fontSize: 40,
                     color: AppColor().tealBlue,
@@ -120,7 +134,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                       ),
                     ),
                     Text(
-                      'In Process',
+                      widget.pallet.status,
                       style: TextStyle(
                         fontSize: 16,
                         color: AppColor().tealBlue,
@@ -129,17 +143,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     ),
                     IconButton(
                       onPressed: () async {
-                        await showPalletPICInfo(
+                        await showQuickPICInfo(
                           context,
-                          "John Doe",
-                          "2024-04-22, 3:00 p.m",
-                          "Jane Smith",
-                          "2024-04-23, 3:00 p.m",
-                          "Alice Johnson",
-                          "2024-04-24, 3:00 p.m",
-                          "Bob Brown",
-                          "2024-04-25, 3:00 p.m",
-                          "Ali Bin Abu",
+                          widget.pallet,
                         );
                       },
                       icon: Icon(
@@ -150,13 +156,13 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                createPalletDetails('Type', 'Palletise'),
+                createPalletDetails('Type', widget.pallet.palletType),
                 const SizedBox(height: 5),
-                createPalletDetails('Destination', 'Kuantan'),
+                createPalletDetails('Destination', widget.pallet.destination),
                 const SizedBox(height: 5),
-                createPalletDetails('Lorry No', 'ABC 1234'),
+                createPalletDetails('Lorry No', widget.pallet.lorryNo),
                 const SizedBox(height: 5),
-                createPalletDetails('Forklift Driver', 'Ali Bin Abu'),
+                createPalletDetails('Forklift Driver', ''),
                 const SizedBox(height: 5),
               ],
             ),
@@ -290,22 +296,33 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                minimumSize: MaterialStateProperty.all(const Size(160, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                  AppColor().blueZodiac,
-                ),
+                minimumSize: MaterialStateProperty.all(const Size(150, 50)),
+                backgroundColor: isOutBound
+                    ? MaterialStateProperty.all<Color>(AppColor().greyGoose)
+                    : MaterialStateProperty.all<Color>(AppColor().blueZodiac),
                 elevation: MaterialStateProperty.all(3),
               ),
-              onPressed: _movePallet,
-              icon: const Icon(
+              onPressed: isOutBound
+                  ? () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              const Text('The pallet is already outBound.'),
+                          backgroundColor: Colors.red.shade300,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  : _movePallet,
+              icon: Icon(
                 Icons.compare_arrows_sharp,
-                color: Colors.white,
+                color: isOutBound ? AppColor().matteBlack : Colors.white,
               ),
-              label: const Text(
+              label: Text(
                 'Move',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
+                  color: isOutBound ? AppColor().matteBlack : Colors.white,
+                  fontSize: 18,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -317,7 +334,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                minimumSize: MaterialStateProperty.all(const Size(160, 50)),
+                minimumSize: MaterialStateProperty.all(const Size(150, 50)),
                 backgroundColor: MaterialStateProperty.all<Color>(
                   AppColor().blueZodiac,
                 ),
@@ -332,7 +349,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 'Assign',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -350,7 +367,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                minimumSize: MaterialStateProperty.all(const Size(150, 50)),
+                minimumSize: MaterialStateProperty.all(const Size(140, 50)),
                 backgroundColor: MaterialStateProperty.all<Color>(
                   AppColor().blueZodiac,
                 ),
@@ -365,7 +382,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 'Signature',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -377,7 +394,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                minimumSize: MaterialStateProperty.all(const Size(160, 50)),
+                minimumSize: MaterialStateProperty.all(const Size(150, 50)),
                 backgroundColor: MaterialStateProperty.all<Color>(
                   AppColor().blueZodiac,
                 ),
@@ -392,7 +409,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 'Print',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -571,29 +588,22 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  customTextLabel('Forklift Driver:'),
-                                ],
-                              ),
+                              customTextLabel('Forklift Driver:'),
                               Padding(
                                 padding:
                                     const EdgeInsets.fromLTRB(0, 10, 0, 20),
                                 child: forklifDriverDropDown(),
                               ),
-                              Row(
-                                children: [
-                                  customTextLabel('Lorry No.:'),
-                                ],
-                              ),
+                              if (_selectedForkliftDriver == null)
+                                customTextErr(forkliftDriverErr),
+                              customTextLabel('Lorry No.:'),
                               Padding(
                                 padding:
                                     const EdgeInsets.fromLTRB(0, 10, 0, 20),
                                 child: TextFormField(
+                                  controller: lorryNo,
                                   cursorHeight: 22,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
+                                  style: const TextStyle(fontSize: 16),
                                   textAlign: TextAlign.center,
                                   decoration: customTextFormFieldDeco(
                                       'Enter Lorry Number'),
@@ -603,6 +613,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                                     }
                                     return null;
                                   },
+                                  autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
+                                  enabled: !loading,
                                 ),
                               ),
                             ],
@@ -624,30 +637,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                         color: Colors.blue.shade500,
                       ),
                     ),
-                    onTap: () {
-                      if (_formKey.currentState!.validate() &&
-                          _selectedForkliftDriver !=
-                              Constant().forkliftDriver[0]) {
-                        Navigator.pop(context);
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text('Successfully assign job.'),
-                            backgroundColor: Colors.green.shade300,
-                            duration: const Duration(seconds: 5),
-                          ),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
-                                'Please complete the details needed.'),
-                            backgroundColor: Colors.red.shade300,
-                            duration: const Duration(seconds: 5),
-                          ),
-                        );
-                      }
-                    },
+                    onTap: loading ? null : assignSubmit,
                   ),
                   Divider(
                     thickness: 2.0,
@@ -657,19 +647,21 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     color: Colors.grey.shade300,
                   ),
                   ListTile(
-                    title: const Text(
-                      "Cancel",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w600,
+                      title: const Text(
+                        "Cancel",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
+                      onTap: loading
+                          ? null
+                          : () {
+                              Navigator.pop(context);
+                              _cancelAssign;
+                            }),
                 ],
               ),
             ),
@@ -686,11 +678,11 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
             Padding(
               padding: const EdgeInsets.only(left: 10.0),
               child: Text(
-                Constant().forkliftDriver[0],
+                '--Select Forklift Driver--',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade700,
+                  color: loading ? Colors.grey : Colors.grey.shade700,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -715,16 +707,24 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 ))
             .toList(),
         value: _selectedForkliftDriver,
-        onChanged: (String? value) {
-          setState(() {
-            _selectedForkliftDriver = value;
-          });
-        },
+        onChanged: loading
+            ? null
+            : (String? value) {
+                setState(() {
+                  _selectedForkliftDriver = value;
+                });
+              },
         buttonStyleData: ButtonStyleData(
           height: 35,
           width: 210,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
+            border: Border.all(
+              color: loading
+                  ? Colors.grey.shade300
+                  : forkliftDriverErr != ""
+                      ? Colors.red.shade900
+                      : Colors.grey,
+            ),
             borderRadius: BorderRadius.circular(10),
             color: AppColor().milkWhite,
           ),
@@ -744,9 +744,58 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         ),
         menuItemStyleData: const MenuItemStyleData(
           height: 40,
+          padding: EdgeInsets.only(left: 14, right: 14),
         ),
       ),
     );
+  }
+
+  assignSubmit() {
+    setState(() {
+      loading = true;
+    });
+
+    if (!assignValidate()) {
+      setState(() {
+        loading = false;
+      });
+
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please complete the form.'),
+          backgroundColor: Colors.red.shade300,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+
+      return;
+    }
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(
+          content: const Text('Successfully open pallet.'),
+          backgroundColor: Colors.green.shade300,
+          duration: const Duration(seconds: 5),
+        ))
+        .closed
+        .then((value) => Navigator.pop(context));
+  }
+
+  bool assignValidate() {
+    bool v = _formKey.currentState!.validate();
+
+    if (_selectedForkliftDriver != null) {
+      forkliftDriverErr = "";
+    } else {
+      v = false;
+      forkliftDriverErr = "Please choose a forklift driver";
+    }
+
+    setState(() {});
+
+    return v;
   }
 
   // Create Signature pop up box
@@ -897,5 +946,11 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         );
       },
     );
+  }
+
+  void _cancelAssign() {
+    lorryNo.clear();
+    _selectedForkliftDriver = null;
+    setState(() {});
   }
 }

@@ -3,10 +3,10 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:store_management_system/models/color_model.dart';
+import 'package:store_management_system/view/assign/job_assign_view.dart';
 import 'package:store_management_system/view/pallet/pallet_view.dart';
 import 'package:store_management_system/view/account/account_view.dart';
 import 'package:store_management_system/view/home/home_view.dart';
-import 'package:store_management_system/view/search_history/search_history_view.dart';
 
 class NavigationTabView extends StatefulWidget {
   const NavigationTabView({super.key});
@@ -78,7 +78,7 @@ class _NavigationTabViewState extends State<NavigationTabView>
         children: const <Widget>[
           HomeView(),
           PalletView(),
-          PalletHistoryView(),
+          JobAssignView(),
           AccountView(),
         ],
       ),
@@ -119,8 +119,8 @@ class _NavigationTabViewState extends State<NavigationTabView>
                   },
                 ),
                 GButton(
-                  icon: FluentIcons.search_24_filled,
-                  text: 'Search',
+                  icon: FluentIcons.clipboard_task_list_rtl_24_filled,
+                  text: 'Jobs',
                   onPressed: () {
                     _tabController.animateTo(2);
                   },

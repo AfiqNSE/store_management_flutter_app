@@ -24,17 +24,22 @@ double getScreenWidth(BuildContext context) =>
 double getScreenHeight(BuildContext context) =>
     MediaQuery.of(context).size.height;
 
-Color customCardColor(String openPalletLocation) {
-  switch (openPalletLocation) {
-    case "InBound":
+Color customCardColor(String palletLocation) {
+  switch (palletLocation) {
+    case "inbound":
       return AppColor().greyGoose;
-    case "OutBound":
+    case "outbound":
       return AppColor().lightMustard;
     case "Pallet":
     default:
       return AppColor().milkWhite;
   }
 }
+
+Widget customEmptyValue = const Padding(
+  padding: EdgeInsets.only(right: 3),
+  child: Text('N/A'),
+);
 
 class SlideRoute extends PageRouteBuilder {
   final Widget page;

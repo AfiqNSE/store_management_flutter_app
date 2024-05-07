@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/services/api_services.dart';
@@ -122,13 +123,14 @@ class _PalletFormViewState extends State<PalletFormView> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         customTextLabel('Pallet Number: '),
         Padding(
-          padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
+          padding: const EdgeInsets.fromLTRB(0, 5, 0, 15),
           child: TextFormField(
             controller: palletNo,
             cursorHeight: 22,
             style: const TextStyle(fontSize: 16),
             textAlign: TextAlign.center,
-            decoration: customTextFormFieldDeco('Enter Pallet Number'),
+            decoration: customTextFormFieldDeco('Enter Pallet Number',
+                onPressed: scanPalletNumber),
             inputFormatters: [FilteringTextInputFormatter.deny(RegExp(" "))],
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -282,6 +284,33 @@ class _PalletFormViewState extends State<PalletFormView> {
       isSelected: selected,
       children: items.map((String e) => Text(e)).toList(),
     );
+  }
+
+  scanPalletNumber() async {
+    String barcodeScanRes = "-1";
+    var scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+        '#ff6666',
+        'Cancel',
+        true,
+        ScanMode.BARCODE,
+      );
+    } on PlatformException {
+      scaffoldMessenger.showSnackBar(SnackBar(
+        content: const Text('Failed to get platform version.'),
+        backgroundColor: Colors.red.shade300,
+        duration: const Duration(seconds: 3),
+      ));
+      throw ErrorDescription('Failed to get platform version.');
+    }
+    if (barcodeScanRes == '-1' || barcodeScanRes.isEmpty) {
+      palletNo.text.isEmpty;
+    } else {
+      palletNo.text = barcodeScanRes;
+    }
   }
 
   submit() {

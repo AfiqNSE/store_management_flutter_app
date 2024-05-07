@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:store_management_system/components/search_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/models/pallet_model.dart';
+import 'package:store_management_system/services/api_services.dart';
+
+// TODO: Search bar need to be update to function properly.
 
 class PalletView extends StatefulWidget {
   const PalletView({super.key});
@@ -18,20 +23,21 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
   List<dynamic> pallets = List.empty();
   List<dynamic> searchPallet = List.empty();
 
-  List<Pallet> allPallet = List.empty(growable: true);
-  List<Pallet> inBoundPallet = List.empty(growable: true);
-  List<Pallet> outBoundPallet = List.empty(growable: true);
+  List<Pallet> allPalletList = List.empty(growable: true);
+  List<Pallet> inBoundPalletList = List.empty(growable: true);
+  List<Pallet> outBoundPalletList = List.empty(growable: true);
 
   Pallet? pallet;
   late TabController _tabController;
   late int total;
 
   bool searchMode = false;
-  bool loading = true;
+  bool loading = false;
 
   @override
   void initState() {
     super.initState();
+    _getAllPallet();
     _tabController = TabController(length: 3, vsync: this);
   }
 
@@ -39,6 +45,27 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  _getAllPallet() async {
+    List<dynamic> res = await ApiServices.pallet.all();
+
+    if (res.isEmpty) {
+      return;
+    }
+    allPalletList = res.map((e) => Pallet.fromMap(e)).toList();
+
+    for (var i = 0; i < allPalletList.length; i++) {
+      if (allPalletList[i].palletLocation == "inbound") {
+        inBoundPalletList.add(allPalletList[i]);
+      }
+      if (allPalletList[i].palletLocation == "outbound") {
+        outBoundPalletList.add(allPalletList[i]);
+      }
+    }
+
+    setState(() {});
+    return;
   }
 
   @override
@@ -155,21 +182,17 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
               color: AppColor().milkWhite,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(15, 20, 15, 0),
-                child: allPallet.isEmpty
+                child: allPalletList.isEmpty
                     ? const Center(
                         child: Text('No pallets for today'),
                       )
                     : ListView.builder(
-                        itemCount: allPallet.length,
+                        itemCount: allPalletList.length,
                         itemBuilder: ((context, index) => Padding(
                               padding: const EdgeInsets.only(bottom: 5),
-                              child: createPalletCrad(
+                              child: createPalletCard(
                                 context,
-                                allPallet[index].palletNo,
-                                allPallet[index].lorryNo,
-                                allPallet[index].openPalletLocation,
-                                allPallet[index].destination,
-                                'OutBound',
+                                allPalletList[index],
                               ),
                             )),
                       ),
@@ -179,21 +202,17 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
               color: AppColor().milkWhite,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(15, 20, 15, 0),
-                child: inBoundPallet.isEmpty
+                child: inBoundPalletList.isEmpty
                     ? const Center(
                         child: Text('No inBound pallet'),
                       )
                     : ListView.builder(
-                        itemCount: inBoundPallet.length,
+                        itemCount: inBoundPalletList.length,
                         itemBuilder: ((context, index) => Padding(
                               padding: const EdgeInsets.only(bottom: 5),
-                              child: createPalletCrad(
+                              child: createPalletCard(
                                 context,
-                                inBoundPallet[index].palletNo,
-                                inBoundPallet[index].lorryNo,
-                                inBoundPallet[index].openPalletLocation,
-                                inBoundPallet[index].destination,
-                                'InBound',
+                                inBoundPalletList[index],
                               ),
                             )),
                       ),
@@ -203,21 +222,17 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
               color: AppColor().milkWhite,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(15, 20, 15, 0),
-                child: outBoundPallet.isEmpty
+                child: outBoundPalletList.isEmpty
                     ? const Center(
                         child: Text('No outBound Pallet'),
                       )
                     : ListView.builder(
-                        itemCount: outBoundPallet.length,
+                        itemCount: outBoundPalletList.length,
                         itemBuilder: ((context, index) => Padding(
                               padding: const EdgeInsets.only(bottom: 5),
-                              child: createPalletCrad(
+                              child: createPalletCard(
                                 context,
-                                outBoundPallet[index].palletNo,
-                                outBoundPallet[index].lorryNo,
-                                outBoundPallet[index].openPalletLocation,
-                                outBoundPallet[index].destination,
-                                'OutBound',
+                                outBoundPalletList[index],
                               ),
                             )),
                       ),

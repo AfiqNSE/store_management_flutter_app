@@ -54,9 +54,9 @@ class _HomeViewState extends State<HomeView> {
 
   void _greetingMeesage() async {
     var timeNow = DateTime.now().hour;
-    if (timeNow <= 11.59) {
+    if (timeNow < 12) {
       greetingMessage = 'Good Morning,';
-    } else if (timeNow > 12 && timeNow <= 16) {
+    } else if (timeNow >= 12 && timeNow <= 16) {
       greetingMessage = 'Good Afternoon,';
     } else if (timeNow > 16) {
       greetingMessage = 'Good Evening,';
@@ -104,7 +104,7 @@ class _HomeViewState extends State<HomeView> {
           scrollDirection: Axis.horizontal,
           crossAxisCount: 1,
           children: <Widget>[
-            createFeaturesGrid(
+            createQuickAction(
               'Open Forms',
               onTap: () => {
                 Navigator.of(context).push(MaterialPageRoute(
@@ -113,17 +113,17 @@ class _HomeViewState extends State<HomeView> {
               },
               icon: FluentIcons.form_new_24_filled,
             ),
-            createFeaturesGrid(
+            createQuickAction(
               'Scan Pallet',
               onTap: scanPallet,
               icon: FluentIcons.barcode_scanner_24_filled,
             ),
-            createFeaturesGrid(
+            createQuickAction(
               'Language',
               onTap: () {},
               icon: Icons.language_outlined,
             ),
-            createFeaturesGrid(
+            createQuickAction(
               'More',
               onTap: () {},
               icon: FluentIcons.grid_dots_24_filled,
@@ -140,7 +140,7 @@ class _HomeViewState extends State<HomeView> {
         scrolledUnderElevation: 0,
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 20.0),
+            padding: const EdgeInsets.only(right: 10.0),
             child: IconButton(
               color: Colors.white,
               onPressed: () => Navigator.of(context).push(
@@ -237,9 +237,9 @@ class _HomeViewState extends State<HomeView> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            createSummaryCard("Pallets", total),
-                            createSummaryCard("InBound", inBound),
-                            createSummaryCard("OutBound", outBound),
+                            createSummaryCard("pallets", total),
+                            createSummaryCard("inbound", inBound),
+                            createSummaryCard("outbound", outBound),
                           ],
                         ),
                       ),
@@ -254,7 +254,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Widget createFeaturesGrid(
+  Widget createQuickAction(
     String text, {
     required void Function() onTap,
     required IconData icon,
@@ -303,7 +303,7 @@ class _HomeViewState extends State<HomeView> {
         '#ff6666',
         'Cancel',
         true,
-        ScanMode.QR,
+        ScanMode.BARCODE,
       );
     } on PlatformException {
       scaffoldMessenger.showSnackBar(SnackBar(
@@ -369,7 +369,7 @@ class _HomeViewState extends State<HomeView> {
                       ),
                       children: <TextSpan>[
                         TextSpan(
-                            text: text,
+                            text: text.toUpperCase(),
                             style: TextStyle(
                               color: AppColor().matteBlack,
                               fontSize: 24,

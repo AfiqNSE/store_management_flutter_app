@@ -24,17 +24,22 @@ double getScreenWidth(BuildContext context) =>
 double getScreenHeight(BuildContext context) =>
     MediaQuery.of(context).size.height;
 
-Color customCardColor(String openPalletLocation) {
-  switch (openPalletLocation) {
-    case "InBound":
+Color customCardColor(String palletLocation) {
+  switch (palletLocation) {
+    case "inbound":
       return AppColor().greyGoose;
-    case "OutBound":
+    case "outbound":
       return AppColor().lightMustard;
     case "Pallet":
     default:
       return AppColor().milkWhite;
   }
 }
+
+Widget customEmptyValue = const Padding(
+  padding: EdgeInsets.only(right: 3),
+  child: Text('N/A'),
+);
 
 class SlideRoute extends PageRouteBuilder {
   final Widget page;
@@ -58,4 +63,30 @@ class SlideRoute extends PageRouteBuilder {
           },
           transitionDuration: const Duration(milliseconds: 600),
         );
+}
+
+extension StringExtension on String {
+  String capitalize() =>
+      length > 0 ? "${this[0].toUpperCase()}${substring(1).toLowerCase()}" : "";
+
+  String capitalizeOnly() =>
+      length > 0 ? "${this[0].toUpperCase()}${substring(1)}" : "";
+
+  String capitalizeWords() =>
+      length > 0 ? split(' ').map((word) => word.capitalize()).join(' ') : "";
+
+  String seperate() {
+    var sb = StringBuffer();
+    for (var rune in runes) {
+      var char = String.fromCharCode(rune);
+      if (char == char.toUpperCase()) {
+        sb.write(' ');
+        sb.write(char.toLowerCase());
+      } else {
+        sb.write(char);
+      }
+    }
+
+    return sb.toString();
+  }
 }

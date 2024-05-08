@@ -1,6 +1,8 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:store_management_system/models/color_model.dart';
+import 'package:store_management_system/utils/main_utils.dart';
+import 'package:store_management_system/view/account/user_profile_view.dart';
 import 'package:store_management_system/view/login/login_view.dart';
 
 class AccountView extends StatefulWidget {
@@ -74,29 +76,10 @@ class _AccountViewState extends State<AccountView> {
                       Icons.arrow_forward_ios_outlined,
                       size: 16,
                     ),
-                    onTap: () {},
-                  ),
-                  Divider(
-                    color: Colors.grey.shade200,
-                  ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -4),
-                    leading: const Icon(
-                      Icons.manage_accounts_outlined,
-                      size: 25,
-                    ),
-                    title: const Text(
-                      "Account Management",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 15,
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios_outlined,
-                      size: 16,
-                    ),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).push(SlideRoute(
+                          page: const UserProfile(), toRight: false));
+                    },
                   ),
                   Divider(
                     color: Colors.grey.shade200,

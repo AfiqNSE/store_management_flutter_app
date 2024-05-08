@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Storage {
@@ -64,7 +63,6 @@ class Storage {
   }
 
   void setFcmToken(String fcmToken) {
-    debugPrint(fcmToken);
     _fcmToken = fcmToken;
     _storage.write(key: "fcm-token", value: fcmToken);
   }

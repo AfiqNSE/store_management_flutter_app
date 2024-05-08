@@ -12,6 +12,7 @@ class Pallet {
   String moveByUserName;
   String assignPalletDateTime;
   String assignToUserGuid;
+  String assignToUserName;
   String assignByUserName;
   String loadPalletDateTime;
   String loadByUserName;
@@ -34,6 +35,7 @@ class Pallet {
     required this.openPalletLocation,
     required this.assignPalletDateTime,
     required this.assignToUserGuid,
+    required this.assignToUserName,
     required this.assignByUserName,
     required this.loadPalletDateTime,
     required this.loadByUserName,
@@ -57,6 +59,7 @@ class Pallet {
         openPalletLocation: map["openPalletLocation"],
         assignPalletDateTime: map["assignPalletDateTime"],
         assignToUserGuid: map["assignToUserGuid"],
+        assignToUserName: map["assignToUserName"],
         assignByUserName: map["assignToUserName"],
         loadPalletDateTime: map["loadPalletDateTime"],
         loadByUserName: map["loadByUserName"],
@@ -80,6 +83,7 @@ class Pallet {
         openPalletLocation: "",
         assignPalletDateTime: "",
         assignToUserGuid: "",
+        assignToUserName: "",
         assignByUserName: "",
         loadPalletDateTime: "",
         loadByUserName: "",
@@ -102,6 +106,7 @@ class Pallet {
         "openPalletLocation": openPalletLocation,
         "assignPalletDateTime": assignPalletDateTime,
         "assignToUserGuid": assignToUserGuid,
+        "assignToUserName": assignToUserName,
         "assignByUserName": assignByUserName,
         "loadPalletDateTime": loadPalletDateTime,
         "loadByUserName": loadByUserName,

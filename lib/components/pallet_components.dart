@@ -1,6 +1,7 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/utils/main_utils.dart';
@@ -12,13 +13,6 @@ class Constant {
   final List<String> forkliftDriver = [
     'InBound Forklift Driver',
     'OutBound Forklif Driver'
-  ];
-
-  final List<PalletItem> _items = [
-    PalletItem('Toshiba', 10),
-    PalletItem('Sharp', 10),
-    PalletItem('Daikin', 10),
-    PalletItem('Delfi', 10),
   ];
 
   // testing
@@ -469,36 +463,41 @@ String formatDateString(String date) {
   return DateFormat('yyyy-MM-dd, HH:mm:ss').format(parsedDate);
 }
 
-Widget createPalletDetails(String detail, String value, {int flex = 2}) => Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 1,
-          child: Text(detail,
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColor().tealBlue,
-                fontWeight: FontWeight.w600,
-              )),
+Widget createPalletDetails(String detail, String? value, {int flex = 2}) {
+  return Row(children: [
+    Expanded(
+      flex: 1,
+      child: Text(
+        detail,
+        style: TextStyle(
+          fontSize: 16,
+          color: AppColor().tealBlue,
+          fontWeight: FontWeight.w600,
         ),
-        const Text(
-          ": ",
-          style: TextStyle(
-            fontSize: 15,
-          ),
-        ),
-        Expanded(
-          flex: flex,
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 17,
+      ),
+    ),
+    const Text(": ", style: TextStyle(fontSize: 15)),
+    Expanded(
+      flex: flex,
+      child: (value == null)
+          ? Shimmer.fromColors(
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.grey.shade100,
+              child: Container(
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            )
+          : Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
             ),
-          ),
-        ),
-      ],
-    );
+    ),
+  ]);
+}
 
 
 // No need for current version

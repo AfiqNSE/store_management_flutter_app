@@ -12,6 +12,7 @@ class Pallet {
   String moveByUserName;
   String assignPalletDateTime;
   String assignToUserGuid;
+  String assignToUserName;
   String assignByUserName;
   String loadPalletDateTime;
   String loadByUserName;
@@ -34,6 +35,7 @@ class Pallet {
     required this.openPalletLocation,
     required this.assignPalletDateTime,
     required this.assignToUserGuid,
+    required this.assignToUserName,
     required this.assignByUserName,
     required this.loadPalletDateTime,
     required this.loadByUserName,
@@ -57,6 +59,7 @@ class Pallet {
         openPalletLocation: map["openPalletLocation"],
         assignPalletDateTime: map["assignPalletDateTime"],
         assignToUserGuid: map["assignToUserGuid"],
+        assignToUserName: map["assignToUserName"],
         assignByUserName: map["assignToUserName"],
         loadPalletDateTime: map["loadPalletDateTime"],
         loadByUserName: map["loadByUserName"],
@@ -64,6 +67,29 @@ class Pallet {
         palletLocation: map["palletLocation"],
         items: (map['items'] as List).map((e) => Item.fromMap(e)).toList(),
         // signature: Attachment.fromMap(map['signature'] as Map<String, dynamic>),
+      );
+
+  factory Pallet.empty() => Pallet(
+        palletActivityId: 0,
+        palletID: 0,
+        palletNo: "",
+        lorryNo: "",
+        palletType: "",
+        destination: "",
+        openPalletDateTime: "",
+        openByUserName: "",
+        movePalletDateTime: "",
+        moveByUserName: "",
+        openPalletLocation: "",
+        assignPalletDateTime: "",
+        assignToUserGuid: "",
+        assignToUserName: "",
+        assignByUserName: "",
+        loadPalletDateTime: "",
+        loadByUserName: "",
+        status: "",
+        palletLocation: "",
+        items: List.empty(),
       );
 
   Map<String, dynamic> toMap() => {
@@ -80,6 +106,7 @@ class Pallet {
         "openPalletLocation": openPalletLocation,
         "assignPalletDateTime": assignPalletDateTime,
         "assignToUserGuid": assignToUserGuid,
+        "assignToUserName": assignToUserName,
         "assignByUserName": assignByUserName,
         "loadPalletDateTime": loadPalletDateTime,
         "loadByUserName": loadByUserName,
@@ -88,6 +115,28 @@ class Pallet {
         "items": items.map((item) => item.toMap()).toList(),
         // "signature": signature.toMap(),
       };
+
+  bool isEmpty() {
+    return palletActivityId == 0 &&
+        palletID == 0 &&
+        palletNo == "" &&
+        lorryNo == "" &&
+        palletType == "" &&
+        destination == "" &&
+        openPalletDateTime == "" &&
+        openByUserName == "" &&
+        movePalletDateTime == "" &&
+        moveByUserName == "" &&
+        openPalletLocation == "" &&
+        assignPalletDateTime == "" &&
+        assignToUserGuid == "" &&
+        assignByUserName == "" &&
+        loadPalletDateTime == "" &&
+        loadByUserName == "" &&
+        status == "" &&
+        palletLocation == "" &&
+        items.isEmpty;
+  }
 }
 
 class Item {

@@ -1,8 +1,10 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/view/assign/job_assign_view.dart';
+import 'package:store_management_system/view/pallet/pallet_details.dart';
 import 'package:store_management_system/view/pallet/pallet_view.dart';
 import 'package:store_management_system/view/account/account_view.dart';
 import 'package:store_management_system/view/home/home_view.dart';
@@ -24,6 +26,36 @@ class _NavigationTabViewState extends State<NavigationTabView>
     super.initState();
     _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
     _tabController.addListener(_handleTabSelection);
+    // Run code required to handle interacted messages
+    setupInteractedMessage();
+  }
+
+  // Handle notification interaction
+  Future<void> setupInteractedMessage() async {
+    // Get any messages which caused the application to open from
+    // a terminated state.
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+
+    if (initialMessage != null) {
+      _handleMessage(initialMessage);
+    }
+
+    // Also handle any interaction when the app is in the background via a
+    // Stream listener
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+  }
+
+  // Handle the data property of the message
+  void _handleMessage(RemoteMessage message) {
+    // Open pallet details
+    if (message.data['code'] == "1") {
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => PalletDetailsView(
+          palletNo: message.data["palletNo"],
+        ),
+      ));
+    }
   }
 
   @override

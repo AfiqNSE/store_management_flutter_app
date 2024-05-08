@@ -8,6 +8,7 @@ class Storage {
   String _displayName = "";
   String _accessToken = "";
   String _refreshToken = "";
+  String _fcmToken = "";
 
   Future<String> get username async =>
       (await _storage.read(key: "username")) ?? "";
@@ -59,6 +60,16 @@ class Storage {
   Future<String> getRefreshToken() async {
     if (_refreshToken != "") return _refreshToken;
     return (await _storage.read(key: "refresh-token")) ?? "";
+  }
+
+  void setFcmToken(String fcmToken) {
+    _fcmToken = fcmToken;
+    _storage.write(key: "fcm-token", value: fcmToken);
+  }
+
+  Future<String> getFcmToken() async {
+    if (_fcmToken != "") return _fcmToken;
+    return (await _storage.read(key: "fcm-token")) ?? "";
   }
 
   void removeAll() => _storage.deleteAll();

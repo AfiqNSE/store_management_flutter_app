@@ -1,6 +1,7 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/utils/main_utils.dart';
@@ -9,20 +10,15 @@ import 'package:store_management_system/view/pallet/pallet_details.dart';
 class Constant {
   static List<String> palletLocations = ['Inbound', 'Outbound'];
   static List<String> palletTypes = ['Palletise', 'Loose'];
-  final List<String> forkliftDriver = [
+  static List<String> forkliftDriver = [
     'InBound Forklift Driver',
     'OutBound Forklif Driver'
   ];
 
-  final List<PalletItem> _items = [
-    PalletItem('Toshiba', 10),
-    PalletItem('Sharp', 10),
-    PalletItem('Daikin', 10),
-    PalletItem('Delfi', 10),
-  ];
-
-  // testing
-  final List<String> assignJobList = ['PTN001', 'PTN002'];
+  // testing purpose
+  static List<String> custName = ['Daikin', 'Delfi', 'Sharp'];
+  static List<String> jobAssignedListTest = ['PTN0001'];
+  static List<String> confirmJobListTest = ['PTN0001'];
 }
 
 Widget customTextLabel(String text) => Padding(
@@ -334,7 +330,7 @@ Future showQuickPICInfo(
                 color: Colors.white,
               ),
               width: double.maxFinite,
-              height: 360,
+              height: 330,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
                 child: SingleChildScrollView(
@@ -469,36 +465,44 @@ String formatDateString(String date) {
   return DateFormat('yyyy-MM-dd, HH:mm:ss').format(parsedDate);
 }
 
-Widget createPalletDetails(String detail, String value, {int flex = 2}) => Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 1,
-          child: Text(detail,
+Widget createPalletDetails(String detail, String? value, {int flex = 2}) {
+  return Row(children: [
+    Expanded(
+      flex: 1,
+      child: Text(
+        detail,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+    const Text(": ", style: TextStyle(fontSize: 15)),
+    Expanded(
+      flex: flex,
+      child: (value == null)
+          ? Shimmer.fromColors(
+              baseColor: Colors.grey.shade300,
+              highlightColor: Colors.grey.shade100,
+              child: Container(
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            )
+          : Text(
+              value,
               style: TextStyle(
+                fontWeight: FontWeight.w600,
                 fontSize: 16,
                 color: AppColor().tealBlue,
-                fontWeight: FontWeight.w600,
-              )),
-        ),
-        const Text(
-          ": ",
-          style: TextStyle(
-            fontSize: 15,
-          ),
-        ),
-        Expanded(
-          flex: flex,
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 17,
+              ),
             ),
-          ),
-        ),
-      ],
-    );
+    ),
+  ]);
+}
 
 
 // No need for current version

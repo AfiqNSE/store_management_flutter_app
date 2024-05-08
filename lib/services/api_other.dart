@@ -12,7 +12,25 @@ class ApiOther {
     try {
       response = await get(Uri.parse("${ApiServices.base}/zones"));
     } catch (e) {
-      debugPrint("[Login] ${e.toString()}");
+      debugPrint("[Get Zones] ${e.toString()}");
+      return List.empty();
+    }
+
+    if (response.statusCode != HttpStatus.ok) {
+      debugPrint(response.body);
+      return List.empty();
+    }
+
+    return jsonDecode(response.body);
+  }
+
+  Future<List> customers() async {
+    Response response;
+
+    try {
+      response = await get(Uri.parse("${ApiServices.base}/customers"));
+    } catch (e) {
+      debugPrint("[Get Customers] ${e.toString()}");
       return List.empty();
     }
 

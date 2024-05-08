@@ -4,12 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:store_management_system/models/color_model.dart';
+import 'package:store_management_system/models/summary.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/home/notification_view.dart';
 import 'package:store_management_system/view/pallet/pallet_form.dart';
+import 'package:store_management_system/view/search_history/search_history_view.dart';
 
 // TODO: change snackbars to something else
 
@@ -23,10 +26,6 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   late String formattedDate;
   String greetingMessage = "";
-
-  int total = 0;
-  int inBound = 0;
-  int outBound = 0;
 
   @override
   void initState() {
@@ -84,11 +83,7 @@ class _HomeViewState extends State<HomeView> {
       return res["err"];
     }
 
-    total = res["pallets"];
-    inBound = res["inBound"];
-    outBound = res["outBound"];
-
-    setState(() {});
+    if (mounted) Provider.of<SummaryNotifier>(context, listen: false).set(res);
     return 0;
   }
 
@@ -119,9 +114,12 @@ class _HomeViewState extends State<HomeView> {
               icon: FluentIcons.barcode_scanner_24_filled,
             ),
             createQuickAction(
-              'Language',
-              onTap: () {},
-              icon: Icons.language_outlined,
+              'Search',
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const PalletHistoryView()));
+              },
+              icon: FluentIcons.search_24_filled,
             ),
             createQuickAction(
               'More',
@@ -192,60 +190,66 @@ class _HomeViewState extends State<HomeView> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
               child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
-                      child: Text(
-                        'What would you like to do today?',
-                        style: TextStyle(
-                          color: Color.fromRGBO(40, 40, 43, 1),
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
+                child: Consumer<SummaryNotifier>(
+                    builder: (context, summary, child) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                        child: Text(
+                          'What would you like to do today?',
+                          style: TextStyle(
+                            color: Color.fromRGBO(40, 40, 43, 1),
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                    quickbar,
-                    Divider(
-                      color: Colors.grey.shade400,
-                      indent: 8,
-                      endIndent: 8,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Pallet's Summary",
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: refreshSummary,
-                            icon: const Icon(Icons.refresh_outlined, size: 30),
-                          )
-                        ],
+                      quickbar,
+                      Divider(
+                        color: Colors.grey.shade400,
+                        indent: 8,
+                        endIndent: 8,
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 5, 8, 90),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            createSummaryCard("pallets", total),
-                            createSummaryCard("inbound", inBound),
-                            createSummaryCard("outbound", outBound),
+                            const Text(
+                              "Pallet's Summary",
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: refreshSummary,
+                              icon: const Icon(
+                                Icons.refresh_outlined,
+                                size: 30,
+                              ),
+                            )
                           ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 5, 8, 90),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              createSummaryCard("Pallets", summary.pallets),
+                              createSummaryCard("inbound", summary.inBound),
+                              createSummaryCard("outbound", summary.outBound),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
               ),
             ),
           ),

@@ -1,5 +1,8 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/models/color_model.dart';
+import 'package:store_management_system/view/pallet/pallet_details.dart';
 
 class JobAssignView extends StatefulWidget {
   const JobAssignView({super.key});
@@ -10,6 +13,9 @@ class JobAssignView extends StatefulWidget {
 
 class _JobAssignViewState extends State<JobAssignView>
     with TickerProviderStateMixin {
+  List<String> confirmJobList = List.empty(growable: true);
+  List<String> jobAssignedList = List.empty(growable: true);
+
   late TabController _tabController;
 
   @override
@@ -26,6 +32,158 @@ class _JobAssignViewState extends State<JobAssignView>
 
   @override
   Widget build(BuildContext context) {
+    // job assign content tab
+    Widget jobAssignContent(index) => Padding(
+          padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
+          child: Material(
+            borderRadius: BorderRadius.circular(10),
+            elevation: 3.0,
+            color: Colors.amber.shade200,
+            child: ListTile(
+              onTap: () {
+                var palletNo = Constant.jobAssignedListTest[index];
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => PalletDetailsView(
+                            palletNo: palletNo,
+                          )),
+                );
+              },
+              title: Text(
+                Constant.jobAssignedListTest[index],
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: const Text(
+                'outBound/inBound',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              trailing: IconButton(
+                onPressed: () => confirmDialogBox(),
+                icon: const Icon(FluentIcons.clipboard_more_24_filled),
+              ),
+            ),
+          ),
+        );
+
+    // confirm job content tab
+    Widget confirmJobContent(index) => Padding(
+          padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
+          child: Material(
+              borderRadius: BorderRadius.circular(10),
+              elevation: 3.0,
+              color: Colors.blue.shade200,
+              child: ListTile(
+                  onTap: () {
+                    // Comment this part for right now since the BE still in progress
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) => PalletDetailsView(
+                                palletNo: Constant.jobAssignedListTest[index],
+                              )),
+                    );
+                  },
+                  title: Text(
+                    Constant.confirmJobListTest[index],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'outBound/inBound',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  trailing:
+                      const Icon(FluentIcons.clipboard_checkmark_24_filled))),
+        );
+
+    // Create Tab categories; All, InBound, OutBound
+    Widget palletCategories() {
+      Widget appBarTitle = const Text(
+        "Today's Job Assign",
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+
+      return DefaultTabController(
+        initialIndex: 0,
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Padding(
+              padding: const EdgeInsets.only(left: 5.0),
+              child: appBarTitle,
+            ),
+            backgroundColor: AppColor().milkWhite,
+            bottom: TabBar(
+              controller: _tabController,
+              labelColor: AppColor().blueZodiac,
+              indicatorColor: AppColor().blueZodiac,
+              tabs: const <Widget>[
+                Tab(
+                  child: Text(
+                    'Job Assign',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                Tab(
+                  child: Text(
+                    'Confirm Job',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            controller: _tabController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: <Widget>[
+              Container(
+                color: AppColor().milkWhite,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Constant.jobAssignedListTest.isEmpty
+                      ? const Text('No job assign for today')
+                      : ListView.builder(
+                          itemCount: Constant.jobAssignedListTest.length,
+                          itemBuilder: ((context, index) =>
+                              jobAssignContent(index))),
+                ),
+              ),
+              Container(
+                color: AppColor().milkWhite,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Constant.confirmJobListTest.isEmpty
+                      ? const Text('No job confirm for today')
+                      : ListView.builder(
+                          itemCount: Constant.confirmJobListTest.length,
+                          itemBuilder: ((context, index) =>
+                              confirmJobContent(index))),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Column(
         mainAxisSize: MainAxisSize.min,
@@ -38,75 +196,45 @@ class _JobAssignViewState extends State<JobAssignView>
     );
   }
 
-  // Create Tab categories; All, InBound, OutBound
-  Widget palletCategories() {
-    Widget appBarTitle = const Text(
-      "Today's Job Assign",
-      style: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-
-    return DefaultTabController(
-      initialIndex: 0,
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Padding(
-            padding: const EdgeInsets.only(left: 5.0),
-            child: appBarTitle,
+  confirmDialogBox() => showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
-          backgroundColor: AppColor().milkWhite,
-          bottom: TabBar(
-            controller: _tabController,
-            labelColor: AppColor().blueZodiac,
-            indicatorColor: AppColor().blueZodiac,
-            tabs: const <Widget>[
-              Tab(
-                child: Text(
-                  'Job Assign',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              Tab(
-                child: Text(
-                  'Confirm Job',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          controller: _tabController,
-          physics: const NeverScrollableScrollPhysics(),
-          children: <Widget>[
-            Container(
-              color: AppColor().milkWhite,
-              child: const Padding(
-                  padding: EdgeInsets.fromLTRB(15, 20, 15, 0),
-                  child: Center(
-                    child: Text('No job assign for today'),
-                  )),
+          backgroundColor: Colors.white,
+          elevation: 3.0,
+          title: const Text(
+            'Job Confirmation',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
             ),
-            Container(
-              color: AppColor().milkWhite,
-              child: const Padding(
-                  padding: EdgeInsets.fromLTRB(15, 20, 15, 0),
-                  child: Center(
-                    child: Text('No confirm job for today'),
-                  )),
+          ),
+          content: const Text('Confirm to accept this assigned job?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: AppColor().yaleBlue,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Confirm',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: AppColor().yaleBlue,
+                ),
+              ),
             ),
           ],
-        ),
-      ),
-    );
-  }
+        );
+      });
 }

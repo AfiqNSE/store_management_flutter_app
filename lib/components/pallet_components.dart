@@ -10,13 +10,15 @@ import 'package:store_management_system/view/pallet/pallet_details.dart';
 class Constant {
   static List<String> palletLocations = ['Inbound', 'Outbound'];
   static List<String> palletTypes = ['Palletise', 'Loose'];
-  final List<String> forkliftDriver = [
+  static List<String> forkliftDriver = [
     'InBound Forklift Driver',
     'OutBound Forklif Driver'
   ];
 
-  // testing
-  final List<String> assignJobList = ['PTN001', 'PTN002'];
+  // testing purpose
+  static List<String> custName = ['Daikin', 'Delfi', 'Sharp'];
+  static List<String> jobAssignedListTest = ['PTN0001'];
+  static List<String> confirmJobListTest = ['PTN0001'];
 }
 
 Widget customTextLabel(String text) => Padding(
@@ -328,7 +330,7 @@ Future showQuickPICInfo(
                 color: Colors.white,
               ),
               width: double.maxFinite,
-              height: 360,
+              height: 330,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
                 child: SingleChildScrollView(
@@ -471,7 +473,6 @@ Widget createPalletDetails(String detail, String? value, {int flex = 2}) {
         detail,
         style: TextStyle(
           fontSize: 16,
-          color: AppColor().tealBlue,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -493,7 +494,11 @@ Widget createPalletDetails(String detail, String? value, {int flex = 2}) {
             )
           : Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                color: AppColor().tealBlue,
+              ),
             ),
     ),
   ]);

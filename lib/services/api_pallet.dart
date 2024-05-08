@@ -7,7 +7,7 @@ import 'package:store_management_system/services/api_services.dart';
 class ApiPallet {
   String path = "${ApiServices.base}/pallet";
 
-  Future<List<dynamic>> all() async {
+  Future<dynamic> all() async {
     Response res = await ApiServices.call(
       Method.get,
       Uri.parse("$path/all"),

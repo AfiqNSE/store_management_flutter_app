@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/view/assign/job_assign_view.dart';
+import 'package:store_management_system/view/pallet/pallet_details.dart';
 import 'package:store_management_system/view/pallet/pallet_view.dart';
 import 'package:store_management_system/view/account/account_view.dart';
 import 'package:store_management_system/view/home/home_view.dart';
@@ -47,12 +48,14 @@ class _NavigationTabViewState extends State<NavigationTabView>
 
   // Handle the data property of the message
   void _handleMessage(RemoteMessage message) {
-    debugPrint(message.toString());
-    // if (message.data['type'] == 'chat') {
-    //   Navigator.pushNamed(context, '/chat',
-    //     arguments: ChatArguments(message),
-    //   );
-    // }
+    // Open pallet details
+    if (message.data['code'] == "1") {
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => PalletDetailsView(
+          palletNo: message.data["palletNo"],
+        ),
+      ));
+    }
   }
 
   @override

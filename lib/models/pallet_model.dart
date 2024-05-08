@@ -66,6 +66,28 @@ class Pallet {
         // signature: Attachment.fromMap(map['signature'] as Map<String, dynamic>),
       );
 
+  factory Pallet.empty() => Pallet(
+        palletActivityId: 0,
+        palletID: 0,
+        palletNo: "",
+        lorryNo: "",
+        palletType: "",
+        destination: "",
+        openPalletDateTime: "",
+        openByUserName: "",
+        movePalletDateTime: "",
+        moveByUserName: "",
+        openPalletLocation: "",
+        assignPalletDateTime: "",
+        assignToUserGuid: "",
+        assignByUserName: "",
+        loadPalletDateTime: "",
+        loadByUserName: "",
+        status: "",
+        palletLocation: "",
+        items: List.empty(),
+      );
+
   Map<String, dynamic> toMap() => {
         "palletActivityId": palletActivityId,
         "palletId": palletID,
@@ -88,6 +110,28 @@ class Pallet {
         "items": items.map((item) => item.toMap()).toList(),
         // "signature": signature.toMap(),
       };
+
+  bool isEmpty() {
+    return palletActivityId == 0 &&
+        palletID == 0 &&
+        palletNo == "" &&
+        lorryNo == "" &&
+        palletType == "" &&
+        destination == "" &&
+        openPalletDateTime == "" &&
+        openByUserName == "" &&
+        movePalletDateTime == "" &&
+        moveByUserName == "" &&
+        openPalletLocation == "" &&
+        assignPalletDateTime == "" &&
+        assignToUserGuid == "" &&
+        assignByUserName == "" &&
+        loadPalletDateTime == "" &&
+        loadByUserName == "" &&
+        status == "" &&
+        palletLocation == "" &&
+        items.isEmpty;
+  }
 }
 
 class Item {

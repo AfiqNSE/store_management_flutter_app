@@ -222,8 +222,10 @@ class _HomeViewState extends State<HomeView> {
                             ),
                             IconButton(
                               onPressed: refreshSummary,
-                              icon:
-                                  const Icon(Icons.refresh_outlined, size: 30),
+                              icon: const Icon(
+                                Icons.refresh_outlined,
+                                size: 30,
+                              ),
                             )
                           ],
                         ),
@@ -235,8 +237,8 @@ class _HomeViewState extends State<HomeView> {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               createSummaryCard("Pallets", summary.pallets),
-                              createSummaryCard("InBound", summary.inBound),
-                              createSummaryCard("OutBound", summary.outBound),
+                              createSummaryCard("inbound", summary.inBound),
+                              createSummaryCard("outbound", summary.outBound),
                             ],
                           ),
                         ),

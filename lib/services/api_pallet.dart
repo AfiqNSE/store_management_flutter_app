@@ -16,6 +16,7 @@ class ApiPallet {
     if (res.statusCode != HttpStatus.ok) {
       return List.empty();
     }
+
     return json.decode(res.body);
   }
 
@@ -24,6 +25,16 @@ class ApiPallet {
       Method.get,
       Uri.parse("$path/all/summary"),
     );
+
+    if (res.statusCode != HttpStatus.ok) {
+      return {"err": 1};
+    }
+
+    return json.decode(res.body);
+  }
+
+  Future<Map<String, dynamic>> getByNo(String no) async {
+    Response res = await ApiServices.call(Method.get, Uri.parse("$path/$no"));
 
     if (res.statusCode != HttpStatus.ok) {
       return {"err": 1};

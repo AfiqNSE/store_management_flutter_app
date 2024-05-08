@@ -1,18 +1,21 @@
-import 'dart:typed_data';
-import 'dart:ui' as ui;
-
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
+import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
 class PalletDetailsView extends StatefulWidget {
-  final Pallet pallet;
-  const PalletDetailsView({super.key, required this.pallet});
+  final Pallet? pallet;
+  final String palletNo;
+
+  /// Create a pallet details view, either pallet or palletNo is required.
+  /// If pallet is given, palletNo will be ignored. Otherwise, it will search
+  /// pallet with the palletNo.
+  const PalletDetailsView({super.key, this.pallet, this.palletNo = ""});
 
   @override
   State<PalletDetailsView> createState() => _PalletDetailsViewState();
@@ -22,401 +25,296 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController lorryNo = TextEditingController();
 
-  late int total;
+  Pallet? pallet;
+  int itemTotal = 0;
 
   String forkliftDriverErr = "";
   String? _selectedForkliftDriver;
 
   bool _withSignature = false;
   bool loading = false;
-  bool isOutBound = false;
-
-  final List<PalletItem> _items = [
-    PalletItem('Toshiba', 10),
-    PalletItem('Sharp', 10),
-    PalletItem('Daikin', 10),
-    PalletItem('Delfi', 10),
-  ];
 
   @override
   void initState() {
     super.initState();
-    checkPalletLocation();
-    total = _calculateTotal();
+    loadPallet();
   }
 
-  int _calculateTotal() {
-    return _items.fold(0, (sum, item) => sum + item.quantity);
-  }
+  loadPallet() async {
+    if (widget.pallet != null) {
+      pallet = widget.pallet;
+      return;
+    }
 
-  checkPalletLocation() {
-    if (widget.pallet.palletLocation != 'inbound') {
-      isOutBound = true;
+    // Search pallet with palletNo
+    Map<String, dynamic> res = await ApiServices.pallet.getByNo(
+      widget.palletNo,
+    );
+
+    if (res.containsKey("err")) {
+      pallet = Pallet.empty();
+      // TODO: show an error
+    } else {
+      pallet = Pallet.fromMap(res);
+      itemTotal = pallet!.items.fold(0, (sum, item) => sum + item.qty);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: customAppBar("Pallet Details"),
-      backgroundColor: AppColor().milkWhite,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-          child: Column(
-            children: [
-              const SizedBox(height: 10),
-              // Show pallet general info
-              _palletDetails(),
-
-              const SizedBox(height: 10),
-              // Show pallet item table info
-              _palletItemsArea(),
-
-              const SizedBox(height: 20),
-              // Show function button info
-              _displayButton(),
-              const SizedBox(height: 20),
-            ],
-          ),
+    // Create section for pallet general info
+    Widget palletDetails = Container(
+      alignment: Alignment.topCenter,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColor().milkWhite,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Pallet No:',
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+            ),
+            Text(
+              pallet!.palletNo,
+              style: TextStyle(
+                fontSize: 40,
+                color: AppColor().tealBlue,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Divider(color: Colors.grey.shade400, indent: 8, endIndent: 8),
+            Row(children: [
+              const Text(
+                'Status: ',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+              ),
+              Text(
+                pallet!.status,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColor().tealBlue,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              IconButton(
+                onPressed: () async {
+                  await showQuickPICInfo(context, pallet!);
+                },
+                icon: Icon(Icons.info_outline, color: AppColor().tealBlue),
+              )
+            ]),
+            const SizedBox(height: 10),
+            createPalletDetails('Type', pallet!.palletType),
+            const SizedBox(height: 5),
+            createPalletDetails('Destination', pallet!.destination),
+            const SizedBox(height: 5),
+            createPalletDetails('Lorry No', pallet!.lorryNo),
+            const SizedBox(height: 5),
+            createPalletDetails('Forklift Driver', ''),
+            const SizedBox(height: 5),
+          ],
         ),
       ),
     );
-  }
 
-  // Create section for pallet general info
-  Widget _palletDetails() => Stack(
-        children: [
-          Container(
-            alignment: Alignment.topCenter,
-            height: 310,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppColor().milkWhite,
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              children: [
-                const Row(
-                  children: [
-                    Text(
-                      'Pallet No:',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  widget.pallet.palletNo,
-                  style: TextStyle(
-                    fontSize: 40,
-                    color: AppColor().tealBlue,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Divider(
-                  color: Colors.grey.shade400,
-                  indent: 8,
-                  endIndent: 8,
-                ),
-                Row(
-                  children: [
-                    const Text(
-                      'Status: ',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      widget.pallet.status,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppColor().tealBlue,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        await showQuickPICInfo(
-                          context,
-                          widget.pallet,
-                        );
-                      },
-                      icon: Icon(
-                        Icons.info_outline,
-                        color: AppColor().tealBlue,
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(height: 10),
-                createPalletDetails('Type', widget.pallet.palletType),
-                const SizedBox(height: 5),
-                createPalletDetails('Destination', widget.pallet.destination),
-                const SizedBox(height: 5),
-                createPalletDetails('Lorry No', widget.pallet.lorryNo),
-                const SizedBox(height: 5),
-                createPalletDetails('Forklift Driver', ''),
-                const SizedBox(height: 5),
-              ],
-            ),
-          ),
-        ],
-      );
-
-  // Create expansion tile for pallet item
-  Widget _palletItemsArea() => ExpansionTile(
-        collapsedBackgroundColor: AppColor().greyGoose,
-        collapsedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        title: const Text(
-          'Pallet Items:',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        children: [
-          _palletItems(),
-          const SizedBox(height: 20),
-        ],
-      );
-
-  // Create table for pallet items
-  Widget _palletItems() {
-    return SingleChildScrollView(
+    // Create table for pallet items
+    Widget palletItems = SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: DataTable(
         border: TableBorder.all(width: 0.5),
         columnSpacing: 35,
         headingTextStyle: const TextStyle(fontWeight: FontWeight.w600),
         columns: const [
-          DataColumn(
-              label: Text(
-            'Name',
-            style: TextStyle(),
-          )),
-          DataColumn(
-              label: Text(
-            'Quantity',
-            style: TextStyle(),
-          )),
-          DataColumn(
-              label: Text(
-            'Actions',
-            style: TextStyle(),
-          )),
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Quantity')),
+          DataColumn(label: Text('Actions')),
         ],
         rows: [
-          ..._items
-              .map((item) => DataRow(cells: [
-                    DataCell(
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            item.name,
-                            style: const TextStyle(),
-                          ),
-                        ],
-                      ),
+          ...pallet!.items
+              .map(
+                (item) => DataRow(cells: [
+                  DataCell(Text(item.customerName)),
+                  DataCell(Text(item.qty.toString())),
+                  DataCell(Row(children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {},
                     ),
-                    DataCell(
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            item.quantity.toString(),
-                            style: const TextStyle(),
-                          ),
-                        ],
-                      ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {},
                     ),
-                    DataCell(
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
-                            onPressed: () {},
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () {},
-                          ),
-                        ],
-                      ),
-                    ),
-                  ]))
+                  ])),
+                ]),
+              )
               .toList(),
           // Row for Total Quantity
           DataRow(cells: [
-            const DataCell(Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Total',
-                  style: TextStyle(),
-                ),
-              ],
-            )), // Empty cell
-            DataCell(Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  total.toString(),
-                  style: const TextStyle(),
-                ),
-              ],
-            )),
+            const DataCell(Text('Total')), // Empty cell
+            DataCell(Align(child: Text(itemTotal.toString()))),
             const DataCell(SizedBox.shrink()), // Empty cell
           ]),
         ],
       ),
     );
-  }
 
-  // Create display button area
-  Widget _displayButton() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ElevatedButton.icon(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<OutlinedBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                minimumSize: MaterialStateProperty.all(const Size(150, 50)),
-                backgroundColor: isOutBound
-                    ? MaterialStateProperty.all<Color>(AppColor().greyGoose)
-                    : MaterialStateProperty.all<Color>(AppColor().blueZodiac),
-                elevation: MaterialStateProperty.all(3),
-              ),
-              onPressed: isOutBound
-                  ? () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content:
-                              const Text('The pallet is already outBound.'),
-                          backgroundColor: Colors.red.shade300,
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    }
-                  : _movePallet,
-              icon: Icon(
-                Icons.compare_arrows_sharp,
-                color: isOutBound ? AppColor().matteBlack : Colors.white,
-              ),
-              label: Text(
-                'Move',
-                style: TextStyle(
-                  color: isOutBound ? AppColor().matteBlack : Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
+    // Create expansion tile for pallet item
+    Widget palletItemsArea = ExpansionTile(
+      collapsedBackgroundColor: AppColor().greyGoose,
+      collapsedShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      title: const Text(
+        'Pallet Items:',
+        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+      ),
+      children: [palletItems, const SizedBox(height: 20)],
+    );
+
+    // Create display button area
+    Widget displayButton = Column(children: [
+      Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-            ElevatedButton.icon(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<OutlinedBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                minimumSize: MaterialStateProperty.all(const Size(150, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                  AppColor().blueZodiac,
-                ),
-                elevation: MaterialStateProperty.all(3),
-              ),
-              onPressed: _assignJob,
-              icon: const Icon(
-                FluentIcons.person_add_24_filled,
-                color: Colors.white,
-              ),
-              label: const Text(
-                'Assign',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            )
-          ],
+            minimumSize: const Size(150, 50),
+            backgroundColor: pallet!.palletLocation == "outbound"
+                ? AppColor().greyGoose
+                : AppColor().blueZodiac,
+            elevation: 3,
+          ),
+          onPressed: pallet!.palletLocation == "outbound"
+              ? () => ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('The pallet is already outBound.'),
+                      backgroundColor: Colors.red.shade300,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  )
+              : _movePallet,
+          icon: Icon(
+            Icons.compare_arrows_sharp,
+            color: pallet!.palletLocation == "outbound"
+                ? AppColor().matteBlack
+                : Colors.white,
+          ),
+          label: Text(
+            'Move',
+            style: TextStyle(
+              color: pallet!.palletLocation == "outbound"
+                  ? AppColor().matteBlack
+                  : Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
         ),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ElevatedButton.icon(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<OutlinedBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                minimumSize: MaterialStateProperty.all(const Size(140, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                  AppColor().blueZodiac,
-                ),
-                elevation: MaterialStateProperty.all(3),
-              ),
-              onPressed: _signatureBox,
-              icon: const Icon(
-                FluentIcons.signature_24_filled,
-                color: Colors.white,
-              ),
-              label: const Text(
-                'Signature',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
+        ElevatedButton.icon(
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all<OutlinedBorder>(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-            ElevatedButton.icon(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<OutlinedBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                minimumSize: MaterialStateProperty.all(const Size(150, 50)),
-                backgroundColor: MaterialStateProperty.all<Color>(
-                  AppColor().blueZodiac,
-                ),
-                elevation: MaterialStateProperty.all(3),
-              ),
-              onPressed: () {},
-              icon: const Icon(
-                Icons.print_outlined,
-                color: Colors.white,
-              ),
-              label: const Text(
-                'Print',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            )
-          ],
+            minimumSize: MaterialStateProperty.all(const Size(150, 50)),
+            backgroundColor: MaterialStateProperty.all<Color>(
+              AppColor().blueZodiac,
+            ),
+            elevation: MaterialStateProperty.all(3),
+          ),
+          onPressed: _assignJob,
+          icon: const Icon(
+            FluentIcons.person_add_24_filled,
+            color: Colors.white,
+          ),
+          label: const Text(
+            'Assign',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
         )
-      ],
+      ]),
+      const SizedBox(height: 10),
+      Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            minimumSize: const Size(140, 50),
+            backgroundColor: AppColor().blueZodiac,
+            elevation: 3,
+          ),
+          onPressed: _signatureBox,
+          icon: const Icon(
+            FluentIcons.signature_24_filled,
+            color: Colors.white,
+          ),
+          label: const Text(
+            'Signature',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            minimumSize: const Size(150, 50),
+            backgroundColor: AppColor().blueZodiac,
+            elevation: 3,
+          ),
+          onPressed: () {},
+          icon: const Icon(Icons.print_outlined, color: Colors.white),
+          label: const Text(
+            'Print',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        )
+      ])
+    ]);
+
+    return Scaffold(
+      appBar: customAppBar("Pallet Details"),
+      backgroundColor: AppColor().milkWhite,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+          child: Column(children: [
+            const SizedBox(height: 10),
+            // Show pallet general info
+            palletDetails,
+
+            const SizedBox(height: 10),
+            // Show pallet item table info
+            palletItemsArea,
+
+            const SizedBox(height: 20),
+            // Show function button info
+            displayButton,
+            const SizedBox(height: 20),
+          ]),
+        ),
+      ),
     );
   }
 

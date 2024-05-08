@@ -81,7 +81,7 @@ Future<void> firebaseSetup() async {
   });
 
   // Subscribe to topic on each app start-up
-  await messaging.subscribeToTopic('broadcast');
+  await messaging.subscribeToTopic('sma-broadcast');
 
   // Handle notification message when on background
   FirebaseMessaging.onBackgroundMessage(_handleMessage);
@@ -125,7 +125,7 @@ class _RootAppState extends State<RootApp> {
     // Update summary values
     Provider.of<SummaryNotifier>(context, listen: false).update();
 
-    // Add notif to database
+    // TODO: add notif to database
   }
 
   @override

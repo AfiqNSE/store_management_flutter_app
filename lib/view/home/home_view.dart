@@ -190,66 +190,67 @@ class _HomeViewState extends State<HomeView> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
               child: SingleChildScrollView(
-                child: Consumer<SummaryNotifier>(
-                    builder: (context, summary, child) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
-                        child: Text(
-                          'What would you like to do today?',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                          ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      child: Text(
+                        'What would you like to do today?',
+                        style: TextStyle(
+                          color: Color.fromRGBO(40, 40, 43, 1),
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      quickbar,
-                      Divider(
-                        color: Colors.grey.shade400,
-                        indent: 8,
-                        endIndent: 8,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Pallet's Summary",
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w500,
-                              ),
+                    ),
+                    quickbar,
+                    Divider(
+                      color: Colors.grey.shade400,
+                      indent: 8,
+                      endIndent: 8,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Pallet's Summary",
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w500,
                             ),
-                            IconButton(
-                              onPressed: refreshSummary,
-                              icon: const Icon(
-                                Icons.refresh_outlined,
-                                size: 30,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 5, 8, 90),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              createSummaryCard("Pallets", summary.pallets),
-                              createSummaryCard("inbound", summary.inBound),
-                              createSummaryCard("outbound", summary.outBound),
-                            ],
                           ),
-                        ),
+                          IconButton(
+                            onPressed: refreshSummary,
+                            icon: const Icon(
+                              Icons.refresh_outlined,
+                              size: 30,
+                            ),
+                          )
+                        ],
                       ),
-                    ],
-                  );
-                }),
+                    ),
+                    Consumer<SummaryNotifier>(
+                      builder: (context, summary, child) {
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 5, 8, 90),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                createSummaryCard("Pallets", summary.pallets),
+                                createSummaryCard("inbound", summary.inBound),
+                                createSummaryCard("outbound", summary.outBound),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

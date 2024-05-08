@@ -70,33 +70,59 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
   @override
   Widget build(BuildContext context) {
     // Create section for pallet general info
-    Widget palletDetails = Padding(
+    Widget palletDetails = Container(
+      alignment: Alignment.topCenter,
+      width: double.infinity,
       padding: const EdgeInsets.only(top: 10),
-      child: Container(
-        alignment: Alignment.topCenter,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: AppColor().milkWhite,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(children: [
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Pallet No:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
+      decoration: BoxDecoration(
+        color: AppColor().milkWhite,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(children: [
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Pallet No:',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          ),
+          (pallet == null)
+              ? Shimmer.fromColors(
+                  baseColor: Colors.grey.shade300,
+                  highlightColor: Colors.grey.shade100,
+                  child: Container(
+                    width: 200,
+                    height: 45,
+                    margin: const EdgeInsets.only(top: 10, bottom: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                )
+              : Text(
+                  pallet!.palletNo,
+                  style: TextStyle(
+                    fontSize: 40,
+                    color: AppColor().tealBlue,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+          Divider(color: Colors.grey.shade400, indent: 10, endIndent: 10),
+          Row(children: [
+            const Text(
+              'Status: ',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             (pallet == null)
                 ? Shimmer.fromColors(
                     baseColor: Colors.grey.shade300,
                     highlightColor: Colors.grey.shade100,
                     child: Container(
-                      width: 200,
-                      height: 45,
-                      margin: const EdgeInsets.only(top: 10, bottom: 10),
+                      width: 130,
+                      height: 20,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
@@ -104,58 +130,30 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     ),
                   )
                 : Text(
-                    pallet!.palletNo,
+                    pallet!.status,
                     style: TextStyle(
-                      fontSize: 40,
+                      fontSize: 16,
                       color: AppColor().tealBlue,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-            Divider(color: Colors.grey.shade400, indent: 10, endIndent: 10),
-            Row(children: [
-              const Text(
-                'Status: ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              (pallet == null)
-                  ? Shimmer.fromColors(
-                      baseColor: Colors.grey.shade300,
-                      highlightColor: Colors.grey.shade100,
-                      child: Container(
-                        width: 130,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    )
-                  : Text(
-                      pallet!.status,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppColor().tealBlue,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-              IconButton(
-                onPressed: (pallet == null)
-                    ? null
-                    : () => showQuickPICInfo(context, pallet!),
-                icon: Icon(Icons.info_outline, color: AppColor().tealBlue),
-              )
-            ]),
-            const SizedBox(height: 10),
-            createPalletDetails('Type', pallet?.palletType),
-            const SizedBox(height: 5),
-            createPalletDetails('Destination', pallet?.destination),
-            const SizedBox(height: 5),
-            createPalletDetails('Lorry No', pallet?.lorryNo),
-            const SizedBox(height: 5),
-            createPalletDetails('Forklift Driver', pallet?.assignToUserName),
-            const SizedBox(height: 5),
+            IconButton(
+              onPressed: (pallet == null)
+                  ? null
+                  : () => showQuickPICInfo(context, pallet!),
+              icon: Icon(Icons.info_outline, color: AppColor().tealBlue),
+            )
           ]),
-        ),
+          const SizedBox(height: 10),
+          createPalletDetails('Type', pallet?.palletType.capitalize()),
+          const SizedBox(height: 5),
+          createPalletDetails('Destination', pallet?.destination.capitalize()),
+          const SizedBox(height: 5),
+          createPalletDetails('Lorry No', pallet?.lorryNo),
+          const SizedBox(height: 5),
+          createPalletDetails('Forklift Driver', pallet?.assignToUserName),
+          const SizedBox(height: 5),
+        ]),
       ),
     );
 
@@ -169,28 +167,25 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         ),
         title: const Text(
           'Signature:',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         children: const [Text('Signature Not Available'), SizedBox(height: 20)],
       ),
     );
 
     // Create table for pallet items
-    Widget palletItems() {
-      return SizedBox(
-        width: double.maxFinite,
-        child: DataTable(
-          border: TableBorder.all(width: 0.5),
-          columnSpacing: 35,
-          headingTextStyle: const TextStyle(fontWeight: FontWeight.w600),
-          columns: const [
-            DataColumn(label: Text('Name')),
-            DataColumn(label: Text('Quantity')),
-          ],
-          rows: [
+    Widget palletItems = SizedBox(
+      width: double.maxFinite,
+      child: DataTable(
+        border: TableBorder.all(width: 0.5),
+        columnSpacing: 35,
+        headingTextStyle: const TextStyle(fontWeight: FontWeight.w600),
+        columns: const [
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Quantity')),
+        ],
+        rows: [
+          if (pallet != null)
             ...pallet!.items
                 .map(
                   (item) => DataRow(cells: [
@@ -209,23 +204,20 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   ]),
                 )
                 .toList(),
-            // Row for Total Quantity
-            DataRow(cells: [
-              const DataCell(Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [Text('Total')],
-              )), // Empty cell
-              DataCell(Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(itemTotal.toString()),
-                ],
-              )),
-            ]),
-          ],
-        ),
-      );
-    }
+          // Row for Total Quantity
+          DataRow(cells: [
+            const DataCell(Align(
+              alignment: Alignment.center,
+              child: Text('Total'),
+            )), // Empty cell
+            DataCell(Align(
+              alignment: Alignment.center,
+              child: Text(itemTotal.toString()),
+            )),
+          ]),
+        ],
+      ),
+    );
 
     // Create expansion tile for pallet item
     Widget palletItemsArea = Padding(
@@ -248,17 +240,17 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 children: [
                   const Text(
                     'Items List:',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   TextButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).push(SlideRoute(
-                          page: ItemTableEditView(palletItems: pallet!.items),
-                          toRight: true));
-                    },
+                    onPressed: (pallet == null)
+                        ? null
+                        : () => Navigator.of(context).push(SlideRoute(
+                              page: ItemTableEditView(
+                                palletItems: pallet!.items,
+                              ),
+                              toRight: true,
+                            )),
                     icon: Icon(
                       FluentIcons.edit_24_filled,
                       color: AppColor().blueZodiac,
@@ -276,12 +268,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
               )
             : const Text(
                 'Items List:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
-        children: [palletItems(), const SizedBox(height: 20)],
+        children: [palletItems, const SizedBox(height: 20)],
       ),
     );
 

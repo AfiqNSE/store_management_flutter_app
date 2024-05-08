@@ -10,13 +10,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:store_management_system/firebase_options.dart';
 import 'package:store_management_system/models/color_model.dart';
+import 'package:store_management_system/models/notif.dart';
 import 'package:store_management_system/models/summary.dart';
+import 'package:store_management_system/utils/db_utils.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/login/login_view.dart';
 
 // TODO: setup notification for ios
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DB.instance.initialize();
   await firebaseSetup();
 
   LicenseRegistry.addLicense(() async* {
@@ -24,14 +28,16 @@ void main() async {
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
 
-  runApp(ChangeNotifierProvider(
-    create: (context) => SummaryNotifier(),
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (context) => SummaryNotifier()),
+      ChangeNotifierProvider(create: (context) => NotifNotifier()),
+    ],
     child: const RootApp(),
   ));
 }
 
 Future<void> firebaseSetup() async {
-  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -89,18 +95,14 @@ Future<void> firebaseSetup() async {
 
 @pragma('vm:entry-point')
 Future<void> _handleMessage(RemoteMessage message) async {
-  debugPrint(message.toString());
-  // RemoteNotification? notification = message.notification;
-  // if (notification != null) {
-  //   await DB.instance.insert(Notif(
-  //     guid: message.data["guid"],
-  //     messageId: message.messageId ?? "",
-  //     title: notification.title ?? "",
-  //     content: notification.body ?? "",
-  //     referenceNo: message.data["ref"],
-  //     createdOn: DateTime.now(),
-  //   ));
-  // }
+  await DB.instance.insertNotif(Notif(
+    messageId: message.messageId ?? "",
+    guid: message.data["guid"],
+    code: message.data["code"],
+    activityId: message.data["id"],
+    palletNo: message.data["palletNo"],
+    createdOn: DateTime.now(),
+  ));
 }
 
 class RootApp extends StatefulWidget {
@@ -119,13 +121,19 @@ class _RootAppState extends State<RootApp> {
   }
 
   _addMessage(RemoteMessage message) {
-    Map<String, dynamic> data = message.data;
-    debugPrint(data.toString());
-
     // Update summary values
     Provider.of<SummaryNotifier>(context, listen: false).update();
 
-    // TODO: add notif to database
+    // Add notif to database
+    Provider.of<NotifNotifier>(context, listen: false).add(Notif(
+      messageId: message.messageId ?? "",
+      guid: message.data["guid"] ?? "",
+      code: message.data["code"] == null ? 0 : int.parse(message.data["code"]),
+      activityId:
+          message.data["id"] == null ? 0 : int.parse(message.data["id"]),
+      palletNo: message.data["palletNo"] ?? "",
+      createdOn: DateTime.now(),
+    ));
   }
 
   @override

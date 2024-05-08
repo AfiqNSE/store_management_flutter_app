@@ -12,6 +12,7 @@ import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/home/notification_view.dart';
 import 'package:store_management_system/view/pallet/pallet_form.dart';
+import 'package:store_management_system/view/search_history/search_history_view.dart';
 
 // TODO: change snackbars to something else
 
@@ -113,9 +114,12 @@ class _HomeViewState extends State<HomeView> {
               icon: FluentIcons.barcode_scanner_24_filled,
             ),
             createQuickAction(
-              'Language',
-              onTap: () {},
-              icon: Icons.language_outlined,
+              'Search',
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const PalletHistoryView()));
+              },
+              icon: FluentIcons.search_24_filled,
             ),
             createQuickAction(
               'More',

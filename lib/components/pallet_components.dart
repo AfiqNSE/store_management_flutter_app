@@ -74,107 +74,85 @@ InputDecoration customTextFormFieldDeco(
           : null,
     );
 
-Widget createPalletCard(
-  BuildContext context,
-  Pallet pallet,
-) {
+Widget createPalletCard(BuildContext context, Pallet pallet) {
   return Card(
     elevation: 5,
     color: customCardColor(pallet.palletLocation),
     shadowColor: Colors.black,
     child: InkWell(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (context) => PalletDetailsView(
-                    pallet: pallet,
-                  )),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10.0, 0, 10, 0),
-        child: SizedBox(
-          height: 125,
-          width: double.infinity,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      pallet.palletNo,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 25,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () => showQuickItemInfo(context, pallet.items),
-                          child: const Icon(
-                            FluentIcons.clipboard_task_list_ltr_24_filled,
-                            size: 30,
-                          ),
-                        ),
-                        const SizedBox(width: 18),
-                        GestureDetector(
-                          onTap: () => showQuickPICInfo(context, pallet),
-                          child: const Icon(
-                            FluentIcons.person_clock_24_filled,
-                            size: 30,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => PalletDetailsView(
+          palletActivityId: pallet.palletActivityId,
+        ),
+      )),
+      child: Container(
+        height: 125,
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text(
+                pallet.palletNo,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 25,
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      pallet.lorryNo,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 17,
-                      ),
-                    ),
-                    Text(
-                      pallet.palletLocation,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    )
-                  ],
+              ),
+              Row(children: [
+                GestureDetector(
+                  onTap: () => showQuickItemInfo(context, pallet.items),
+                  child: const Icon(
+                    FluentIcons.clipboard_task_list_ltr_24_filled,
+                    size: 30,
+                  ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      pallet.destination,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 17,
-                      ),
-                    ),
-                    Text(
-                      pallet.status,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
+                const SizedBox(width: 18),
+                GestureDetector(
+                  onTap: () => showQuickPICInfo(context, pallet),
+                  child: const Icon(
+                    FluentIcons.person_clock_24_filled,
+                    size: 30,
+                  ),
+                ),
+              ]),
+            ]),
+            const SizedBox(height: 10),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text(
+                pallet.lorryNo.capitalizeOnly(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 17,
+                ),
+              ),
+              Text(
+                pallet.palletLocation.capitalizeOnly(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              )
+            ]),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text(
+                pallet.destination.capitalizeOnly(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 17,
+                ),
+              ),
+              Text(
+                pallet.status,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ])
+          ],
         ),
       ),
     ),

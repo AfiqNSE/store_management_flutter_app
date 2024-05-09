@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:store_management_system/firebase_options.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/notif.dart';
+import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/models/summary.dart';
 import 'package:store_management_system/utils/db_utils.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
@@ -32,6 +33,7 @@ void main() async {
     providers: [
       ChangeNotifierProvider(create: (context) => SummaryNotifier()),
       ChangeNotifierProvider(create: (context) => NotifNotifier()),
+      ChangeNotifierProvider(create: (context) => PalletNotifier()),
     ],
     child: const RootApp(),
   ));
@@ -121,16 +123,30 @@ class _RootAppState extends State<RootApp> {
   }
 
   _addMessage(RemoteMessage message) {
-    // Update summary values
-    Provider.of<SummaryNotifier>(context, listen: false).update();
+    int code =
+        message.data["code"] == null ? 0 : int.parse(message.data["code"]);
+    int activityId =
+        message.data["id"] == null ? 0 : int.parse(message.data["id"]);
+    switch (code) {
+      case 1:
+        // Update summary values
+        Provider.of<SummaryNotifier>(context, listen: false).update();
+        break;
+      case 2:
+        // Update summary values
+        Provider.of<SummaryNotifier>(context, listen: false).update();
+        // Update pallet info
+        Provider.of<PalletNotifier>(context, listen: false).update(activityId);
+        break;
+      default:
+    }
 
     // Add notif to database
     Provider.of<NotifNotifier>(context, listen: false).add(Notif(
       messageId: message.messageId ?? "",
       guid: message.data["guid"] ?? "",
-      code: message.data["code"] == null ? 0 : int.parse(message.data["code"]),
-      activityId:
-          message.data["id"] == null ? 0 : int.parse(message.data["id"]),
+      code: code,
+      activityId: activityId,
       palletNo: message.data["palletNo"] ?? "",
       createdOn: DateTime.now(),
     ));

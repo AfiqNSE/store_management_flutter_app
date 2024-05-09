@@ -1,12 +1,10 @@
-import 'dart:convert';
-
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:store_management_system/components/search_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/models/pallet_model.dart';
-import 'package:store_management_system/services/api_services.dart';
 
 // TODO: Search bar need to be update to function properly.
 
@@ -23,10 +21,6 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
   List<dynamic> pallets = List.empty();
   List<dynamic> searchPallet = List.empty();
 
-  List<Pallet> allPalletList = List.empty(growable: true);
-  List<Pallet> inBoundPalletList = List.empty(growable: true);
-  List<Pallet> outBoundPalletList = List.empty(growable: true);
-
   Pallet? pallet;
   late TabController _tabController;
   late int total;
@@ -37,8 +31,8 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _getAllPallet();
     _tabController = TabController(length: 3, vsync: this);
+    Provider.of<PalletNotifier>(context, listen: false).initialize();
   }
 
   @override
@@ -47,50 +41,11 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  _getAllPallet() async {
-    List<dynamic> res = await ApiServices.pallet.all();
-
-    if (res.isEmpty) {
-      return;
-    }
-    allPalletList = res.map((e) => Pallet.fromMap(e)).toList();
-
-    for (var i = 0; i < allPalletList.length; i++) {
-      if (allPalletList[i].palletLocation == "inbound") {
-        inBoundPalletList.add(allPalletList[i]);
-      }
-      if (allPalletList[i].palletLocation == "outbound") {
-        outBoundPalletList.add(allPalletList[i]);
-      }
-    }
-
-    setState(() {});
-    return;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColor().milkWhite,
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Expanded(
-            child: palletCategories(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Create Tab categories; All, InBound, OutBound
-  Widget palletCategories() {
     Widget appBarTitle = const Text(
       "Today's Pallet List",
-      style: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-      ),
+      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
     );
 
     Widget searchBar = PalletSearch(
@@ -98,14 +53,17 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
       controller: searchController,
       onSearch: (value) {
         searchPallet = pallets
-            .where((element) =>
-                element[""].contains(value) || element[""].contains(value))
+            .where(
+              (element) =>
+                  element[""].contains(value) || element[""].contains(value),
+            )
             .toList();
 
         setState(() {});
       },
     );
 
+    // Create Tab categories; All, InBound, OutBound
     return DefaultTabController(
       initialIndex: 0,
       length: 3,
@@ -122,10 +80,7 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
               child: (!searchMode)
                   ? IconButton(
                       onPressed: () => setState(() => searchMode = true),
-                      icon: const Icon(
-                        FluentIcons.search_24_filled,
-                        size: 28,
-                      ),
+                      icon: const Icon(FluentIcons.search_24_filled, size: 28),
                     )
                   : TextButton(
                       onPressed: () => setState(() => searchMode = false),
@@ -147,45 +102,49 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
               Tab(
                 child: Text(
                   'All',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                 ),
               ),
               Tab(
                 child: Text(
                   'InBound',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                 ),
               ),
               Tab(
                 child: Text(
                   'OutBound',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                 ),
               ),
             ],
           ),
         ),
-        body: TabBarView(
-          controller: _tabController,
-          physics: const NeverScrollableScrollPhysics(),
-          children: <Widget>[
-            Container(
-              color: AppColor().milkWhite,
-              child: Padding(
+        body: Consumer<PalletNotifier>(builder: (context, value, child) {
+          List<Pallet> allPalletList =
+              value.pallets.entries.map((e) => e.value).toList();
+
+          List<Pallet> inBoundPalletList = List.empty(growable: true);
+          List<Pallet> outBoundPalletList = List.empty(growable: true);
+
+          for (var i = 0; i < allPalletList.length; i++) {
+            if (allPalletList[i].palletLocation == "inbound") {
+              inBoundPalletList.add(allPalletList[i]);
+            }
+            if (allPalletList[i].palletLocation == "outbound") {
+              outBoundPalletList.add(allPalletList[i]);
+            }
+          }
+
+          return TabBarView(
+            controller: _tabController,
+            physics: const NeverScrollableScrollPhysics(),
+            children: <Widget>[
+              Container(
+                color: AppColor().milkWhite,
                 padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
                 child: allPalletList.isEmpty
-                    ? const Center(
-                        child: Text('No pallets for today'),
-                      )
+                    ? const Center(child: Text('No pallets for today'))
                     : ListView.builder(
                         itemCount: allPalletList.length,
                         itemBuilder: ((context, index) => Padding(
@@ -197,15 +156,11 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                             )),
                       ),
               ),
-            ),
-            Container(
-              color: AppColor().milkWhite,
-              child: Padding(
+              Container(
+                color: AppColor().milkWhite,
                 padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
                 child: inBoundPalletList.isEmpty
-                    ? const Center(
-                        child: Text('No inBound pallet'),
-                      )
+                    ? const Center(child: Text('No inBound pallet'))
                     : ListView.builder(
                         itemCount: inBoundPalletList.length,
                         itemBuilder: ((context, index) => Padding(
@@ -217,15 +172,11 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                             )),
                       ),
               ),
-            ),
-            Container(
-              color: AppColor().milkWhite,
-              child: Padding(
+              Container(
+                color: AppColor().milkWhite,
                 padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
                 child: outBoundPalletList.isEmpty
-                    ? const Center(
-                        child: Text('No outBound Pallet'),
-                      )
+                    ? const Center(child: Text('No outBound Pallet'))
                     : ListView.builder(
                         itemCount: outBoundPalletList.length,
                         itemBuilder: ((context, index) => Padding(
@@ -237,9 +188,9 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                             )),
                       ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
       ),
     );
   }

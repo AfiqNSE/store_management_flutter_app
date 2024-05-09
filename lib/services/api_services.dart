@@ -8,7 +8,7 @@ import 'package:store_management_system/services/api_user.dart';
 import 'package:store_management_system/utils/global_utils.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
 
-enum Method { get, post }
+enum Method { get, post, patch }
 
 class ApiServices {
   // static String base = "http://103.230.124.241:8220"; // Test Server
@@ -115,6 +115,8 @@ class ApiServices {
         return await get(uri, headers: headers);
       case Method.post:
         return await post(uri, headers: headers, body: body);
+      case Method.patch:
+        return await patch(uri, headers: headers, body: body);
       default:
         return Response("", HttpStatus.internalServerError);
     }

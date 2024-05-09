@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
@@ -11,13 +12,17 @@ import 'package:store_management_system/view/pallet/pallet_item_edit.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
 class PalletDetailsView extends StatefulWidget {
-  final Pallet? pallet;
+  final int palletActivityId;
   final String palletNo;
 
-  /// Create a pallet details view, either pallet or palletNo is required.
-  /// If pallet is given, palletNo will be ignored. Otherwise, it will search
+  /// Create a pallet details view, either palletActivityId or palletNo is required.
+  /// If palletActivityId is given, palletNo will be ignored. Otherwise, it will search
   /// pallet with the palletNo.
-  const PalletDetailsView({super.key, this.pallet, this.palletNo = ""});
+  const PalletDetailsView({
+    super.key,
+    this.palletActivityId = 0,
+    this.palletNo = "",
+  });
 
   @override
   State<PalletDetailsView> createState() => _PalletDetailsViewState();
@@ -36,8 +41,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
 
   bool _withSignature = false;
   bool expanded = false;
+
   bool loading = false;
-  bool isOutBound = false;
+  bool reqLoading = false;
 
   @override
   void initState() {
@@ -45,9 +51,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     loadPallet();
   }
 
+  // Load pallet when pallectActivityId is not present
   loadPallet() async {
-    if (widget.pallet != null) {
-      pallet = widget.pallet;
+    if (widget.palletActivityId != 0) {
       return;
     }
 
@@ -67,41 +73,14 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     setState(() {});
   }
 
-  movePalletToOutBound(int palletActivityId) async {
-    var scaffoldMessenger = ScaffoldMessenger.of(context);
-    int res = await ApiServices.pallet.movePallet(palletActivityId);
-
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: const Text('Sending request...'),
-        backgroundColor: Colors.blue.shade300,
-        duration: const Duration(seconds: 5),
-      ),
-    );
-
-    if (res == 1) {
-      scaffoldMessenger.hideCurrentSnackBar();
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: const Text('Move pallet request failed. Please try again.'),
-          backgroundColor: Colors.red.shade300,
-          duration: const Duration(seconds: 5),
-        ),
-      );
-    } else {
-      scaffoldMessenger.hideCurrentSnackBar();
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: const Text('Move pallet request successfull.'),
-          backgroundColor: Colors.blue.shade300,
-          duration: const Duration(seconds: 5),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Get pallet from provider
+    if (widget.palletActivityId != 0) {
+      pallet =
+          Provider.of<PalletNotifier>(context).pallets[widget.palletActivityId];
+    }
+
     // Create section for pallet general info
     Widget palletDetails = Container(
       alignment: Alignment.topCenter,
@@ -328,8 +307,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 : pallet?.palletLocation == "outbound"
                     ? () => ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content:
-                                const Text('This pallet is already outBound.'),
+                            content: const Text(
+                              'This pallet is already outBound.',
+                            ),
                             backgroundColor: Colors.red.shade300,
                             duration: const Duration(seconds: 2),
                           ),
@@ -437,150 +417,191 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     return Scaffold(
       appBar: customAppBar("Pallet Details"),
       backgroundColor: AppColor().milkWhite,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 10, 8, 0),
-          child: Column(children: [
-            // Show pallet general info
-            palletDetails,
+      body: Stack(children: [
+        SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 10, 8, 0),
+            child: Column(children: [
+              // Show pallet general info
+              palletDetails,
 
-            // Show PIC Signature
-            signatureArea,
+              // Show PIC Signature
+              signatureArea,
 
-            // Show pallet item table info
-            palletItemsArea,
+              // Show pallet item table info
+              palletItemsArea,
 
-            // Show function button info
-            displayButton,
-          ]),
+              // Show function button info
+              displayButton,
+            ]),
+          ),
         ),
-      ),
+        if (reqLoading)
+          Container(
+            color: const Color.fromRGBO(255, 255, 255, .8),
+            child: const Center(child: CircularProgressIndicator.adaptive()),
+          )
+      ]),
     );
   }
 
-  void _movePallet() => showGeneralDialog(
-        context: context,
-        barrierDismissible: true,
-        barrierLabel: '',
-        pageBuilder: (context, animation1, animation2) {
-          return Container();
-        },
-        transitionBuilder: (context, a1, a2, widget) {
-          return ScaleTransition(
-            scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
-            child: FadeTransition(
-              opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
-              child: AlertDialog(
-                elevation: 3.0,
-                backgroundColor: AppColor().milkWhite,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(10),
-                  ),
-                ),
-                title: const Center(
-                  child: Text(
-                    'Move Pallet',
+  void _movePallet() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      pageBuilder: (context, animation1, animation2) {
+        return AlertDialog(
+          elevation: 3.0,
+          backgroundColor: AppColor().milkWhite,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          title: const Center(
+            child: Text(
+              'Move Pallet',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+            ),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+          content: Container(
+            alignment: Alignment.center,
+            height: 80,
+            width: double.maxFinite,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.white,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(children: <InlineSpan>[
+                  TextSpan(
+                    text: 'Confirm to move this pallet from ',
                     style: TextStyle(
+                      color: AppColor().matteBlack,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'INBOUND ',
+                    style: TextStyle(
+                      color: AppColor().matteBlack,
                       fontWeight: FontWeight.w600,
-                      fontSize: 18,
+                      fontSize: 19,
                     ),
                   ),
-                ),
-                contentPadding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                content: Container(
-                  alignment: Alignment.center,
-                  height: 80,
-                  width: double.maxFinite,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.white,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(children: <InlineSpan>[
-                        TextSpan(
-                          text: 'Confirm to move this pallet from ',
-                          style: TextStyle(
-                            color: AppColor().matteBlack,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'INBOUND ',
-                          style: TextStyle(
-                            color: AppColor().matteBlack,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 19,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'to ',
-                          style: TextStyle(
-                            color: AppColor().matteBlack,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'OUTBOUND',
-                          style: TextStyle(
-                            color: AppColor().matteBlack,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 19,
-                          ),
-                        ),
-                      ]),
+                  TextSpan(
+                    text: 'to ',
+                    style: TextStyle(
+                      color: AppColor().matteBlack,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16,
                     ),
                   ),
-                ),
-                actionsPadding: const EdgeInsets.only(top: 8, bottom: 5),
-                actions: [
-                  ListTile(
-                    title: Text(
-                      "Move Pallet",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.blue.shade500,
-                      ),
+                  TextSpan(
+                    text: 'OUTBOUND',
+                    style: TextStyle(
+                      color: AppColor().matteBlack,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 19,
                     ),
-                    onTap: () async {
-                      Navigator.pop(context);
-                      await movePalletToOutBound(pallet!.palletActivityId);
-                    },
                   ),
-                  Divider(
-                    thickness: 2.0,
-                    indent: 20.0,
-                    endIndent: 20.0,
-                    height: 0.1,
-                    color: Colors.grey.shade300,
-                  ),
-                  ListTile(
-                    title: const Text(
-                      "Cancel",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
+                ]),
               ),
             ),
-          );
-        },
-      );
+          ),
+          actionsPadding: const EdgeInsets.only(top: 8, bottom: 5),
+          actions: [
+            ListTile(
+              title: Text(
+                "Move Pallet",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue.shade500,
+                ),
+              ),
+              onTap: () => Navigator.pop(context, 1),
+            ),
+            Divider(
+              thickness: 2.0,
+              indent: 20.0,
+              endIndent: 20.0,
+              height: 0.1,
+              color: Colors.grey.shade300,
+            ),
+            ListTile(
+              title: const Text(
+                "Cancel",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        );
+      },
+      transitionBuilder: (context, a1, a2, widget) {
+        return ScaleTransition(
+          scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
+          child: FadeTransition(
+            opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
+            child: widget,
+          ),
+        );
+      },
+    ).then((value) {
+      if (value != 1) return;
+      movePalletToOutBound();
+    });
+  }
+
+  movePalletToOutBound() {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: const Text('Sending request...'),
+      backgroundColor: Colors.blue.shade300,
+      duration: const Duration(seconds: 5),
+    ));
+
+    setState(() {
+      reqLoading = true;
+    });
+
+    ApiServices.pallet.move(pallet!.palletActivityId).then((value) {
+      if (!value) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: const Text(
+            'Move pallet request failed. Please try again.',
+          ),
+          backgroundColor: Colors.red.shade300,
+          duration: const Duration(seconds: 5),
+        ));
+      } else {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Move pallet request successfull.'),
+            backgroundColor: Colors.blue.shade300,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+
+      setState(() {
+        reqLoading = false;
+      });
+    });
+  }
 
   void _assignJob() => showGeneralDialog(
         context: context,

@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:store_management_system/services/api_services.dart';
+
 class Pallet {
   int palletActivityId;
   int palletID;
@@ -208,4 +211,33 @@ class PalletItem {
     this.name,
     this.quantity,
   );
+}
+
+class PalletNotifier extends ChangeNotifier {
+  Map<int, Pallet> _pallets = {};
+
+  Map<int, Pallet> get pallets => _pallets;
+
+  initialize() async {
+    List<dynamic> res = await ApiServices.pallet.all();
+
+    if (res.isEmpty) {
+      _pallets = {};
+    } else {
+      _pallets = {for (var v in res) v["palletActivityId"]: Pallet.fromMap(v)};
+    }
+
+    notifyListeners();
+  }
+
+  update(int id) async {
+    var res = await ApiServices.pallet.getById(id);
+
+    if (res.containsKey("err")) {
+      return;
+    }
+
+    _pallets[id] = Pallet.fromMap(res);
+    notifyListeners();
+  }
 }

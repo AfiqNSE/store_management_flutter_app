@@ -59,7 +59,8 @@ class _JobAssignViewState extends State<JobAssignView>
                 Navigator.of(context).push(
                   MaterialPageRoute(
                       builder: (context) => PalletDetailsView(
-                            pallet: jobAssignedList[index],
+                            palletActivityId:
+                                jobAssignedList[index].palletActivityId,
                           )),
                 );
               },

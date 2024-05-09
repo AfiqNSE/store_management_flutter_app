@@ -2,6 +2,8 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/models/color_model.dart';
+import 'package:store_management_system/models/pallet_model.dart';
+import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 
 class JobAssignView extends StatefulWidget {
@@ -14,7 +16,7 @@ class JobAssignView extends StatefulWidget {
 class _JobAssignViewState extends State<JobAssignView>
     with TickerProviderStateMixin {
   List<String> confirmJobList = List.empty(growable: true);
-  List<String> jobAssignedList = List.empty(growable: true);
+  List<Pallet> jobAssignedList = List.empty(growable: true);
 
   late TabController _tabController;
 
@@ -22,6 +24,7 @@ class _JobAssignViewState extends State<JobAssignView>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    getAssignedJob();
   }
 
   @override
@@ -30,10 +33,22 @@ class _JobAssignViewState extends State<JobAssignView>
     super.dispose();
   }
 
+  getAssignedJob() async {
+    List<dynamic> res = await ApiServices.pallet.assignJob();
+
+    if (res.isEmpty) {
+      return;
+    }
+    jobAssignedList = res.map((e) => Pallet.fromMap(e)).toList();
+
+    setState(() {});
+    return;
+  }
+
   @override
   Widget build(BuildContext context) {
     // job assign content tab
-    Widget jobAssignContent(index) => Padding(
+    Widget jobAssignedContent(index) => Padding(
           padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
           child: Material(
             borderRadius: BorderRadius.circular(10),
@@ -41,11 +56,10 @@ class _JobAssignViewState extends State<JobAssignView>
             color: Colors.amber.shade200,
             child: ListTile(
               onTap: () {
-                var palletNo = Constant.jobAssignedListTest[index];
                 Navigator.of(context).push(
                   MaterialPageRoute(
                       builder: (context) => PalletDetailsView(
-                            palletNo: palletNo,
+                            pallet: jobAssignedList[index],
                           )),
                 );
               },
@@ -56,9 +70,9 @@ class _JobAssignViewState extends State<JobAssignView>
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              subtitle: const Text(
-                'outBound/inBound',
-                style: TextStyle(
+              subtitle: Text(
+                jobAssignedList[index].palletLocation,
+                style: const TextStyle(
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -131,7 +145,7 @@ class _JobAssignViewState extends State<JobAssignView>
               tabs: const <Widget>[
                 Tab(
                   child: Text(
-                    'Job Assign',
+                    'Job Assigned',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -158,12 +172,12 @@ class _JobAssignViewState extends State<JobAssignView>
                 color: AppColor().milkWhite,
                 child: Padding(
                   padding: const EdgeInsets.only(top: 10),
-                  child: Constant.jobAssignedListTest.isEmpty
-                      ? const Text('No job assign for today')
+                  child: jobAssignedList.isEmpty
+                      ? const Center(child: Text('No job assign for today'))
                       : ListView.builder(
-                          itemCount: Constant.jobAssignedListTest.length,
+                          itemCount: jobAssignedList.length,
                           itemBuilder: ((context, index) =>
-                              jobAssignContent(index))),
+                              jobAssignedContent(index))),
                 ),
               ),
               Container(
@@ -171,7 +185,7 @@ class _JobAssignViewState extends State<JobAssignView>
                 child: Padding(
                   padding: const EdgeInsets.only(top: 10),
                   child: Constant.confirmJobListTest.isEmpty
-                      ? const Text('No job confirm for today')
+                      ? const Center(child: Text('No job confirm for today'))
                       : ListView.builder(
                           itemCount: Constant.confirmJobListTest.length,
                           itemBuilder: ((context, index) =>

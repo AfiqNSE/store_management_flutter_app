@@ -299,11 +299,13 @@ class _PalletFormViewState extends State<PalletFormView> {
         ScanMode.BARCODE,
       );
     } on PlatformException {
-      scaffoldMessenger.showSnackBar(SnackBar(
-        content: const Text('Failed to get platform version.'),
-        backgroundColor: Colors.red.shade300,
-        duration: const Duration(seconds: 3),
-      ));
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: const Text('Failed to get platform version.'),
+          backgroundColor: Colors.red.shade300,
+          duration: const Duration(seconds: 5),
+        ),
+      );
       throw ErrorDescription('Failed to get platform version.');
     }
     if (barcodeScanRes == '-1' || barcodeScanRes.isEmpty) {

@@ -181,7 +181,7 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
             Container(
               color: AppColor().milkWhite,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(15, 20, 15, 0),
+                padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
                 child: allPalletList.isEmpty
                     ? const Center(
                         child: Text('No pallets for today'),
@@ -201,7 +201,7 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
             Container(
               color: AppColor().milkWhite,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(15, 20, 15, 0),
+                padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
                 child: inBoundPalletList.isEmpty
                     ? const Center(
                         child: Text('No inBound pallet'),
@@ -221,7 +221,7 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
             Container(
               color: AppColor().milkWhite,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(15, 20, 15, 0),
+                padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
                 child: outBoundPalletList.isEmpty
                     ? const Center(
                         child: Text('No outBound Pallet'),

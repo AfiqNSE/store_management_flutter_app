@@ -67,6 +67,39 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     setState(() {});
   }
 
+  movePalletToOutBound(int palletActivityId) async {
+    var scaffoldMessenger = ScaffoldMessenger.of(context);
+    int res = await ApiServices.pallet.movePallet(palletActivityId);
+
+    scaffoldMessenger.showSnackBar(
+      SnackBar(
+        content: const Text('Sending request...'),
+        backgroundColor: Colors.blue.shade300,
+        duration: const Duration(seconds: 5),
+      ),
+    );
+
+    if (res == 1) {
+      scaffoldMessenger.hideCurrentSnackBar();
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: const Text('Move pallet request failed. Please try again.'),
+          backgroundColor: Colors.red.shade300,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    } else {
+      scaffoldMessenger.hideCurrentSnackBar();
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: const Text('Move pallet request successfull.'),
+          backgroundColor: Colors.blue.shade300,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Create section for pallet general info
@@ -297,9 +330,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
               ),
               minimumSize: const Size(150, 50),
               backgroundColor: pallet?.palletLocation == "outbound"
-                  ? AppColor().greyGoose
+                  ? AppColor().greyGoose.withOpacity(0.8)
                   : AppColor().blueZodiac,
-              elevation: 3,
+              elevation: pallet?.palletLocation == "outbound" ? 0 : 3,
             ),
             onPressed: pallet == null
                 ? null
@@ -307,24 +340,20 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     ? () => ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content:
-                                const Text('The pallet is already outBound.'),
+                                const Text('This pallet is already outBound.'),
                             backgroundColor: Colors.red.shade300,
                             duration: const Duration(seconds: 2),
                           ),
                         )
                     : _movePallet,
-            icon: Icon(
+            icon: const Icon(
               Icons.compare_arrows_sharp,
-              color: pallet?.palletLocation == "outbound"
-                  ? AppColor().matteBlack
-                  : Colors.white,
+              color: Colors.white,
             ),
-            label: Text(
+            label: const Text(
               'Move',
               style: TextStyle(
-                color: pallet?.palletLocation == "outbound"
-                    ? AppColor().matteBlack
-                    : Colors.white,
+                color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w400,
               ),
@@ -336,10 +365,23 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(150, 50),
-              backgroundColor: AppColor().blueZodiac,
-              elevation: 3,
+              backgroundColor: pallet?.assignByUserName == "N/A"
+                  ? AppColor().greyGoose.withOpacity(0.8)
+                  : AppColor().blueZodiac,
+              elevation: pallet?.assignByUserName != "" ? 0 : 3,
             ),
-            onPressed: pallet == null ? null : _assignJob,
+            onPressed: pallet == null
+                ? null
+                : pallet?.assignByUserName == "N/A"
+                    ? () => ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text(
+                                'This pallet is already been assigned.'),
+                            backgroundColor: Colors.red.shade300,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        )
+                    : _assignJob,
             icon: const Icon(
               FluentIcons.person_add_24_filled,
               color: Colors.white,
@@ -518,8 +560,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                         color: Colors.blue.shade500,
                       ),
                     ),
-                    onTap: () {
+                    onTap: () async {
                       Navigator.pop(context);
+                      await movePalletToOutBound(pallet!.palletActivityId);
                     },
                   ),
                   Divider(

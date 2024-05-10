@@ -10,13 +10,10 @@ import 'package:store_management_system/view/pallet/pallet_details.dart';
 class Constant {
   static List<String> palletLocations = ['Inbound', 'Outbound'];
   static List<String> palletTypes = ['Palletise', 'Loose'];
-  static List<String> forkliftDriver = [
-    'InBound Forklift Driver',
-    'OutBound Forklif Driver'
-  ];
 
   // testing purpose
-  static List<String> custName = ['Daikin', 'Delfi', 'Sharp'];
+  static List<String> forkliftDriverTest = ['Driver A', 'Driver B', 'Driver C'];
+  static List<String> custNameTest = ['Daikin', 'Delfi', 'Sharp'];
   static List<String> jobAssignedListTest = ['PTN0001'];
   static List<String> confirmJobListTest = ['PTN0001'];
 }
@@ -319,19 +316,19 @@ Future showQuickPICInfo(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Open By:'),
-                          pallet.openByUserName.isEmpty
+                          pallet.openByUserName!.isEmpty
                               ? customEmptyValue
-                              : Text(pallet.openByUserName),
+                              : Text(pallet.openByUserName!),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Open On:'),
-                          pallet.openPalletDateTime.isEmpty
+                          pallet.openPalletDateTime!.isEmpty
                               ? customEmptyValue
                               : Text(
-                                  formatDateString(pallet.openPalletDateTime)),
+                                  formatDateString(pallet.openPalletDateTime!)),
                         ],
                       ),
                       Divider(
@@ -341,19 +338,19 @@ Future showQuickPICInfo(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Move By:'),
-                          pallet.moveByUserName.isEmpty
+                          pallet.moveByUserName!.isEmpty
                               ? customEmptyValue
-                              : Text(pallet.moveByUserName),
+                              : Text(pallet.moveByUserName!),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Move On:'),
-                          pallet.movePalletDateTime.isEmpty
+                          pallet.movePalletDateTime!.isEmpty
                               ? customEmptyValue
                               : Text(
-                                  formatDateString(pallet.movePalletDateTime)),
+                                  formatDateString(pallet.movePalletDateTime!)),
                         ],
                       ),
                       Divider(
@@ -363,19 +360,18 @@ Future showQuickPICInfo(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Assign By:'),
-                          pallet.assignByUserName.isEmpty
+                          pallet.assignByUserName!.isEmpty
                               ? customEmptyValue
-                              : Text(pallet.assignByUserName),
+                              : Text(pallet.assignByUserName!),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Assign On:'),
-                          pallet.assignPalletDateTime.isEmpty
+                          pallet.assignPalletDateTime!.isEmpty
                               ? customEmptyValue
-                              : Text(formatDateString(
-                                  pallet.assignPalletDateTime)),
+                              : Text(pallet.assignPalletDateTime!),
                         ],
                       ),
                       Divider(
@@ -385,19 +381,18 @@ Future showQuickPICInfo(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Load By:'),
-                          pallet.loadByUserName.isEmpty
+                          pallet.loadByUserName!.isEmpty
                               ? customEmptyValue
-                              : Text(pallet.loadByUserName),
+                              : Text(pallet.loadByUserName!),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Load On:'),
-                          pallet.loadPalletDateTime.isEmpty
+                          pallet.loadPalletDateTime!.isEmpty
                               ? customEmptyValue
-                              : Text(
-                                  formatDateString(pallet.loadPalletDateTime)),
+                              : Text(pallet.loadPalletDateTime!),
                         ],
                       ),
                       Divider(
@@ -436,11 +431,12 @@ Future showQuickPICInfo(
 }
 
 String formatDateString(String date) {
-  if (date.isEmpty) {
-    return "";
+  try {
+    DateTime parsedDate = DateTime.parse(date);
+    return DateFormat('yyyy-MM-dd, HH:mm:ss').format(parsedDate);
+  } catch (e) {
+    return 'Invalid Date';
   }
-  DateTime parsedDate = DateTime.parse(date);
-  return DateFormat('yyyy-MM-dd, HH:mm:ss').format(parsedDate);
 }
 
 Widget createPalletDetails(String detail, String? value, {int flex = 2}) {
@@ -449,7 +445,7 @@ Widget createPalletDetails(String detail, String? value, {int flex = 2}) {
       flex: 1,
       child: Text(
         detail,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),

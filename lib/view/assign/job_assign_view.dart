@@ -15,8 +15,8 @@ class JobAssignView extends StatefulWidget {
 
 class _JobAssignViewState extends State<JobAssignView>
     with TickerProviderStateMixin {
-  List<String> confirmJobList = List.empty(growable: true);
   List<Pallet> jobAssignedList = List.empty(growable: true);
+  List<Pallet> jobConfirmList = List.empty(growable: true);
 
   late TabController _tabController;
 
@@ -25,6 +25,7 @@ class _JobAssignViewState extends State<JobAssignView>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     getAssignedJob();
+    getConfirmJob();
   }
 
   @override
@@ -34,12 +35,25 @@ class _JobAssignViewState extends State<JobAssignView>
   }
 
   getAssignedJob() async {
-    List<dynamic> res = await ApiServices.pallet.assignJob();
+    List<dynamic>? res = await ApiServices.pallet.fetchAssignedJob();
 
-    if (res.isEmpty) {
+    if (res == null || res.isEmpty) {
       return;
     }
     jobAssignedList = res.map((e) => Pallet.fromMap(e)).toList();
+
+    setState(() {});
+    return;
+  }
+
+  getConfirmJob() async {
+    List<dynamic>? res = await ApiServices.pallet.fetchConfirmedJob();
+
+    if (res == null || res.isEmpty) {
+      return;
+    }
+
+    jobConfirmList = res.map((e) => Pallet.fromMap(e)).toList();
 
     setState(() {});
     return;
@@ -94,24 +108,24 @@ class _JobAssignViewState extends State<JobAssignView>
               color: Colors.blue.shade200,
               child: ListTile(
                   onTap: () {
-                    // Comment this part for right now since the BE still in progress
                     Navigator.of(context).push(
                       MaterialPageRoute(
                           builder: (context) => PalletDetailsView(
-                                palletNo: Constant.jobAssignedListTest[index],
+                                palletActivityId:
+                                    jobConfirmList[index].palletActivityId,
                               )),
                     );
                   },
                   title: Text(
-                    Constant.confirmJobListTest[index],
+                    jobConfirmList[index].palletNo,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  subtitle: const Text(
-                    'outBound/inBound',
-                    style: TextStyle(
+                  subtitle: Text(
+                    jobConfirmList[index].palletLocation,
+                    style: const TextStyle(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -185,10 +199,10 @@ class _JobAssignViewState extends State<JobAssignView>
                 color: AppColor().milkWhite,
                 child: Padding(
                   padding: const EdgeInsets.only(top: 10),
-                  child: Constant.confirmJobListTest.isEmpty
+                  child: jobConfirmList.isEmpty
                       ? const Center(child: Text('No job confirm for today'))
                       : ListView.builder(
-                          itemCount: Constant.confirmJobListTest.length,
+                          itemCount: jobConfirmList.length,
                           itemBuilder: ((context, index) =>
                               confirmJobContent(index))),
                 ),

@@ -50,7 +50,17 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
   @override
   void initState() {
     super.initState();
-    loadPallet();
+    loadPallet().then((value) {
+      if (value > 0) {
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Pallet not found."),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          )),
+        );
+      }
+    });
   }
 
   // Load pallet when pallectActivityId is not present
@@ -64,15 +74,17 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
       widget.palletNo,
     );
 
+    int err = 0;
     if (res.containsKey("err")) {
       pallet = Pallet.empty();
-      // TODO: show an error
+      err = 1;
     } else {
       pallet = Pallet.fromMap(res);
       itemTotal = pallet!.items.fold(0, (sum, item) => sum + item.qty);
     }
 
     setState(() {});
+    return err;
   }
 
   @override
@@ -289,10 +301,10 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(150, 50),
-              backgroundColor: pallet!.palletLocation == "outbound"
+              backgroundColor: pallet?.palletLocation == "outbound"
                   ? AppColor().greyGoose.withOpacity(0.8)
                   : AppColor().blueZodiac,
-              elevation: pallet!.palletLocation == "outbound" ? 0 : 3,
+              elevation: pallet?.palletLocation == "outbound" ? 0 : 3,
             ),
             onPressed: pallet == null
                 ? null
@@ -328,10 +340,10 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(150, 50),
-              backgroundColor: (pallet!.assignByUserName != '')
+              backgroundColor: (pallet?.assignByUserName != '')
                   ? AppColor().greyGoose.withOpacity(0.8)
                   : AppColor().blueZodiac,
-              elevation: pallet!.assignByUserName != "" ? 0 : 3,
+              elevation: pallet?.assignByUserName != "" ? 0 : 3,
             ),
             onPressed: pallet == null
                 ? null

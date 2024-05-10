@@ -93,7 +93,25 @@ class ApiPallet {
     return true;
   }
 
-  Future<dynamic> assignJob() async {
+  Future<int> assignJob(assignToUserGuid, lorryNo, palletActivityId) async {
+    Response res = await ApiServices.call(
+      Method.post,
+      Uri.parse("$path/assign"),
+      body: jsonEncode(
+        {
+          "assignToUserGuid": assignToUserGuid,
+          "lorryNo": lorryNo,
+          "palletActivityid": palletActivityId,
+        },
+      ),
+    );
+    if (res.statusCode != HttpStatus.ok) {
+      return 1;
+    }
+    return 0;
+  }
+
+  Future<dynamic> fetchAssignedJob() async {
     Response res =
         await ApiServices.call(Method.get, Uri.parse("$path/assigned"));
 
@@ -101,6 +119,16 @@ class ApiPallet {
       return List.empty();
     }
 
+    return json.decode(res.body);
+  }
+
+  Future<dynamic> fetchConfirmedJob() async {
+    Response res =
+        await ApiServices.call(Method.get, Uri.parse("$path/confirmed"));
+
+    if (res.statusCode != HttpStatus.ok) {
+      return List.empty();
+    }
     return json.decode(res.body);
   }
 }

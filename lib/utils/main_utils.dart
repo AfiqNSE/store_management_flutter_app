@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:store_management_system/models/color_model.dart';
 
 AppBar customAppBar(
@@ -40,6 +41,29 @@ Widget customEmptyValue = const Padding(
   padding: EdgeInsets.only(right: 3),
   child: Text('N/A'),
 );
+
+ToastFuture customShowToast(context, String text, Color color) => showToast(
+      text,
+      context: context,
+      axis: Axis.horizontal,
+      alignment: Alignment.center,
+      borderRadius: const BorderRadius.all(
+        Radius.circular(5),
+      ),
+      animation: StyledToastAnimation.slideFromTopFade,
+      reverseAnimation: StyledToastAnimation.slideToTopFade,
+      position:
+          const StyledToastPosition(align: Alignment.topCenter, offset: 0.0),
+      startOffset: const Offset(0.0, -3.0),
+      reverseEndOffset: const Offset(0.0, -3.0),
+      duration: const Duration(seconds: 3),
+      animDuration: const Duration(seconds: 1),
+      curve: Curves.fastLinearToSlowEaseIn,
+      reverseCurve: Curves.fastOutSlowIn,
+      backgroundColor: Colors.red.shade300,
+      fullWidth: true,
+      textAlign: TextAlign.justify,
+    );
 
 class SlideRoute extends PageRouteBuilder {
   final Widget page;

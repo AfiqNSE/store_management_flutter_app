@@ -72,5 +72,11 @@ class Storage {
     return (await _storage.read(key: "fcm-token")) ?? "";
   }
 
+  void removeData() {
+    _storage.delete(key: "guid");
+    _storage.delete(key: "access-token");
+    _storage.delete(key: "refresh-token");
+  }
+
   void removeAll() => _storage.deleteAll();
 }

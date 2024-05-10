@@ -48,4 +48,17 @@ class ApiUser {
 
     return true;
   }
+
+  Future<bool> logout() async {
+    Response response = await ApiServices.call(
+      Method.post,
+      Uri.parse("${ApiServices.base}/logout"),
+    );
+
+    if (response.statusCode != HttpStatus.ok) {
+      return false;
+    }
+
+    return true;
+  }
 }

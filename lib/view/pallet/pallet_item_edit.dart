@@ -47,9 +47,9 @@ class _ItemTableEditViewState extends State<ItemTableEditView> {
                         Autocomplete<String>(
                           optionsBuilder: (TextEditingValue textEditingValue) {
                             if (textEditingValue.text.isEmpty) {
-                              return Constant.custName;
+                              return Constant.custNameTest;
                             }
-                            return Constant.custName.where(
+                            return Constant.custNameTest.where(
                               (custName) => custName.toLowerCase().contains(
                                   textEditingValue.text.toLowerCase()),
                             );

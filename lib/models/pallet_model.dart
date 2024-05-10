@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:store_management_system/services/api_services.dart';
+
 class Pallet {
   int palletActivityId;
   int palletID;
@@ -5,17 +8,17 @@ class Pallet {
   String lorryNo;
   String palletType;
   String destination;
-  String openPalletDateTime;
+  String? openPalletDateTime;
   String openPalletLocation;
-  String openByUserName;
-  String movePalletDateTime;
-  String moveByUserName;
-  String assignPalletDateTime;
+  String? openByUserName;
+  String? movePalletDateTime;
+  String? moveByUserName;
+  String? assignPalletDateTime;
   String assignToUserGuid;
   String assignToUserName;
-  String assignByUserName;
-  String loadPalletDateTime;
-  String loadByUserName;
+  String? assignByUserName;
+  String? loadPalletDateTime;
+  String? loadByUserName;
   String status;
   String palletLocation;
   List<Item> items;
@@ -52,17 +55,17 @@ class Pallet {
         lorryNo: map["lorryNo"],
         palletType: map["palletType"],
         destination: map["destination"],
-        openPalletDateTime: map["openPalletDateTime"],
-        openByUserName: map["openByUserName"],
-        movePalletDateTime: map["movePalletDateTime"],
-        moveByUserName: map["moveByUserName"],
+        openPalletDateTime: map["openPalletDateTime"] ?? "",
+        openByUserName: map["openByUserName"] ?? "",
+        movePalletDateTime: map["movePalletDateTime"] ?? "",
+        moveByUserName: map["moveByUserName"] ?? "",
         openPalletLocation: map["openPalletLocation"],
-        assignPalletDateTime: map["assignPalletDateTime"],
+        assignPalletDateTime: map["assignPalletDateTime"] ?? "",
         assignToUserGuid: map["assignToUserGuid"],
         assignToUserName: map["assignToUserName"],
-        assignByUserName: map["assignToUserName"],
-        loadPalletDateTime: map["loadPalletDateTime"],
-        loadByUserName: map["loadByUserName"],
+        assignByUserName: map["assignToUserName"] ?? "",
+        loadPalletDateTime: map["loadPalletDateTime"] ?? "",
+        loadByUserName: map["loadByUserName"] ?? "",
         status: map["status"],
         palletLocation: map["palletLocation"],
         items: (map['items'] as List).map((e) => Item.fromMap(e)).toList(),
@@ -208,4 +211,33 @@ class PalletItem {
     this.name,
     this.quantity,
   );
+}
+
+class PalletNotifier extends ChangeNotifier {
+  Map<int, Pallet> _pallets = {};
+
+  Map<int, Pallet> get pallets => _pallets;
+
+  initialize() async {
+    List<dynamic> res = await ApiServices.pallet.all();
+
+    if (res.isEmpty) {
+      _pallets = {};
+    } else {
+      _pallets = {for (var v in res) v["palletActivityId"]: Pallet.fromMap(v)};
+    }
+
+    notifyListeners();
+  }
+
+  update(int id) async {
+    var res = await ApiServices.pallet.getById(id);
+
+    if (res.containsKey("err")) {
+      return;
+    }
+
+    _pallets[id] = Pallet.fromMap(res);
+    notifyListeners();
+  }
 }

@@ -49,7 +49,8 @@ class _NavigationTabViewState extends State<NavigationTabView>
   // Handle the data property of the message
   void _handleMessage(RemoteMessage message) {
     // Open pallet details
-    if (message.data['code'] == "1") {
+    String code = message.data['code'];
+    if (code == "1" || code == "2") {
       Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => PalletDetailsView(
           palletNo: message.data["palletNo"],

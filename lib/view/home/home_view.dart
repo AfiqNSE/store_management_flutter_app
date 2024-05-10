@@ -6,11 +6,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:store_management_system/models/color_model.dart';
+import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/models/summary.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/home/notification_view.dart';
+import 'package:store_management_system/view/pallet/pallet_details.dart';
 import 'package:store_management_system/view/pallet/pallet_form.dart';
 import 'package:store_management_system/view/search_history/search_history_view.dart';
 
@@ -190,66 +192,67 @@ class _HomeViewState extends State<HomeView> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
               child: SingleChildScrollView(
-                child: Consumer<SummaryNotifier>(
-                    builder: (context, summary, child) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
-                        child: Text(
-                          'What would you like to do today?',
-                          style: TextStyle(
-                            color: Color.fromRGBO(40, 40, 43, 1),
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                          ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                      child: Text(
+                        'What would you like to do today?',
+                        style: TextStyle(
+                          color: Color.fromRGBO(40, 40, 43, 1),
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      quickbar,
-                      Divider(
-                        color: Colors.grey.shade400,
-                        indent: 8,
-                        endIndent: 8,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Pallet's Summary",
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w500,
-                              ),
+                    ),
+                    quickbar,
+                    Divider(
+                      color: Colors.grey.shade400,
+                      indent: 8,
+                      endIndent: 8,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Pallet's Summary",
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w500,
                             ),
-                            IconButton(
-                              onPressed: refreshSummary,
-                              icon: const Icon(
-                                Icons.refresh_outlined,
-                                size: 30,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 5, 8, 90),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              createSummaryCard("Pallets", summary.pallets),
-                              createSummaryCard("inbound", summary.inBound),
-                              createSummaryCard("outbound", summary.outBound),
-                            ],
                           ),
-                        ),
+                          IconButton(
+                            onPressed: refreshSummary,
+                            icon: const Icon(
+                              Icons.refresh_outlined,
+                              size: 30,
+                            ),
+                          )
+                        ],
                       ),
-                    ],
-                  );
-                }),
+                    ),
+                    Consumer<SummaryNotifier>(
+                      builder: (context, summary, child) {
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 5, 8, 90),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                createSummaryCard("Pallets", summary.pallets),
+                                createSummaryCard("inbound", summary.inBound),
+                                createSummaryCard("outbound", summary.outBound),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -298,44 +301,59 @@ class _HomeViewState extends State<HomeView> {
   }
 
   scanPallet() async {
-    String qrScanRes = "-1";
+    String barcodeScanRes = "-1";
     var scaffoldMessenger = ScaffoldMessenger.of(context);
 
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      qrScanRes = await FlutterBarcodeScanner.scanBarcode(
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
         '#ff6666',
         'Cancel',
         true,
         ScanMode.BARCODE,
       );
     } on PlatformException {
-      scaffoldMessenger.showSnackBar(SnackBar(
-        content: const Text('Failed to get platform version.'),
-        backgroundColor: Colors.red.shade300,
-        duration: const Duration(seconds: 3),
-      ));
-
-      throw ErrorDescription('Failed to get platform version.');
-    }
-
-    if (qrScanRes == '-1') {
-      return;
-    }
-
-    try {
-      //Store the qr value in here into a variable
-
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    } on Exception {
-      if (mounted) {
-        scaffoldMessenger.showSnackBar(SnackBar(
-          content: const Text('Unknown format, please scan again!'),
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: const Text('Failed to get platform version.'),
           backgroundColor: Colors.red.shade300,
-          duration: const Duration(seconds: 5),
-        ));
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      barcodeScanRes = '-1';
+    }
+
+    if (barcodeScanRes == '-1') {
+      return;
+    } else {
+      scaffoldMessenger.showSnackBar(SnackBar(
+        content: const Text('Searching...'),
+        backgroundColor: Colors.blue.shade300,
+        duration: const Duration(seconds: 5),
+      ));
+    }
+    Pallet? pallet;
+
+    Map<String, dynamic> res = await ApiServices.pallet.getByNo(
+      barcodeScanRes,
+    );
+
+    if (res.containsKey("err")) {
+      scaffoldMessenger.hideCurrentSnackBar();
+      scaffoldMessenger.showSnackBar(SnackBar(
+        content: const Text('No pallet number found in the database'),
+        backgroundColor: Colors.red.shade300,
+        duration: const Duration(seconds: 5),
+      ));
+    } else {
+      if (mounted) {
+        pallet = Pallet.fromMap(res);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+              builder: (context) => PalletDetailsView(
+                    palletActivityId: pallet!.palletActivityId,
+                  )),
+        );
       }
     }
   }

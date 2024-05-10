@@ -10,13 +10,10 @@ import 'package:store_management_system/view/pallet/pallet_details.dart';
 class Constant {
   static List<String> palletLocations = ['Inbound', 'Outbound'];
   static List<String> palletTypes = ['Palletise', 'Loose'];
-  static List<String> forkliftDriver = [
-    'InBound Forklift Driver',
-    'OutBound Forklif Driver'
-  ];
 
   // testing purpose
-  static List<String> custName = ['Daikin', 'Delfi', 'Sharp'];
+  static List<String> forkliftDriverTest = ['Driver A', 'Driver B', 'Driver C'];
+  static List<String> custNameTest = ['Daikin', 'Delfi', 'Sharp'];
   static List<String> jobAssignedListTest = ['PTN0001'];
   static List<String> confirmJobListTest = ['PTN0001'];
 }
@@ -74,107 +71,85 @@ InputDecoration customTextFormFieldDeco(
           : null,
     );
 
-Widget createPalletCard(
-  BuildContext context,
-  Pallet pallet,
-) {
+Widget createPalletCard(BuildContext context, Pallet pallet) {
   return Card(
     elevation: 5,
     color: customCardColor(pallet.palletLocation),
     shadowColor: Colors.black,
     child: InkWell(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (context) => PalletDetailsView(
-                    pallet: pallet,
-                  )),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10.0, 0, 10, 0),
-        child: SizedBox(
-          height: 125,
-          width: double.infinity,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      pallet.palletNo,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 25,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () => showQuickItemInfo(context, pallet.items),
-                          child: const Icon(
-                            FluentIcons.clipboard_task_list_ltr_24_filled,
-                            size: 30,
-                          ),
-                        ),
-                        const SizedBox(width: 18),
-                        GestureDetector(
-                          onTap: () => showQuickPICInfo(context, pallet),
-                          child: const Icon(
-                            FluentIcons.person_clock_24_filled,
-                            size: 30,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => PalletDetailsView(
+          palletActivityId: pallet.palletActivityId,
+        ),
+      )),
+      child: Container(
+        height: 125,
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text(
+                pallet.palletNo,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 25,
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      pallet.lorryNo,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 17,
-                      ),
-                    ),
-                    Text(
-                      pallet.palletLocation,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    )
-                  ],
+              ),
+              Row(children: [
+                GestureDetector(
+                  onTap: () => showQuickItemInfo(context, pallet.items),
+                  child: const Icon(
+                    FluentIcons.clipboard_task_list_ltr_24_filled,
+                    size: 30,
+                  ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      pallet.destination,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 17,
-                      ),
-                    ),
-                    Text(
-                      pallet.status,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
+                const SizedBox(width: 18),
+                GestureDetector(
+                  onTap: () => showQuickPICInfo(context, pallet),
+                  child: const Icon(
+                    FluentIcons.person_clock_24_filled,
+                    size: 30,
+                  ),
+                ),
+              ]),
+            ]),
+            const SizedBox(height: 10),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text(
+                pallet.lorryNo.capitalizeOnly(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 17,
+                ),
+              ),
+              Text(
+                pallet.palletLocation.capitalizeOnly(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              )
+            ]),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text(
+                pallet.destination.capitalizeOnly(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 17,
+                ),
+              ),
+              Text(
+                pallet.status,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ])
+          ],
         ),
       ),
     ),
@@ -341,19 +316,19 @@ Future showQuickPICInfo(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Open By:'),
-                          pallet.openByUserName.isEmpty
+                          pallet.openByUserName!.isEmpty
                               ? customEmptyValue
-                              : Text(pallet.openByUserName),
+                              : Text(pallet.openByUserName!),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Open On:'),
-                          pallet.openPalletDateTime.isEmpty
+                          pallet.openPalletDateTime!.isEmpty
                               ? customEmptyValue
                               : Text(
-                                  formatDateString(pallet.openPalletDateTime)),
+                                  formatDateString(pallet.openPalletDateTime!)),
                         ],
                       ),
                       Divider(
@@ -363,19 +338,19 @@ Future showQuickPICInfo(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Move By:'),
-                          pallet.moveByUserName.isEmpty
+                          pallet.moveByUserName!.isEmpty
                               ? customEmptyValue
-                              : Text(pallet.moveByUserName),
+                              : Text(pallet.moveByUserName!),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Move On:'),
-                          pallet.movePalletDateTime.isEmpty
+                          pallet.movePalletDateTime!.isEmpty
                               ? customEmptyValue
                               : Text(
-                                  formatDateString(pallet.movePalletDateTime)),
+                                  formatDateString(pallet.movePalletDateTime!)),
                         ],
                       ),
                       Divider(
@@ -385,19 +360,18 @@ Future showQuickPICInfo(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Assign By:'),
-                          pallet.assignByUserName.isEmpty
+                          pallet.assignByUserName!.isEmpty
                               ? customEmptyValue
-                              : Text(pallet.assignByUserName),
+                              : Text(pallet.assignByUserName!),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Assign On:'),
-                          pallet.assignPalletDateTime.isEmpty
+                          pallet.assignPalletDateTime!.isEmpty
                               ? customEmptyValue
-                              : Text(formatDateString(
-                                  pallet.assignPalletDateTime)),
+                              : Text(pallet.assignPalletDateTime!),
                         ],
                       ),
                       Divider(
@@ -407,19 +381,18 @@ Future showQuickPICInfo(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Load By:'),
-                          pallet.loadByUserName.isEmpty
+                          pallet.loadByUserName!.isEmpty
                               ? customEmptyValue
-                              : Text(pallet.loadByUserName),
+                              : Text(pallet.loadByUserName!),
                         ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Load On:'),
-                          pallet.loadPalletDateTime.isEmpty
+                          pallet.loadPalletDateTime!.isEmpty
                               ? customEmptyValue
-                              : Text(
-                                  formatDateString(pallet.loadPalletDateTime)),
+                              : Text(pallet.loadPalletDateTime!),
                         ],
                       ),
                       Divider(
@@ -458,11 +431,12 @@ Future showQuickPICInfo(
 }
 
 String formatDateString(String date) {
-  if (date.isEmpty) {
-    return "";
+  try {
+    DateTime parsedDate = DateTime.parse(date);
+    return DateFormat('yyyy-MM-dd, HH:mm:ss').format(parsedDate);
+  } catch (e) {
+    return 'Invalid Date';
   }
-  DateTime parsedDate = DateTime.parse(date);
-  return DateFormat('yyyy-MM-dd, HH:mm:ss').format(parsedDate);
 }
 
 Widget createPalletDetails(String detail, String? value, {int flex = 2}) {
@@ -471,7 +445,7 @@ Widget createPalletDetails(String detail, String? value, {int flex = 2}) {
       flex: 1,
       child: Text(
         detail,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),

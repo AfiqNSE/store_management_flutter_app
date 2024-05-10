@@ -11,6 +11,8 @@ import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/view/pallet/pallet_item_edit.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
+//TODO: Need to amend the assign job to get the list of forklift driver from B.E
+
 class PalletDetailsView extends StatefulWidget {
   final int palletActivityId;
   final String palletNo;
@@ -203,16 +205,6 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   (item) => DataRow(cells: [
                     DataCell(Text(item.customerName)),
                     DataCell(Text(item.qty.toString())),
-                    DataCell(Row(children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {},
-                      ),
-                    ])),
                   ]),
                 )
                 .toList(),
@@ -297,23 +289,25 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(150, 50),
-              backgroundColor: pallet?.palletLocation == "outbound"
+              backgroundColor: pallet!.palletLocation == "outbound"
                   ? AppColor().greyGoose.withOpacity(0.8)
                   : AppColor().blueZodiac,
-              elevation: pallet?.palletLocation == "outbound" ? 0 : 3,
+              elevation: pallet!.palletLocation == "outbound" ? 0 : 3,
             ),
             onPressed: pallet == null
                 ? null
-                : pallet?.palletLocation == "outbound"
-                    ? () => ScaffoldMessenger.of(context).showSnackBar(
+                : pallet!.palletLocation == "outbound"
+                    ? () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Text(
-                              'This pallet is already outBound.',
-                            ),
-                            backgroundColor: Colors.red.shade300,
+                            content:
+                                const Text('This pallet is already outBound.'),
+                            backgroundColor: Colors.grey.shade600,
                             duration: const Duration(seconds: 2),
                           ),
-                        )
+                        );
+                      }
                     : _movePallet,
             icon: const Icon(
               Icons.compare_arrows_sharp,
@@ -334,22 +328,25 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(150, 50),
-              backgroundColor: pallet?.assignByUserName == "N/A"
+              backgroundColor: (pallet!.assignByUserName != '')
                   ? AppColor().greyGoose.withOpacity(0.8)
                   : AppColor().blueZodiac,
-              elevation: pallet?.assignByUserName != "" ? 0 : 3,
+              elevation: pallet!.assignByUserName != "" ? 0 : 3,
             ),
             onPressed: pallet == null
                 ? null
-                : pallet?.assignByUserName == "N/A"
-                    ? () => ScaffoldMessenger.of(context).showSnackBar(
+                : (pallet!.assignByUserName != '')
+                    ? () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: const Text(
                                 'This pallet is already been assigned.'),
-                            backgroundColor: Colors.red.shade300,
+                            backgroundColor: Colors.grey.shade600,
                             duration: const Duration(seconds: 2),
                           ),
-                        )
+                        );
+                      }
                     : _assignJob,
             icon: const Icon(
               FluentIcons.person_add_24_filled,
@@ -707,21 +704,17 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     color: Colors.grey.shade300,
                   ),
                   ListTile(
-                      title: const Text(
-                        "Cancel",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    title: const Text(
+                      "Cancel",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w600,
                       ),
-                      onTap: loading
-                          ? null
-                          : () {
-                              Navigator.pop(context);
-                              _cancelAssign;
-                            }),
+                    ),
+                    onTap: loading ? null : _cancelAssign,
+                  ),
                 ],
               ),
             ),
@@ -749,7 +742,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
             ),
           ],
         ),
-        items: Constant.forkliftDriver
+        items: Constant.forkliftDriverTest
             .map((String item) => DropdownMenuItem<String>(
                   value: item,
                   child: Padding(
@@ -819,27 +812,34 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         loading = false;
       });
 
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please complete the form.'),
-          backgroundColor: Colors.red.shade300,
-          duration: const Duration(seconds: 5),
-        ),
-      );
-
       return;
     }
-    Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(
-          content: const Text('Successfully open pallet.'),
-          backgroundColor: Colors.green.shade300,
+
+    assignJob().then((value) {
+      if (value > 0) {
+        setState(() {
+          loading = false;
+        });
+
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: const Text('Server error, please try again later.'),
+          backgroundColor: Colors.red.shade300,
           duration: const Duration(seconds: 5),
-        ))
-        .closed
-        .then((value) => Navigator.pop(context));
+        ));
+
+        return;
+      }
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(
+            content: const Text('Successfully assign job.'),
+            backgroundColor: Colors.green.shade300,
+            duration: const Duration(seconds: 5),
+          ))
+          .closed
+          .then((value) => Navigator.pop(context));
+    });
   }
 
   bool assignValidate() {
@@ -855,6 +855,16 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     setState(() {});
 
     return v;
+  }
+
+  Future<int> assignJob() async {
+    int res = await ApiServices.pallet.assignJob(
+      _selectedForkliftDriver,
+      pallet!.lorryNo,
+      pallet!.palletActivityId,
+    );
+
+    return res;
   }
 
   // Create Signature pop up box
@@ -1008,6 +1018,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
   }
 
   void _cancelAssign() {
+    Navigator.pop(context);
     lorryNo.clear();
     _selectedForkliftDriver = null;
     setState(() {});

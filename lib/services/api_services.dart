@@ -4,6 +4,7 @@ import 'package:http/http.dart';
 import 'package:flutter/material.dart';
 import 'package:store_management_system/services/api_other.dart';
 import 'package:store_management_system/services/api_pallet.dart';
+import 'package:store_management_system/services/api_signature.dart';
 import 'package:store_management_system/services/api_user.dart';
 import 'package:store_management_system/utils/global_utils.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
@@ -13,11 +14,12 @@ enum Method { get, post, patch }
 class ApiServices {
   // static String base = "http://103.230.124.241:8220"; // Test Server
   static String base = "http://10.0.2.2:8220"; // Emulator
-  // static String base = "http://localhost:8220";
+  // static String base = "http://localhost:8220"; // Device
 
   static ApiUser user = ApiUser();
   static ApiPallet pallet = ApiPallet();
   static ApiOther other = ApiOther();
+  static ApiSignature signature = ApiSignature();
 
   static Future<Map<String, String>> getHeaders({bool isAccess = true}) async {
     Map<String, String> headers = {"Content-Type": "application/json"};

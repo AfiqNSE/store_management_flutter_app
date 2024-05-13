@@ -1,7 +1,10 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:store_management_system/models/color_model.dart';
+import 'package:store_management_system/services/api_services.dart';
+import 'package:store_management_system/utils/global_utils.dart';
 import 'package:store_management_system/utils/main_utils.dart';
+import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/account/user_profile_view.dart';
 import 'package:store_management_system/view/login/login_view.dart';
 
@@ -206,6 +209,11 @@ class _AccountViewState extends State<AccountView> {
   }
 
   void _logout() async {
+    Global.instance.isLoggedIn = false;
+
+    await ApiServices.user.logout();
+    await Storage.removeAll();
+
     if (mounted) {
       Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginView()),

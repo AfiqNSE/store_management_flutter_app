@@ -10,8 +10,9 @@ class ApiSignature {
   Future<http.StreamedResponse> sendSignature(
     int palletActivityId,
     File signature,
+    bool isAccess,
   ) async {
-    var request = await _createRequest(palletActivityId, signature);
+    var request = await _createRequest(palletActivityId, signature, isAccess);
     var response = http.StreamedResponse(
       const Stream.empty(),
       HttpStatus.internalServerError,
@@ -30,6 +31,7 @@ class ApiSignature {
   Future<http.MultipartRequest> _createRequest(
     int palletActivityId,
     File signature,
+    bool isAccess,
   ) async {
     http.MultipartRequest request = http.MultipartRequest(
       "POST",
@@ -40,11 +42,16 @@ class ApiSignature {
     request.fields["palletActivityId"] = palletActivityId.toString();
 
     // Add Signature File
-    var signatureMultipartFile = await http.MultipartFile.fromPath(
-      "signaturePath",
-      signature.path,
-    );
+    var signatureMultipartFile =
+        await http.MultipartFile.fromPath("signaturePath", signature.path);
+
     request.files.add(signatureMultipartFile);
+
+    // Get Token Headers
+    Map<String, String> headers =
+        await ApiServices.getHeaders(isAccess: isAccess);
+
+    request.headers.addAll(headers);
 
     return request;
   }

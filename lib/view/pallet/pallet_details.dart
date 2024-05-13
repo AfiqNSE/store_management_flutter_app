@@ -53,6 +53,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
 
   bool loading = false;
   bool reqLoading = false;
+  bool isAccess = true;
 
   @override
   void initState() {
@@ -190,7 +191,19 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
           'Signature:',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
-        children: const [Text('Signature Not Available'), SizedBox(height: 20)],
+        children: [
+          Container(
+            child: pallet == null
+                ? null
+                : pallet!.signature.attachmentFullPath != ""
+                    ? Container(
+                        height: 100,
+                        child: const Text('Signature here'),
+                      )
+                    : const Text('No signature available'),
+          ),
+          const SizedBox(height: 20),
+        ],
       ),
     );
 
@@ -377,10 +390,26 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(140, 50),
-              backgroundColor: AppColor().blueZodiac,
-              elevation: 3,
+              backgroundColor: (pallet!.signature.attachmentFullPath != '')
+                  ? AppColor().greyGoose.withOpacity(0.8)
+                  : AppColor().blueZodiac,
+              elevation: pallet!.signature.attachmentFullPath != '' ? 0 : 3,
             ),
-            onPressed: pallet == null ? null : _signatureBox,
+            onPressed: pallet == null
+                ? null
+                : pallet!.signature.attachmentFullPath != ""
+                    ? () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text(
+                                'This pallet is already been signned.'),
+                            backgroundColor: Colors.grey.shade600,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    : _signatureBox,
             icon: const Icon(
               FluentIcons.signature_24_filled,
               color: Colors.white,
@@ -1022,7 +1051,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     await signatureFile.writeAsBytes(signatureBytes);
 
     var res = await ApiServices.signature
-        .sendSignature(palletActivityId, signatureFile);
+        .sendSignature(palletActivityId, signatureFile, isAccess);
 
     if (mounted) {
       if (res.statusCode != HttpStatus.ok) {

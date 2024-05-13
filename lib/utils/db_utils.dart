@@ -55,11 +55,13 @@ class DB {
     });
   }
 
-  Future<List<Notif>> getNotifs() async {
+  Future<List<Notif>> getNotifs(String guid) async {
     if (_database == null) await initialize();
 
     List<Map<String, dynamic>> maps = await _database!.query(
       "notif",
+      where: "guid = '' OR guid = ?",
+      whereArgs: [guid],
       orderBy: "createdOn DESC",
     );
 

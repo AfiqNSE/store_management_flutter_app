@@ -12,7 +12,6 @@ class Constant {
   static List<String> palletTypes = ['Palletise', 'Loose'];
 
   // testing purpose
-  static List<String> forkliftDriverTest = ['Driver A', 'Driver B', 'Driver C'];
   static List<String> custNameTest = ['Daikin', 'Delfi', 'Sharp'];
   static List<String> jobAssignedListTest = ['PTN0001'];
   static List<String> confirmJobListTest = ['PTN0001'];
@@ -371,7 +370,9 @@ Future showQuickPICInfo(
                           const Text('Assign On:'),
                           pallet.assignPalletDateTime!.isEmpty
                               ? customEmptyValue
-                              : Text(pallet.assignPalletDateTime!),
+                              : Text(formatDateString(
+                                  pallet.assignPalletDateTime!,
+                                )),
                         ],
                       ),
                       Divider(

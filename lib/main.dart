@@ -95,16 +95,18 @@ Future<void> firebaseSetup() async {
   FirebaseMessaging.onBackgroundMessage(_handleMessage);
 }
 
-@pragma('vm:entry-point')
 Future<void> _handleMessage(RemoteMessage message) async {
-  await DB.instance.insertNotif(Notif(
-    messageId: message.messageId ?? "",
-    guid: message.data["guid"],
-    code: message.data["code"],
-    activityId: message.data["id"],
-    palletNo: message.data["palletNo"],
-    createdOn: DateTime.now(),
-  ));
+  if (message.notification != null) {
+    await DB.instance.insertNotif(Notif(
+      messageId: message.messageId ?? "",
+      guid: message.data["guid"],
+      code: message.data["code"] == null ? 0 : int.parse(message.data["code"]),
+      activityId:
+          message.data["id"] == null ? 0 : int.parse(message.data["id"]),
+      palletNo: message.data["palletNo"],
+      createdOn: DateTime.now(),
+    ));
+  }
 }
 
 class RootApp extends StatefulWidget {
@@ -127,6 +129,7 @@ class _RootAppState extends State<RootApp> {
         message.data["code"] == null ? 0 : int.parse(message.data["code"]);
     int activityId =
         message.data["id"] == null ? 0 : int.parse(message.data["id"]);
+
     switch (code) {
       case 1:
         // Update summary values
@@ -138,18 +141,24 @@ class _RootAppState extends State<RootApp> {
         // Update pallet info
         Provider.of<PalletNotifier>(context, listen: false).update(activityId);
         break;
+      case 3:
+        // Update pallet info
+        Provider.of<PalletNotifier>(context, listen: false).update(activityId);
+        break;
       default:
     }
 
-    // Add notif to database
-    Provider.of<NotifNotifier>(context, listen: false).add(Notif(
-      messageId: message.messageId ?? "",
-      guid: message.data["guid"] ?? "",
-      code: code,
-      activityId: activityId,
-      palletNo: message.data["palletNo"] ?? "",
-      createdOn: DateTime.now(),
-    ));
+    if (message.notification != null) {
+      // Add notif to database
+      Provider.of<NotifNotifier>(context, listen: false).add(Notif(
+        messageId: message.messageId ?? "",
+        guid: message.data["guid"] ?? "",
+        code: code,
+        activityId: activityId,
+        palletNo: message.data["palletNo"] ?? "",
+        createdOn: DateTime.now(),
+      ));
+    }
   }
 
   @override

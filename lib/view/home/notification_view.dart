@@ -119,6 +119,10 @@ class _NotificationViewState extends State<NotificationView>
         title = "Pallet has been moved";
         subtitle = "Pallet with no ${notif.palletNo} is moved to outbound";
         break;
+      case 3:
+        title = "A pallet has been assigned to you";
+        subtitle = "Pallet with no ${notif.palletNo} is assigned to you";
+        break;
       default:
     }
 

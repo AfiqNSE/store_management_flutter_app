@@ -1,8 +1,8 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:store_management_system/components/pallet_assign_job_form.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/services/api_services.dart';
@@ -31,15 +31,12 @@ class PalletDetailsView extends StatefulWidget {
 }
 
 class _PalletDetailsViewState extends State<PalletDetailsView> {
-  final _formKey = GlobalKey<FormState>();
-
-  TextEditingController lorryNo = TextEditingController();
+  final GlobalKey<AssignJobFormState> assignKey = GlobalKey();
 
   Pallet? pallet;
   int itemTotal = 0;
 
-  String forkliftDriverErr = "";
-  String? _selectedForkliftDriver;
+  List<dynamic> drivers = List.empty();
 
   bool _withSignature = false;
   bool expanded = false;
@@ -51,7 +48,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
   void initState() {
     super.initState();
     loadPallet().then((value) {
-      if (value > 0) {
+      if (value != null && value > 0) {
         WidgetsBinding.instance.addPostFrameCallback(
           (_) => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text("Pallet not found."),
@@ -61,6 +58,8 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         );
       }
     });
+
+    loadDrivers();
   }
 
   // Load pallet when pallectActivityId is not present
@@ -85,6 +84,10 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
 
     setState(() {});
     return err;
+  }
+
+  loadDrivers() async {
+    drivers = await ApiServices.user.getDrivers();
   }
 
   @override
@@ -177,7 +180,10 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
           const SizedBox(height: 5),
           createPalletDetails('Lorry No', pallet?.lorryNo),
           const SizedBox(height: 5),
-          createPalletDetails('Forklift Driver', pallet?.assignToUserName),
+          createPalletDetails(
+            'Forklift Driver',
+            pallet?.assignToUserName.capitalize(),
+          ),
           const SizedBox(height: 5),
         ]),
       ),
@@ -349,15 +355,14 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 ? null
                 : (pallet!.assignByUserName != '')
                     ? () {
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
-                                'This pallet is already been assigned.'),
-                            backgroundColor: Colors.grey.shade600,
-                            duration: const Duration(seconds: 2),
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: const Text(
+                            'This pallet is already been assigned.',
                           ),
-                        );
+                          backgroundColor: Colors.grey.shade600,
+                          duration: const Duration(seconds: 2),
+                        ));
                       }
                     : _assignJob,
             icon: const Icon(
@@ -612,271 +617,107 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     });
   }
 
-  void _assignJob() => showGeneralDialog(
-        context: context,
-        barrierDismissible: true,
-        barrierLabel: '',
-        pageBuilder: (context, animation1, animation2) {
-          return Container();
-        },
-        transitionBuilder: (context, a1, a2, child) {
-          return ScaleTransition(
-            scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
-            child: FadeTransition(
-              opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
-              child: AlertDialog(
-                backgroundColor: AppColor().milkWhite,
-                elevation: 3.0,
-                shape: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                  borderSide: BorderSide.none,
-                ),
-                title: const Center(
-                  child: Text(
-                    "Assign Job",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 18,
+  void _assignJob() {
+    showGeneralDialog(
+      context: context,
+      pageBuilder: (context, animation1, animation2) {
+        return ScaffoldMessenger(
+          child: Builder(builder: (context) {
+            return Scaffold(
+              backgroundColor: Colors.transparent,
+              body: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  if (assignKey.currentState?.loading == false) {
+                    Navigator.pop(context); // Dismiss dialog when tap outside
+                  }
+                },
+                child: GestureDetector(
+                  onTap: () {}, // Prevent dialog to close when tap inside
+                  child: AlertDialog(
+                    backgroundColor: AppColor().milkWhite,
+                    elevation: 3.0,
+                    shape: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide.none,
                     ),
-                  ),
-                ),
-                contentPadding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.white,
-                      ),
-                      width: double.maxFinite,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              customTextLabel('Forklift Driver:'),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(0, 10, 0, 20),
-                                child: forklifDriverDropDown(),
-                              ),
-                              if (_selectedForkliftDriver == null)
-                                customTextErr(forkliftDriverErr),
-                              customTextLabel('Lorry No.:'),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(0, 10, 0, 20),
-                                child: TextFormField(
-                                  controller: lorryNo,
-                                  cursorHeight: 22,
-                                  style: const TextStyle(fontSize: 16),
-                                  textAlign: TextAlign.center,
-                                  decoration: customTextFormFieldDeco(
-                                      'Enter Lorry Number'),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter lorry number';
-                                    }
-                                    return null;
-                                  },
-                                  autovalidateMode:
-                                      AutovalidateMode.onUserInteraction,
-                                  enabled: !loading,
-                                ),
-                              ),
-                            ],
-                          ),
+                    title: const Center(
+                      child: Text(
+                        "Assign Job",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
                         ),
                       ),
                     ),
-                  ],
+                    contentPadding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                    content: Column(mainAxisSize: MainAxisSize.min, children: [
+                      AssignJobForm(
+                        key: assignKey,
+                        drivers: drivers,
+                        palletActivityId: pallet!.palletActivityId,
+                        lorryNo: pallet!.lorryNo,
+                      ),
+                    ]),
+                    actionsPadding: const EdgeInsets.only(top: 8, bottom: 5),
+                    actions: [
+                      ListTile(
+                        title: Text(
+                          "Assign Job",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue.shade500,
+                          ),
+                        ),
+                        onTap: () {
+                          if (assignKey.currentState?.loading == false) {
+                            assignKey.currentState?.submit();
+                          }
+                        },
+                      ),
+                      Divider(
+                        thickness: 2.0,
+                        indent: 20.0,
+                        endIndent: 20.0,
+                        height: 0.1,
+                        color: Colors.grey.shade300,
+                      ),
+                      ListTile(
+                        title: const Text(
+                          "Cancel",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        onTap: () {
+                          if (assignKey.currentState?.loading == false) {
+                            Navigator.pop(context);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                actionsPadding: const EdgeInsets.only(top: 8, bottom: 5),
-                actions: [
-                  ListTile(
-                    title: Text(
-                      "Assign Job",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.blue.shade500,
-                      ),
-                    ),
-                    onTap: loading ? null : assignSubmit,
-                  ),
-                  Divider(
-                    thickness: 2.0,
-                    indent: 20.0,
-                    endIndent: 20.0,
-                    height: 0.1,
-                    color: Colors.grey.shade300,
-                  ),
-                  ListTile(
-                    title: const Text(
-                      "Cancel",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    onTap: loading ? null : _cancelAssign,
-                  ),
-                ],
               ),
-            ),
-          );
-        },
-      );
-
-  Widget forklifDriverDropDown() {
-    return DropdownButtonHideUnderline(
-      child: DropdownButton2<String>(
-        isExpanded: true,
-        hint: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 10.0),
-              child: Text(
-                '--Select Forklift Driver--',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: loading ? Colors.grey : Colors.grey.shade700,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        items: Constant.forkliftDriverTest
-            .map((String item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Text(
-                      item,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ))
-            .toList(),
-        value: _selectedForkliftDriver,
-        onChanged: loading
-            ? null
-            : (String? value) {
-                setState(() {
-                  _selectedForkliftDriver = value;
-                });
-              },
-        buttonStyleData: ButtonStyleData(
-          height: 35,
-          width: 210,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: loading
-                  ? Colors.grey.shade300
-                  : forkliftDriverErr != ""
-                      ? Colors.red.shade900
-                      : Colors.grey,
-            ),
-            borderRadius: BorderRadius.circular(10),
-            color: AppColor().milkWhite,
+            );
+          }),
+        );
+      },
+      transitionBuilder: (context, a1, a2, child) {
+        return ScaleTransition(
+          scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
+          child: FadeTransition(
+            opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
+            child: child,
           ),
-        ),
-        dropdownStyleData: DropdownStyleData(
-          maxHeight: 200,
-          width: 210,
-          decoration: BoxDecoration(
-            color: AppColor().milkWhite,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          scrollbarTheme: ScrollbarThemeData(
-            radius: const Radius.circular(40),
-            thickness: MaterialStateProperty.all<double>(6),
-            thumbVisibility: MaterialStateProperty.all<bool>(true),
-          ),
-        ),
-        menuItemStyleData: const MenuItemStyleData(
-          height: 40,
-          padding: EdgeInsets.only(left: 14, right: 14),
-        ),
-      ),
+        );
+      },
     );
-  }
-
-  assignSubmit() {
-    setState(() {
-      loading = true;
-    });
-
-    if (!assignValidate()) {
-      setState(() {
-        loading = false;
-      });
-
-      return;
-    }
-
-    assignJob().then((value) {
-      if (value > 0) {
-        setState(() {
-          loading = false;
-        });
-
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: const Text('Server error, please try again later.'),
-          backgroundColor: Colors.red.shade300,
-          duration: const Duration(seconds: 5),
-        ));
-
-        return;
-      }
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(
-            content: const Text('Successfully assign job.'),
-            backgroundColor: Colors.green.shade300,
-            duration: const Duration(seconds: 5),
-          ))
-          .closed
-          .then((value) => Navigator.pop(context));
-    });
-  }
-
-  bool assignValidate() {
-    bool v = _formKey.currentState!.validate();
-
-    if (_selectedForkliftDriver != null) {
-      forkliftDriverErr = "";
-    } else {
-      v = false;
-      forkliftDriverErr = "Please choose a forklift driver";
-    }
-
-    setState(() {});
-
-    return v;
-  }
-
-  Future<int> assignJob() async {
-    int res = await ApiServices.pallet.assignJob(
-      _selectedForkliftDriver,
-      pallet!.lorryNo,
-      pallet!.palletActivityId,
-    );
-
-    return res;
   }
 
   // Create Signature pop up box
@@ -1027,12 +868,5 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         );
       },
     );
-  }
-
-  void _cancelAssign() {
-    Navigator.pop(context);
-    lorryNo.clear();
-    _selectedForkliftDriver = null;
-    setState(() {});
   }
 }

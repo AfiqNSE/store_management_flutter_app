@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:store_management_system/utils/db_utils.dart';
+import 'package:store_management_system/utils/storage_utils.dart';
 
 class Notif {
   int id;
@@ -29,7 +30,7 @@ class NotifNotifier extends ChangeNotifier {
   List<Notif> get notifs => _notifs;
 
   void initialize() async {
-    _notifs = await DB.instance.getNotifs();
+    _notifs = await DB.instance.getNotifs(await Storage.instance.getGuid());
     notifyListeners();
   }
 

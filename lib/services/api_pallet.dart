@@ -93,9 +93,9 @@ class ApiPallet {
     return true;
   }
 
-  Future<int> assignJob(assignToUserGuid, lorryNo, palletActivityId) async {
+  Future<bool> assign(assignToUserGuid, lorryNo, palletActivityId) async {
     Response res = await ApiServices.call(
-      Method.post,
+      Method.patch,
       Uri.parse("$path/assign"),
       body: jsonEncode(
         {
@@ -105,10 +105,12 @@ class ApiPallet {
         },
       ),
     );
+
     if (res.statusCode != HttpStatus.ok) {
-      return 1;
+      return false;
     }
-    return 0;
+
+    return true;
   }
 
   Future<dynamic> fetchAssignedJob() async {

@@ -410,9 +410,7 @@ Future showQuickPICInfo(
             actionsPadding: const EdgeInsets.all(8),
             actions: [
               TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+                onPressed: () => Navigator.pop(context),
                 child: Text(
                   'Close',
                   style: TextStyle(

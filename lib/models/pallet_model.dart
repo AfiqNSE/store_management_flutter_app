@@ -22,7 +22,7 @@ class Pallet {
   String status;
   String palletLocation;
   List<Item> items;
-  // Attachment signature;
+  Attachment signature;
 
   Pallet({
     required this.palletActivityId,
@@ -45,7 +45,7 @@ class Pallet {
     required this.status,
     required this.palletLocation,
     required this.items,
-    // required this.signature,
+    required this.signature,
   });
 
   factory Pallet.fromMap(Map<String, dynamic> map) => Pallet(
@@ -69,7 +69,7 @@ class Pallet {
         status: map["status"],
         palletLocation: map["palletLocation"],
         items: (map['items'] as List).map((e) => Item.fromMap(e)).toList(),
-        // signature: Attachment.fromMap(map['signature'] as Map<String, dynamic>),
+        signature: Attachment.fromMap(map['signature'] as Map<String, dynamic>),
       );
 
   factory Pallet.empty() => Pallet(
@@ -93,6 +93,8 @@ class Pallet {
         status: "",
         palletLocation: "",
         items: List.empty(),
+        signature: Attachment(
+            attachmentUrl: "", attachmentFullPath: "", createdByUserName: ""),
       );
 
   Map<String, dynamic> toMap() => {
@@ -116,7 +118,11 @@ class Pallet {
         "status": status,
         "palletLocation": palletLocation,
         "items": items.map((item) => item.toMap()).toList(),
-        // "signature": signature.toMap(),
+        "signature": Attachment(
+          attachmentUrl: signature.attachmentUrl,
+          attachmentFullPath: signature.attachmentFullPath,
+          createdByUserName: signature.createdByUserName,
+        ),
       };
 
   bool isEmpty() {
@@ -138,7 +144,10 @@ class Pallet {
         loadByUserName == "" &&
         status == "" &&
         palletLocation == "" &&
-        items.isEmpty;
+        items.isEmpty &&
+        signature.attachmentUrl == "" &&
+        signature.attachmentFullPath == "" &&
+        signature.createdByUserName == "";
   }
 }
 
@@ -179,9 +188,9 @@ class Item {
 }
 
 class Attachment {
-  String attachmentUrl;
-  String attachmentFullPath;
-  String createdByUserName;
+  String? attachmentUrl;
+  String? attachmentFullPath;
+  String? createdByUserName;
 
   Attachment({
     required this.attachmentUrl,
@@ -190,9 +199,9 @@ class Attachment {
   });
 
   factory Attachment.fromMap(Map<String, dynamic> map) => Attachment(
-        attachmentUrl: map["attachmentUrl"],
-        attachmentFullPath: map["attachmentFullPath"],
-        createdByUserName: map["createdByUserName"],
+        attachmentUrl: map["attachmentUrl"] ?? "",
+        attachmentFullPath: map["attachmentFullPath"] ?? "",
+        createdByUserName: map["createdByUserName"] ?? "",
       );
 
   Map<String, dynamic> toMap() => {
@@ -200,17 +209,6 @@ class Attachment {
         "attachmentFullPath": attachmentFullPath,
         "createdByUserName": createdByUserName,
       };
-}
-
-// testing
-class PalletItem {
-  final String name;
-  final int quantity;
-
-  PalletItem(
-    this.name,
-    this.quantity,
-  );
 }
 
 class PalletNotifier extends ChangeNotifier {

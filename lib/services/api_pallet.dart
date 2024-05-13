@@ -111,6 +111,22 @@ class ApiPallet {
     return 0;
   }
 
+  Future<int> confirmJob(palletActivityId) async {
+    Response res = await ApiServices.call(
+      Method.post,
+      Uri.parse("$path/confirm"),
+      body: jsonEncode({
+        'palletActivityId': palletActivityId,
+      }),
+    );
+
+    if (res.statusCode != HttpStatus.ok) {
+      return 1;
+    }
+
+    return 0;
+  }
+
   Future<dynamic> fetchAssignedJob() async {
     Response res =
         await ApiServices.call(Method.get, Uri.parse("$path/assigned"));

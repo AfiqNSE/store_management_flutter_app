@@ -4,6 +4,7 @@ import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/services/api_services.dart';
+import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 
 class JobAssignView extends StatefulWidget {
@@ -59,6 +60,23 @@ class _JobAssignViewState extends State<JobAssignView>
     return;
   }
 
+  confirmJob(palletActivityId) async {
+    int res = await ApiServices.pallet.confirmJob(palletActivityId);
+    if (res != 0) {
+      if (mounted) {
+        customShowToast(
+          context,
+          "Failed to confirm job, Please try again.",
+          Colors.red.shade300,
+        );
+      }
+
+      return;
+    }
+    setState(() {});
+    return;
+  }
+
   @override
   Widget build(BuildContext context) {
     // job assign content tab
@@ -92,7 +110,9 @@ class _JobAssignViewState extends State<JobAssignView>
                 ),
               ),
               trailing: IconButton(
-                onPressed: () => confirmDialogBox(),
+                onPressed: () => confirmDialogBox(
+                  jobAssignedList[index].palletActivityId,
+                ),
                 icon: const Icon(FluentIcons.clipboard_more_24_filled),
               ),
             ),
@@ -225,7 +245,7 @@ class _JobAssignViewState extends State<JobAssignView>
     );
   }
 
-  confirmDialogBox() => showDialog(
+  confirmDialogBox(palletActivityId) => showDialog(
       context: context,
       barrierDismissible: true,
       builder: (context) {
@@ -254,7 +274,10 @@ class _JobAssignViewState extends State<JobAssignView>
               ),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                Navigator.of(context).pop();
+                confirmJob(palletActivityId);
+              },
               child: Text(
                 'Confirm',
                 style: TextStyle(

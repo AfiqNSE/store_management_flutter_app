@@ -60,7 +60,7 @@ ToastFuture customShowToast(context, String text, Color color) => showToast(
       animDuration: const Duration(seconds: 1),
       curve: Curves.fastLinearToSlowEaseIn,
       reverseCurve: Curves.fastOutSlowIn,
-      backgroundColor: Colors.red.shade300,
+      backgroundColor: color,
       fullWidth: true,
       textAlign: TextAlign.justify,
     );

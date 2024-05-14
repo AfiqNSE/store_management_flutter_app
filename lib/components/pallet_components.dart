@@ -13,7 +13,6 @@ class Constant {
 
   // testing purpose
   static List<String> custNameTest = ['Daikin', 'Delfi', 'Sharp'];
-  static List<String> jobAssignedListTest = ['PTN0001'];
   static List<String> confirmJobListTest = ['PTN0001'];
 }
 

@@ -145,6 +145,10 @@ class _RootAppState extends State<RootApp> {
         // Update pallet info
         Provider.of<PalletNotifier>(context, listen: false).update(activityId);
         break;
+      case 4:
+        // Update pallet info
+        Provider.of<PalletNotifier>(context, listen: false).update(activityId);
+        break;
       default:
     }
 

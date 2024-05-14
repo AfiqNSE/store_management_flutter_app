@@ -113,9 +113,9 @@ class ApiPallet {
     return true;
   }
 
-  Future<int> confirmJob(palletActivityId) async {
+  Future<bool> confirm(palletActivityId) async {
     Response res = await ApiServices.call(
-      Method.post,
+      Method.patch,
       Uri.parse("$path/confirm"),
       body: jsonEncode({
         'palletActivityId': palletActivityId,
@@ -123,30 +123,45 @@ class ApiPallet {
     );
 
     if (res.statusCode != HttpStatus.ok) {
-      return 1;
+      return false;
     }
 
-    return 0;
+    return true;
   }
 
-  Future<dynamic> fetchAssignedJob() async {
-    Response res =
-        await ApiServices.call(Method.get, Uri.parse("$path/assigned"));
+  Future<List> fetchAssignedJob() async {
+    Response res = await ApiServices.call(
+      Method.get,
+      Uri.parse("$path/assigned"),
+    );
 
     if (res.statusCode != HttpStatus.ok) {
       return List.empty();
     }
 
-    return json.decode(res.body);
+    var body = json.decode(res.body);
+    if (body == null) {
+      return List.empty();
+    }
+
+    return body;
   }
 
-  Future<dynamic> fetchConfirmedJob() async {
-    Response res =
-        await ApiServices.call(Method.get, Uri.parse("$path/confirmed"));
+  Future<List> fetchConfirmedJob() async {
+    Response res = await ApiServices.call(
+      Method.get,
+      Uri.parse("$path/confirmed"),
+    );
 
     if (res.statusCode != HttpStatus.ok) {
       return List.empty();
     }
-    return json.decode(res.body);
+
+    var body = json.decode(res.body);
+    if (body == null) {
+      return List.empty();
+    }
+
+    return body;
   }
 }

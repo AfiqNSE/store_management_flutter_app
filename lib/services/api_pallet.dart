@@ -93,7 +93,8 @@ class ApiPallet {
     return true;
   }
 
-  Future<bool> assign(assignToUserGuid, lorryNo, palletActivityId) async {
+  Future<bool> assign(
+      assignToUserGuid, String lorryNo, int palletActivityId) async {
     Response res = await ApiServices.call(
       Method.patch,
       Uri.parse("$path/assign"),
@@ -113,7 +114,7 @@ class ApiPallet {
     return true;
   }
 
-  Future<int> confirmJob(palletActivityId) async {
+  Future<bool> confirmJob(int palletActivityId) async {
     Response res = await ApiServices.call(
       Method.post,
       Uri.parse("$path/confirm"),
@@ -123,10 +124,35 @@ class ApiPallet {
     );
 
     if (res.statusCode != HttpStatus.ok) {
-      return 1;
+      return false;
     }
 
-    return 0;
+    return true;
+  }
+
+  Future<bool> load(int palletActivityId) async {
+    Response res = await ApiServices.call(Method.post, Uri.parse("$path/load"),
+        body: jsonEncode({
+          'palletActivityId': palletActivityId,
+        }));
+    if (res.statusCode != HttpStatus.ok) {
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> close(int palletActivityId) async {
+    Response res = await ApiServices.call(
+      Method.post,
+      Uri.parse("$path/close"),
+      body: jsonEncode({
+        'palletActivityId': palletActivityId,
+      }),
+    );
+    if (res.statusCode != HttpStatus.ok) {
+      return false;
+    }
+    return true;
   }
 
   Future<dynamic> fetchAssignedJob() async {
@@ -146,6 +172,99 @@ class ApiPallet {
 
     if (res.statusCode != HttpStatus.ok) {
       return List.empty();
+    }
+    return json.decode(res.body);
+  }
+
+  Future<dynamic> fetchLoadingJob() async {
+    Response res =
+        await ApiServices.call(Method.get, Uri.parse("$path/loading"));
+    if (res.statusCode != HttpStatus.ok) {
+      return List.empty();
+    }
+    return json.decode(res.body);
+  }
+
+  Future<dynamic> fetchLoadedJob() async {
+    Response res =
+        await ApiServices.call(Method.get, Uri.parse("$path/loaded"));
+    if (res.statusCode != HttpStatus.ok) {
+      return List.empty();
+    }
+    return json.decode(res.body);
+  }
+
+  Future<bool> addItem(
+    int customerId,
+    String customerName,
+    int qty,
+    int palletActivityId,
+  ) async {
+    Response res = await ApiServices.call(
+      Method.post,
+      Uri.parse("$path/item/add"),
+      body: jsonEncode({
+        'customerId': customerId,
+        'customerName': customerName,
+        'qty': qty,
+        'palletActivityId': palletActivityId,
+      }),
+    );
+    if (res.statusCode != HttpStatus.ok) {
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> updateItem(
+    int customerId,
+    String customerName,
+    int qty,
+    int palletActivityId,
+    int palletActivityDetailId,
+  ) async {
+    Response res = await ApiServices.call(
+      Method.post,
+      Uri.parse('$path/item/update/$palletActivityDetailId'),
+      body: jsonEncode({
+        'customerId': customerId,
+        'customerName': customerName,
+        'qty': qty,
+        'palletActivityId': palletActivityId,
+      }),
+    );
+
+    if (res.statusCode != HttpStatus.ok) {
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<bool> deleteItem(
+      int palletActivityDetailId, int palletActivityId) async {
+    Response res = await ApiServices.call(
+      Method.post,
+      Uri.parse('$path/item/delete/$palletActivityDetailId'),
+      body: jsonEncode({
+        'palletActivityId': palletActivityId,
+      }),
+    );
+    if (res.statusCode != HttpStatus.ok) {
+      return false;
+    }
+    return true;
+  }
+
+  Future<dynamic> getSignatureImage(
+    String fileName,
+  ) async {
+    Response res = await ApiServices.call(
+      Method.post,
+      Uri.parse("$path/signature/image/$fileName"),
+    );
+    if (res.statusCode != HttpStatus.ok) {
+      return "";
     }
     return json.decode(res.body);
   }

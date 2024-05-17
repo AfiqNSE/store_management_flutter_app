@@ -66,7 +66,7 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
       if (res != true) {
         customShowToast(
           context,
-          'Failed To Add Item, Please Try Again.',
+          'Failed to add item. Please try again.',
           Colors.red.shade300,
         );
         return;
@@ -98,13 +98,13 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
     );
     if (mounted) {
       if (res != true) {
-        customShowToast(context, 'Failed To Update Item, Please Try Again.',
+        customShowToast(context, 'Failed to update the item. Please try again.',
             Colors.red.shade300);
         return;
       }
       customShowToast(
         context,
-        'Item Update Successful.',
+        'Item updated successfully.',
         Colors.green.shade300,
       );
       return;
@@ -126,14 +126,14 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
       if (res != true) {
         customShowToast(
           context,
-          'Failed To Delete Item, Please Try Again.',
+          'Failed to delete the item. Please try again.',
           Colors.red.shade300,
         );
         return;
       }
       customShowToast(
         context,
-        ' Item Deleted Successful.',
+        ' Item deleted successfully.',
         Colors.green.shade300,
       );
       setState(() {

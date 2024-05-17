@@ -42,13 +42,13 @@ Color customCardColor(String palletLocation) {
 Color customCardColorStatus(String palletStatus) {
   switch (palletStatus) {
     case "Load Job Pending":
-      return AppColor().milkWhite;
+      return const Color.fromRGBO(246, 241, 147, 1);
     case "Load Job Confirmed":
-      return Colors.yellow.shade300;
+      return const Color.fromRGBO(242, 193, 141, 1);
     case "Loading To Truck":
-      return Colors.blue.shade300;
-    case "Loaded To Truck/Close Pallet":
-      return Colors.green.shade300;
+      return const Color.fromRGBO(170, 215, 217, 1);
+    // case "Loaded To Truck/Close Pallet":
+    //   return Colors.green.shade300;
     default:
       return AppColor().milkWhite;
   }

@@ -433,14 +433,12 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(140, 50),
-              backgroundColor:
-                  (pallet!.openPalletLocation != 'Loading To Truck')
-                      ? AppColor().greyGoose.withOpacity(0.8)
-                      : AppColor().blueZodiac,
-              elevation:
-                  pallet!.openPalletLocation != 'Loading To Truck' ? 0 : 3,
+              backgroundColor: (pallet!.status != 'Loading To Truck')
+                  ? AppColor().greyGoose.withOpacity(0.8)
+                  : AppColor().blueZodiac,
+              elevation: pallet!.status != 'Loading To Truck' ? 0 : 3,
             ),
-            onPressed: pallet!.openPalletLocation == 'Loading To Truck'
+            onPressed: pallet!.status == 'Loading To Truck'
                 ? _signatureBox
                 : () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();

@@ -24,9 +24,8 @@ class ApiOther {
     return jsonDecode(response.body);
   }
 
-  Future<List> customers() async {
+  Future<dynamic> customers() async {
     Response response;
-
     try {
       response = await get(Uri.parse("${ApiServices.base}/customers"));
     } catch (e) {

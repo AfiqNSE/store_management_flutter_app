@@ -5,7 +5,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
-import 'package:store_management_system/view/assign/job_assign_view.dart';
+import 'package:store_management_system/view/job/job_view.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 import 'package:store_management_system/view/pallet/pallet_view.dart';
 import 'package:store_management_system/view/account/account_view.dart';
@@ -94,7 +94,7 @@ class _NavigationTabViewState extends State<NavigationTabView>
         children: const <Widget>[
           HomeView(),
           PalletView(),
-          JobAssignView(),
+          JobView(),
           AccountView(),
         ],
       ),

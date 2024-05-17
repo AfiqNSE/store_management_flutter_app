@@ -25,6 +25,7 @@ double getScreenWidth(BuildContext context) =>
 double getScreenHeight(BuildContext context) =>
     MediaQuery.of(context).size.height;
 
+// custom card color based on pallet location
 Color customCardColor(String palletLocation) {
   switch (palletLocation) {
     case "inbound":
@@ -32,6 +33,22 @@ Color customCardColor(String palletLocation) {
     case "outbound":
       return AppColor().lightMustard;
     case "Pallet":
+    default:
+      return AppColor().milkWhite;
+  }
+}
+
+// custom card color based on pallet status
+Color customCardColorStatus(String palletStatus) {
+  switch (palletStatus) {
+    case "Load Job Pending":
+      return AppColor().milkWhite;
+    case "Load Job Confirmed":
+      return Colors.yellow.shade300;
+    case "Loading To Truck":
+      return Colors.blue.shade300;
+    case "Loaded To Truck/Close Pallet":
+      return Colors.green.shade300;
     default:
       return AppColor().milkWhite;
   }

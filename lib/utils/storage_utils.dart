@@ -72,14 +72,11 @@ class Storage {
     return (await _storage.read(key: "fcm-token")) ?? "";
   }
 
-  Future<String> getFcmTokenOld() async {
-    if (_fcmToken != "") return _fcmToken;
-    return (await _storage.read(key: "fcmTokenOld")) ?? "";
+  void removeData() {
+    _storage.delete(key: "guid");
+    _storage.delete(key: "access-token");
+    _storage.delete(key: "refresh-token");
   }
 
-  static removeAll() async {
-    await _storage.delete(key: "guid");
-    await _storage.delete(key: "access-token");
-    await _storage.delete(key: "refresh-token");
-  }
+  void removeAll() => _storage.deleteAll();
 }

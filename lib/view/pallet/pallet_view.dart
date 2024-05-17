@@ -5,6 +5,8 @@ import 'package:store_management_system/components/search_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/models/pallet_model.dart';
+import 'package:store_management_system/utils/main_utils.dart';
+import 'package:store_management_system/view/pallet/pallet_details.dart';
 
 // TODO: Search bar need to be update to function properly.
 
@@ -62,6 +64,101 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
         setState(() {});
       },
     );
+
+    Widget createPalletCard(Pallet pallet) {
+      return Card(
+        elevation: 5,
+        color: customCardColor(pallet.palletLocation),
+        shadowColor: Colors.black,
+        child: InkWell(
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => PalletDetailsView(
+              palletActivityId: pallet.palletActivityId,
+            ),
+          )),
+          child: Container(
+            decoration: BoxDecoration(
+                border: Border.all(width: 0.3, color: Colors.grey.shade600),
+                borderRadius: const BorderRadius.all(Radius.circular(10))),
+            height: 125,
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        pallet.palletNo,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 25,
+                        ),
+                      ),
+                      Row(children: [
+                        GestureDetector(
+                          onTap: () =>
+                              showQuickItemInfo(context, Constant.itemTest),
+                          child: const Icon(
+                            FluentIcons.clipboard_task_list_ltr_24_filled,
+                            size: 30,
+                          ),
+                        ),
+                        const SizedBox(width: 18),
+                        GestureDetector(
+                          onTap: () => showQuickPICInfo(context, pallet),
+                          child: const Icon(
+                            FluentIcons.person_clock_24_filled,
+                            size: 30,
+                          ),
+                        ),
+                      ]),
+                    ]),
+                const SizedBox(height: 10),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        pallet.lorryNo.capitalizeOnly(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 17,
+                        ),
+                      ),
+                      Text(
+                        pallet.palletLocation.capitalizeOnly(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      )
+                    ]),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        pallet.destination.capitalizeOnly(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 17,
+                        ),
+                      ),
+                      Text(
+                        pallet.status,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ])
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     // Create Tab categories; All, InBound, OutBound
     return DefaultTabController(
@@ -150,7 +247,6 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                         itemBuilder: ((context, index) => Padding(
                               padding: const EdgeInsets.only(bottom: 5),
                               child: createPalletCard(
-                                context,
                                 allPalletList[index],
                               ),
                             )),
@@ -166,7 +262,6 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                         itemBuilder: ((context, index) => Padding(
                               padding: const EdgeInsets.only(bottom: 5),
                               child: createPalletCard(
-                                context,
                                 inBoundPalletList[index],
                               ),
                             )),
@@ -182,7 +277,6 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                         itemBuilder: ((context, index) => Padding(
                               padding: const EdgeInsets.only(bottom: 5),
                               child: createPalletCard(
-                                context,
                                 outBoundPalletList[index],
                               ),
                             )),

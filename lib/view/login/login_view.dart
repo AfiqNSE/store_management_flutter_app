@@ -26,7 +26,15 @@ class _LoginViewState extends State<LoginView> {
     super.initState();
 
     autofill();
-    checklogin();
+    checklogin().then((value) {
+      if (value) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const NavigationTabView()),
+          (route) => false,
+        );
+      }
+    });
   }
 
   autofill() async {
@@ -34,7 +42,8 @@ class _LoginViewState extends State<LoginView> {
     password.text = await Storage.instance.password;
   }
 
-  checklogin() async {
+  Future<bool> checklogin() async {
+    bool loggedin = false;
     String guid = await Storage.instance.getGuid();
     String token = await Storage.instance.getRefreshToken();
 
@@ -44,10 +53,9 @@ class _LoginViewState extends State<LoginView> {
         loading = false;
       });
 
-      return;
+      return loggedin;
     }
 
-    bool loggedin = false;
     try {
       loggedin = await ApiServices.user.authorized();
     } catch (e) {
@@ -60,7 +68,7 @@ class _LoginViewState extends State<LoginView> {
         loading = false;
       });
 
-      return;
+      return loggedin;
     }
 
     debugPrint("[Login] User is logged in");
@@ -68,13 +76,7 @@ class _LoginViewState extends State<LoginView> {
       loading = false;
     });
 
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const NavigationTabView()),
-        (route) => false,
-      );
-    }
+    return loggedin;
   }
 
   @override

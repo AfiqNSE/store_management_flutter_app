@@ -2,8 +2,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:provider/provider.dart';
 import 'package:store_management_system/models/color_model.dart';
-import 'package:store_management_system/view/assign/job_assign_view.dart';
+import 'package:store_management_system/models/pallet_model.dart';
+import 'package:store_management_system/view/job/job_view.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 import 'package:store_management_system/view/pallet/pallet_view.dart';
 import 'package:store_management_system/view/account/account_view.dart';
@@ -17,7 +19,7 @@ class NavigationTabView extends StatefulWidget {
 }
 
 class _NavigationTabViewState extends State<NavigationTabView>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late final TabController _tabController;
   int _currentIndex = 0;
 
@@ -28,6 +30,7 @@ class _NavigationTabViewState extends State<NavigationTabView>
     _tabController.addListener(_handleTabSelection);
     // Run code required to handle interacted messages
     setupInteractedMessage();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   // Handle notification interaction
@@ -50,7 +53,7 @@ class _NavigationTabViewState extends State<NavigationTabView>
   void _handleMessage(RemoteMessage message) {
     // Open pallet details
     String code = message.data['code'];
-    if (code == "1" || code == "2") {
+    if (code == "1" || code == "2" || code == "3") {
       Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => PalletDetailsView(
           palletNo: message.data["palletNo"],
@@ -62,7 +65,16 @@ class _NavigationTabViewState extends State<NavigationTabView>
   @override
   void dispose() {
     _tabController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      Provider.of<PalletNotifier>(context, listen: false).initialize();
+    }
   }
 
   void _handleTabSelection() {
@@ -82,7 +94,7 @@ class _NavigationTabViewState extends State<NavigationTabView>
         children: const <Widget>[
           HomeView(),
           PalletView(),
-          JobAssignView(),
+          JobView(),
           AccountView(),
         ],
       ),

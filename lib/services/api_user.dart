@@ -9,7 +9,10 @@ import 'package:store_management_system/utils/storage_utils.dart';
 //TODO: Fix the logout
 
 class ApiUser {
+  String path = "${ApiServices.base}/user";
+
   Future<Map> login(String username, String password) async {
+    String fcmToken = await Storage.instance.getFcmToken();
     Response response;
 
     try {
@@ -19,6 +22,7 @@ class ApiUser {
         body: jsonEncode({
           "loginName": username,
           "password": password,
+          "fcmToken": fcmToken,
         }),
       );
     } catch (e) {
@@ -40,8 +44,11 @@ class ApiUser {
   }
 
   Future<bool> authorized() async {
-    Response response = await head(
+    String fcmToken = await Storage.instance.getFcmToken();
+
+    Response response = await post(
       Uri.parse("${ApiServices.base}/authorized"),
+      body: jsonEncode({"fcmToken": fcmToken}),
       headers: await ApiServices.getHeaders(isAccess: false),
     );
 
@@ -52,12 +59,34 @@ class ApiUser {
     return true;
   }
 
-  Future<void> logout() async {
-    String fcm = await Storage.instance.getFcmToken();
-    String fcmOld = await Storage.instance.getFcmTokenOld();
-    var body = jsonEncode({
-      "token": fcm,
-      "tokenOld": fcmOld,
-    });
+  Future<bool> logout() async {
+    Response response = await ApiServices.call(
+      Method.post,
+      Uri.parse("${ApiServices.base}/logout"),
+    );
+
+    if (response.statusCode != HttpStatus.ok) {
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<List> getDrivers() async {
+    Response response = await ApiServices.call(
+      Method.get,
+      Uri.parse("$path/all/driver"),
+    );
+
+    if (response.statusCode != HttpStatus.ok) {
+      return List.empty();
+    }
+
+    var body = json.decode(response.body);
+    if (body == null) {
+      return List.empty();
+    }
+
+    return body;
   }
 }

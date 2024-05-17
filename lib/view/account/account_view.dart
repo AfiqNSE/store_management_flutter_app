@@ -212,7 +212,7 @@ class _AccountViewState extends State<AccountView> {
     Global.instance.isLoggedIn = false;
 
     await ApiServices.user.logout();
-    await Storage.removeAll();
+    Storage.instance.removeData();
 
     if (mounted) {
       Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(

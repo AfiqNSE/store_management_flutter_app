@@ -59,7 +59,14 @@ Widget customEmptyValue = const Padding(
   child: Text('N/A'),
 );
 
-ToastFuture customShowToast(context, String text, Color color) => showToast(
+ToastFuture customShowToast(
+  context,
+  String text,
+  Color color,
+  bool dismiss,
+) =>
+    showToast(
+      dismissOtherToast: dismiss,
       text,
       context: context,
       axis: Axis.horizontal,

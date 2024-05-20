@@ -77,9 +77,16 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
         false,
       );
     }
-    setState(() {
-      activityDetailItem.add();
-    });
+    // setState(() {
+    //   activityDetailItem.add(
+    //     (PalletActivityDetail(
+    //         palletActivityDetailId: 0,
+    //         palletActivityId: palletActivityId,
+    //         customerId: customerId,
+    //         customerName: customerName,
+    //         qty: qty)),
+    //   );
+    // });
   }
 
   _updateItem(
@@ -115,7 +122,16 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
       );
       return;
     }
-    setState(() {});
+    setState(() {
+      activityDetailItem.add(
+        PalletActivityDetail(
+            palletActivityDetailId: palletActivityDetailId,
+            palletActivityId: palletActivityId,
+            customerId: customerId,
+            customerName: customerName,
+            qty: qty),
+      );
+    });
   }
 
   _deleteItem(

@@ -5,14 +5,14 @@ import 'package:store_management_system/models/color_model.dart';
 
 // TODO: Search bar need to be update to function properly.
 
-class PalletHistoryView extends StatefulWidget {
-  const PalletHistoryView({super.key});
+class SearchPalletView extends StatefulWidget {
+  const SearchPalletView({super.key});
 
   @override
-  State<PalletHistoryView> createState() => _PalletHistoryViewState();
+  State<SearchPalletView> createState() => _SearchPalletViewState();
 }
 
-class _PalletHistoryViewState extends State<PalletHistoryView> {
+class _SearchPalletViewState extends State<SearchPalletView> {
   final TextEditingController searchController = TextEditingController();
 
   List<dynamic> pallets = List.empty();

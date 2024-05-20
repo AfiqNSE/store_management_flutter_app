@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'dart:ui' as ui;
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -13,10 +14,9 @@ import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/components/pallet_components.dart';
-import 'package:store_management_system/view/pallet/pallet_item_edit.dart';
+import 'package:store_management_system/view/pallet/pallet_table.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
-//TODO: Need to amend the assign job to get the list of forklift driver from B.E
 //TODO: Change snackbar to customToast
 
 class PalletDetailsView extends StatefulWidget {
@@ -200,6 +200,13 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     Widget signatureArea = Padding(
       padding: const EdgeInsets.fromLTRB(5, 20, 5, 0),
       child: ExpansionTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(
+            width: 0.5,
+            color: AppColor().blueZodiac,
+          ),
+        ),
         tilePadding: const EdgeInsets.only(left: 8),
         collapsedBackgroundColor: Colors.grey.shade200,
         collapsedShape: RoundedRectangleBorder(
@@ -211,51 +218,39 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         ),
         children: [
           Container(
-            child: pallet == null
-                ? null
-                : pallet!.signature.attachmentFullPath != ""
-                    ? Container(
-                        height: 100,
-                        child: const Text('Signature here'),
-                      )
-                    : const Text('No signature available'),
+            child: pallet == null ? null : const Text('Signature'),
           ),
           const SizedBox(height: 20),
         ],
       ),
     );
 
-    // Create table for pallet items
-    Widget palletItems = SizedBox(
-      width: double.maxFinite,
+    // Create simple table for pallet items
+    Widget palletActivityItems = SizedBox(
       child: DataTable(
-        border: TableBorder.all(width: 0.5),
-        columnSpacing: 35,
+        border: TableBorder.all(width: 0.3),
         headingTextStyle: const TextStyle(fontWeight: FontWeight.w600),
         columns: const [
           DataColumn(label: Text('Name')),
-          DataColumn(label: Text('Quantity')),
+          DataColumn(label: Text('Qty')),
         ],
         rows: [
           if (pallet != null)
             ...pallet!.items
                 .map(
                   (item) => DataRow(cells: [
-                    DataCell(Text(item.customerName)),
-                    DataCell(Text(item.qty.toString())),
+                    DataCell(
+                      Text(item.customerName.toUpperCase()),
+                    ),
+                    DataCell(
+                      Text(item.qty.toString()),
+                    ),
                   ]),
                 )
                 .toList(),
-          // Row for Total Quantity
           DataRow(cells: [
-            const DataCell(Align(
-              alignment: Alignment.center,
-              child: Text('Total'),
-            )), // Empty cell
-            DataCell(Align(
-              alignment: Alignment.center,
-              child: Text(itemTotal.toString()),
-            )),
+            const DataCell(Text('Total')),
+            DataCell(Text(itemTotal.toString())),
           ]),
         ],
       ),
@@ -265,6 +260,13 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     Widget palletItemsArea = Padding(
       padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
       child: ExpansionTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(
+            width: 0.5,
+            color: AppColor().blueZodiac,
+          ),
+        ),
         onExpansionChanged: (value) {
           setState(() {
             expanded = value;
@@ -284,25 +286,32 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     'Items List:',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
-                  TextButton.icon(
-                    onPressed: (pallet == null)
-                        ? null
-                        : () => Navigator.of(context).push(SlideRoute(
-                              page: ItemTableEditView(
-                                palletItems: pallet!.items,
-                              ),
-                              toRight: true,
-                            )),
-                    icon: Icon(
-                      FluentIcons.edit_24_filled,
-                      color: AppColor().blueZodiac,
-                      size: 18,
-                    ),
-                    label: Text(
-                      'Edit Table',
-                      style: TextStyle(
-                        fontSize: 16,
+                  Container(
+                    height: 40,
+                    decoration: BoxDecoration(
                         color: AppColor().blueZodiac,
+                        borderRadius: BorderRadius.circular(20)),
+                    child: TextButton.icon(
+                      onPressed: (pallet == null)
+                          ? null
+                          : () => Navigator.of(context).push(SlideRoute(
+                                page: ActivityDetailsTableView(
+                                  palletActivityId: pallet!.palletActivityId,
+                                  activityItems: pallet!.items,
+                                ),
+                                toRight: true,
+                              )),
+                      icon: const Icon(
+                        FluentIcons.edit_24_filled,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                      label: const Text(
+                        'Edit',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -312,7 +321,16 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 'Items List:',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
-        children: [palletItems, const SizedBox(height: 20)],
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 20, bottom: 20),
+            child: pallet!.items.isNotEmpty
+                ? palletActivityItems
+                : const Center(
+                    child: Text('No pallet items available'),
+                  ),
+          )
+        ],
       ),
     );
 
@@ -407,26 +425,24 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(140, 50),
-              backgroundColor: (pallet!.signature.attachmentFullPath != '')
+              backgroundColor: (pallet!.status != 'Loading To Truck')
                   ? AppColor().greyGoose.withOpacity(0.8)
                   : AppColor().blueZodiac,
-              elevation: pallet!.signature.attachmentFullPath != '' ? 0 : 3,
+              elevation: pallet!.status != 'Loading To Truck' ? 0 : 3,
             ),
-            onPressed: pallet == null
-                ? null
-                : pallet!.signature.attachmentFullPath != ""
-                    ? () {
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
-                                'This pallet is already been signned.'),
-                            backgroundColor: Colors.grey.shade600,
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      }
-                    : _signatureBox,
+            onPressed: pallet!.status == 'Loading To Truck'
+                ? _signatureBox
+                : () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                            'This pallet status need to be --Loading To Truck--'),
+                        backgroundColor: Colors.grey.shade600,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
             icon: const Icon(
               FluentIcons.signature_24_filled,
               color: Colors.white,

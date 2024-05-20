@@ -5,15 +5,29 @@ import 'package:shimmer/shimmer.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/utils/main_utils.dart';
-import 'package:store_management_system/view/pallet/pallet_details.dart';
 
 class Constant {
   static List<String> palletLocations = ['Inbound', 'Outbound'];
   static List<String> palletTypes = ['Palletise', 'Loose'];
 
   // testing purpose
-  static List<String> custNameTest = ['Daikin', 'Delfi', 'Sharp'];
+  static List<String> forkliftDriverTest = ['Driver A', 'Driver B', 'Driver C'];
+  static List<String> custNameTest = [
+    '7-ELEVEN MALAYSIA SDN BHD',
+    'Apex Pharmacy Marketing S/B- collection',
+    'ALPHA HOME APPLIANCES SDN BHD',
+    'APEX PHARMACY MARKETING SDN BHD',
+  ];
+
+  static List<ItemTest> itemTest = [
+    ItemTest(customerName: '7-ELEVEN MALAYSIA SDN BHD', qty: 15),
+    ItemTest(customerName: 'Apex Pharmacy Marketing S/B- collection', qty: 25),
+    ItemTest(customerName: 'ALPHA HOME APPLIANCES SDN BHD', qty: 35),
+    ItemTest(customerName: 'APEX PHARMACY MARKETING SDN BHD', qty: 35),
+  ];
+  static List<String> jobAssignedListTest = ['PTN0001'];
   static List<String> confirmJobListTest = ['PTN0001'];
+  static List<String> palletLoadListTest = ['PTN0001', 'PTN002'];
 }
 
 Widget customTextLabel(String text) => Padding(
@@ -35,6 +49,20 @@ Widget customTextErr(String text) => Padding(
         style: TextStyle(color: Colors.red.shade900, fontSize: 12),
       ),
     );
+
+String formatedCustName(String custName) {
+  String formatText = "\u2022 ${custName.replaceRange(20, null, "...")}";
+  return formatText;
+}
+
+String formatDateString(String date) {
+  try {
+    DateTime parsedDate = DateTime.parse(date);
+    return DateFormat('yyyy-MM-dd, HH:mm:ss').format(parsedDate);
+  } catch (e) {
+    return 'Invalid Date';
+  }
+}
 
 InputDecoration customTextFormFieldDeco(
   String hintText, {
@@ -69,94 +97,9 @@ InputDecoration customTextFormFieldDeco(
           : null,
     );
 
-Widget createPalletCard(BuildContext context, Pallet pallet) {
-  return Card(
-    elevation: 5,
-    color: customCardColor(pallet.palletLocation),
-    shadowColor: Colors.black,
-    child: InkWell(
-      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => PalletDetailsView(
-          palletActivityId: pallet.palletActivityId,
-        ),
-      )),
-      child: Container(
-        height: 125,
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(
-                pallet.palletNo,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 25,
-                ),
-              ),
-              Row(children: [
-                GestureDetector(
-                  onTap: () => showQuickItemInfo(context, pallet.items),
-                  child: const Icon(
-                    FluentIcons.clipboard_task_list_ltr_24_filled,
-                    size: 30,
-                  ),
-                ),
-                const SizedBox(width: 18),
-                GestureDetector(
-                  onTap: () => showQuickPICInfo(context, pallet),
-                  child: const Icon(
-                    FluentIcons.person_clock_24_filled,
-                    size: 30,
-                  ),
-                ),
-              ]),
-            ]),
-            const SizedBox(height: 10),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(
-                pallet.lorryNo.capitalizeOnly(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 17,
-                ),
-              ),
-              Text(
-                pallet.palletLocation.capitalizeOnly(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              )
-            ]),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(
-                pallet.destination.capitalizeOnly(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 17,
-                ),
-              ),
-              Text(
-                pallet.status,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-            ])
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
 Future showQuickItemInfo(
   BuildContext context,
-  List<dynamic> items,
+  List<ItemTest>? activityDetailItem,
 ) {
   return showGeneralDialog(
     context: context,
@@ -201,14 +144,14 @@ Future showQuickItemInfo(
                   ),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(15, 20, 15, 0),
-                    child: items.isEmpty
+                    child: activityDetailItem!.isEmpty
                         ? const Center(
-                            child: Text("No Pallet Items Available"),
+                            child: Text("\u2022 No Pallet Items Available"),
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.only(bottom: 10),
                             shrinkWrap: true,
-                            itemCount: items.length,
+                            itemCount: activityDetailItem.length,
                             itemBuilder: ((context, index) => Column(
                                   children: [
                                     Row(
@@ -216,16 +159,18 @@ Future showQuickItemInfo(
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          "> ${items[index].name}",
+                                          formatedCustName(
+                                              activityDetailItem[index]
+                                                  .customerName),
                                           style: const TextStyle(
-                                            fontSize: 17,
+                                            fontSize: 14,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
                                         Text(
-                                          "Qty: ${items[index].quantity}",
+                                          "[Qty:${activityDetailItem[index].qty}]",
                                           style: const TextStyle(
-                                            fontSize: 16,
+                                            fontSize: 14,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -428,15 +373,6 @@ Future showQuickPICInfo(
   );
 }
 
-String formatDateString(String date) {
-  try {
-    DateTime parsedDate = DateTime.parse(date);
-    return DateFormat('yyyy-MM-dd, HH:mm:ss').format(parsedDate);
-  } catch (e) {
-    return 'Invalid Date';
-  }
-}
-
 Widget createPalletDetails(String detail, String? value, {int flex = 2}) {
   return Row(children: [
     Expanded(
@@ -475,7 +411,6 @@ Widget createPalletDetails(String detail, String? value, {int flex = 2}) {
     ),
   ]);
 }
-
 
 // No need for current version
 // Widget imgSliderContent() {

@@ -21,7 +21,7 @@ class Pallet {
   String? loadByUserName;
   String status;
   String palletLocation;
-  List<Item> items;
+  List<PalletActivityDetail> items;
   Attachment signature;
 
   Pallet({
@@ -68,7 +68,10 @@ class Pallet {
         loadByUserName: map["loadByUserName"] ?? "",
         status: map["status"],
         palletLocation: map["palletLocation"],
-        items: (map['items'] as List).map((e) => Item.fromMap(e)).toList(),
+        items: (map['items'] as List?)
+                ?.map((e) => PalletActivityDetail.fromMap(e))
+                .toList() ??
+            [],
         signature: Attachment.fromMap(map['signature'] as Map<String, dynamic>),
       );
 
@@ -117,7 +120,8 @@ class Pallet {
         "loadByUserName": loadByUserName,
         "status": status,
         "palletLocation": palletLocation,
-        "items": items.map((item) => item.toMap()).toList(),
+        "items":
+            items.isNotEmpty ? items.map((item) => item.toMap()).toList() : [],
         "signature": Attachment(
           attachmentUrl: signature.attachmentUrl,
           attachmentFullPath: signature.attachmentFullPath,
@@ -151,39 +155,46 @@ class Pallet {
   }
 }
 
-class Item {
-  int itemId;
+// Testing purpose
+class ItemTest {
+  String customerName;
+  int qty;
+  ItemTest({
+    required this.customerName,
+    required this.qty,
+  });
+}
+
+class PalletActivityDetail {
+  int palletActivityDetailId;
+  int palletActivityId;
   int customerId;
   String customerName;
-  String itemCode;
   int qty;
-  int palletActivityId;
 
-  Item({
-    required this.itemId,
+  PalletActivityDetail({
+    required this.palletActivityDetailId,
+    required this.palletActivityId,
     required this.customerId,
     required this.customerName,
-    required this.itemCode,
     required this.qty,
-    required this.palletActivityId,
   });
 
-  factory Item.fromMap(Map<String, dynamic> map) => Item(
-        itemId: map["itemId"],
+  factory PalletActivityDetail.fromMap(Map<String, dynamic> map) =>
+      PalletActivityDetail(
+        palletActivityDetailId: map["palletActivityDetailId"],
+        palletActivityId: map["palletActivityId"],
         customerId: map["customerId"],
         customerName: map["customerName"],
-        itemCode: map["itemCode"],
         qty: map["qty"],
-        palletActivityId: map["palletActivityId"],
       );
 
   Map<String, dynamic> toMap() => {
-        "itemId": itemId,
+        "palletActivityDetailId": palletActivityDetailId,
+        "palletActivityId": palletActivityId,
         "customerId": customerId,
         "customerName": customerName,
-        "itemCode": itemCode,
         "qty": qty,
-        "palletActivityId": palletActivityId,
       };
 }
 

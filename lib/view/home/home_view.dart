@@ -14,9 +14,7 @@ import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/home/notification_view.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 import 'package:store_management_system/view/pallet/pallet_form.dart';
-import 'package:store_management_system/view/search_history/search_history_view.dart';
-
-// TODO: change snackbars to something else
+import 'package:store_management_system/view/search/search_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -37,11 +35,12 @@ class _HomeViewState extends State<HomeView> {
     _getSummary().then((value) {
       if (value > 0) {
         WidgetsBinding.instance.addPostFrameCallback(
-          (_) => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Failed to get data from server, try again later."),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
-          )),
+          (_) => customShowToast(
+            context,
+            'Failed to get data from server, try again later.',
+            Colors.red.shade300,
+            false,
+          ),
         );
       }
     });
@@ -119,7 +118,7 @@ class _HomeViewState extends State<HomeView> {
               'Search',
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const PalletHistoryView()));
+                    builder: (context) => const SearchPalletView()));
               },
               icon: FluentIcons.search_24_filled,
             ),
@@ -302,9 +301,7 @@ class _HomeViewState extends State<HomeView> {
 
   scanPallet() async {
     String barcodeScanRes = "-1";
-    var scaffoldMessenger = ScaffoldMessenger.of(context);
 
-    // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
         '#ff6666',
@@ -313,40 +310,36 @@ class _HomeViewState extends State<HomeView> {
         ScanMode.BARCODE,
       );
     } on PlatformException {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: const Text('Failed to get platform version.'),
-          backgroundColor: Colors.red.shade300,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      if (mounted) {
+        customShowToast(
+          context,
+          'Failed to get platform version.',
+          Colors.red.shade300,
+          false,
+        );
+      }
       barcodeScanRes = '-1';
     }
 
     if (barcodeScanRes == '-1') {
       return;
-    } else {
-      scaffoldMessenger.showSnackBar(SnackBar(
-        content: const Text('Searching...'),
-        backgroundColor: Colors.blue.shade300,
-        duration: const Duration(seconds: 5),
-      ));
     }
+
     Pallet? pallet;
 
     Map<String, dynamic> res = await ApiServices.pallet.getByNo(
       barcodeScanRes,
     );
 
-    if (res.containsKey("err")) {
-      scaffoldMessenger.hideCurrentSnackBar();
-      scaffoldMessenger.showSnackBar(SnackBar(
-        content: const Text('No pallet number found in the database'),
-        backgroundColor: Colors.red.shade300,
-        duration: const Duration(seconds: 5),
-      ));
-    } else {
-      if (mounted) {
+    if (mounted) {
+      if (res.containsKey("err")) {
+        customShowToast(
+          context,
+          'No pallet number found in the database',
+          Colors.red.shade300,
+          true,
+        );
+      } else {
         pallet = Pallet.fromMap(res);
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -417,12 +410,12 @@ class _HomeViewState extends State<HomeView> {
   void refreshSummary() {
     _getSummary().then((value) {
       if (value > 0) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Failed to get data from server, try again later."),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ));
+        customShowToast(
+          context,
+          "Failed to get data from server, try again later.",
+          Colors.red.shade300,
+          true,
+        );
       }
     });
   }

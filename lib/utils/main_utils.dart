@@ -25,6 +25,7 @@ double getScreenWidth(BuildContext context) =>
 double getScreenHeight(BuildContext context) =>
     MediaQuery.of(context).size.height;
 
+// custom card color based on pallet location
 Color customCardColor(String palletLocation) {
   switch (palletLocation) {
     case "inbound":
@@ -37,12 +38,35 @@ Color customCardColor(String palletLocation) {
   }
 }
 
+// custom card color based on pallet status
+Color customCardColorStatus(String palletStatus) {
+  switch (palletStatus) {
+    case "Load Job Pending":
+      return const Color.fromRGBO(246, 241, 147, 1);
+    case "Load Job Confirmed":
+      return const Color.fromRGBO(242, 193, 141, 1);
+    case "Loading To Truck":
+      return const Color.fromRGBO(170, 215, 217, 1);
+    // case "Loaded To Truck/Close Pallet":
+    //   return Colors.green.shade300;
+    default:
+      return AppColor().milkWhite;
+  }
+}
+
 Widget customEmptyValue = const Padding(
   padding: EdgeInsets.only(right: 3),
   child: Text('N/A'),
 );
 
-ToastFuture customShowToast(context, String text, Color color) => showToast(
+ToastFuture customShowToast(
+  context,
+  String text,
+  Color color,
+  bool dismiss,
+) =>
+    showToast(
+      dismissOtherToast: dismiss,
       text,
       context: context,
       axis: Axis.horizontal,

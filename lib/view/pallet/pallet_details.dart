@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'dart:ui' as ui;
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -86,8 +87,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
       err = 1;
     } else {
       pallet = Pallet.fromMap(res);
-      itemTotal =
-          pallet!.palletActivityDetail!.fold(0, (sum, item) => sum + item.qty);
+      itemTotal = pallet!.items!.fold(0, (sum, item) => sum + item.qty);
     }
 
     setState(() {});
@@ -218,15 +218,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         ),
         children: [
           Container(
-            child: pallet == null
-                ? null
-                : pallet!.signature.attachmentFullPath != ""
-                    ? const Column(
-                        children: [
-                          Text('Signature here'),
-                        ],
-                      )
-                    : const Text('No signature available'),
+            child: pallet == null ? null : Text('Signature'),
           ),
           const SizedBox(height: 20),
         ],
@@ -244,7 +236,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         ],
         rows: [
           if (pallet != null)
-            ...pallet!.palletActivityDetail!
+            ...pallet!.items!
                 .map(
                   (item) => DataRow(cells: [
                     DataCell(
@@ -305,7 +297,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                           : () => Navigator.of(context).push(SlideRoute(
                                 page: ActivityDetailsTableView(
                                   palletActivityId: pallet!.palletActivityId,
-                                  activityItems: pallet!.palletActivityDetail,
+                                  activityItems: pallet!.items,
                                 ),
                                 toRight: true,
                               )),
@@ -332,7 +324,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 20, bottom: 20),
-            child: pallet!.palletActivityDetail!.isNotEmpty
+            child: pallet!.items!.isNotEmpty
                 ? palletActivityItems
                 : const Center(
                     child: Text('No pallet items available'),

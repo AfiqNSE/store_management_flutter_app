@@ -246,9 +246,11 @@ class ApiPallet {
   }
 
   Future<bool> deleteItem(
-      int palletActivityDetailId, int palletActivityId) async {
+    int palletActivityDetailId,
+    int palletActivityId,
+  ) async {
     Response res = await ApiServices.call(
-      Method.post,
+      Method.delete,
       Uri.parse('$path/item/delete/$palletActivityDetailId'),
       body: jsonEncode({
         'palletActivityId': palletActivityId,
@@ -260,12 +262,13 @@ class ApiPallet {
     return true;
   }
 
-  Future<dynamic> getSignatureImage(
-    String fileName,
-  ) async {
+  Future<dynamic> getSignatureImage(String signaturePath) async {
     Response res = await ApiServices.call(
       Method.post,
-      Uri.parse("$path/signature/image/$fileName"),
+      Uri.parse("$path/signature/image"),
+      body: jsonEncode({
+        'signaturePath': signaturePath,
+      }),
     );
     if (res.statusCode != HttpStatus.ok) {
       return "";

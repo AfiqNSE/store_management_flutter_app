@@ -21,7 +21,7 @@ class Pallet {
   String? loadByUserName;
   String status;
   String palletLocation;
-  List<PalletActivityDetail>? palletActivityDetail;
+  List<PalletActivityDetail>? items;
   Attachment signature;
 
   Pallet({
@@ -44,7 +44,7 @@ class Pallet {
     required this.loadByUserName,
     required this.status,
     required this.palletLocation,
-    required this.palletActivityDetail,
+    required this.items,
     required this.signature,
   });
 
@@ -68,7 +68,7 @@ class Pallet {
         loadByUserName: map["loadByUserName"] ?? "",
         status: map["status"],
         palletLocation: map["palletLocation"],
-        palletActivityDetail: (map['palletActivityDetail'] as List?)
+        items: (map['items'] as List?)
                 ?.map((e) => PalletActivityDetail.fromMap(e))
                 .toList() ??
             [],
@@ -95,7 +95,7 @@ class Pallet {
         loadByUserName: "",
         status: "",
         palletLocation: "",
-        palletActivityDetail: List.empty(),
+        items: List.empty(),
         signature: Attachment(
             attachmentUrl: "", attachmentFullPath: "", createdByUserName: ""),
       );
@@ -120,7 +120,7 @@ class Pallet {
         "loadByUserName": loadByUserName,
         "status": status,
         "palletLocation": palletLocation,
-        "items": palletActivityDetail?.map((item) => item.toMap()).toList(),
+        "items": items?.map((item) => item.toMap()).toList(),
         "signature": Attachment(
           attachmentUrl: signature.attachmentUrl,
           attachmentFullPath: signature.attachmentFullPath,
@@ -147,7 +147,7 @@ class Pallet {
         loadByUserName == "" &&
         status == "" &&
         palletLocation == "" &&
-        palletActivityDetail!.isEmpty &&
+        items!.isEmpty &&
         signature.attachmentUrl == "" &&
         signature.attachmentFullPath == "" &&
         signature.createdByUserName == "";

@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/models/color_model.dart';
@@ -24,9 +25,11 @@ class JobView extends StatefulWidget {
 
 class _JobViewState extends State<JobView> with TickerProviderStateMixin {
   final GlobalKey<SfSignaturePadState> signaturePadKey = GlobalKey();
+  final ValueNotifier<bool> _signatureValidNotifier = ValueNotifier<bool>(true);
+
   List<Pallet> jobAssignedList = List.empty(growable: true);
   List<Pallet> jobConfirmList = List.empty(growable: true);
-  List<Pallet> jobLoadList = List.empty(growable: true);
+  List<Pallet> jobLoadingList = List.empty(growable: true);
 
   String signatureErr = "";
   late TabController _tabController;
@@ -45,6 +48,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
   @override
   void dispose() {
     _tabController.dispose();
+    _signatureValidNotifier.dispose();
     super.dispose();
   }
 
@@ -69,16 +73,10 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
   }
 
   getJobLoads() async {
-    List<dynamic>? res = [];
+    List<dynamic>? res = await ApiServices.pallet.fetchLoadingJob();
 
-    res = await ApiServices.pallet.fetchLoadingJob();
     if (res != null && res.isNotEmpty) {
-      jobLoadList.addAll(res.map((e) => Pallet.fromMap(e)));
-    }
-
-    res = await ApiServices.pallet.fetchLoadedJob();
-    if (res != null && res.isNotEmpty) {
-      jobLoadList.addAll(res.map((e) => Pallet.fromMap(e)));
+      jobLoadingList = res.map((e) => Pallet.fromMap(e)).toList();
     }
 
     setState(() {});
@@ -90,15 +88,17 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
       if (res != true) {
         customShowToast(
           context,
-          "Failed to confirm job, Please try again.",
+          "Failed to confirm the job. Please try again.",
           Colors.red.shade300,
+          false,
         );
         return;
       }
       customShowToast(
         context,
-        "Confirm job succeed.",
+        "Job confirmation successful.",
         Colors.blue.shade300,
+        false,
       );
     }
     setState(() {});
@@ -110,14 +110,17 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
       if (res != true) {
         customShowToast(
           context,
-          "Failed to load pallet to truck, Please try again.",
+          "Failed to load the pallet onto the truck. Please try again",
           Colors.red.shade300,
+          false,
         );
+        return;
       }
       customShowToast(
         context,
-        "The pallet in loading to truck process.",
+        "Loading this pallet onto the truck.",
         Colors.blue.shade300,
+        false,
       );
     }
     setState(() {});
@@ -129,14 +132,18 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
       if (res != true) {
         customShowToast(
           context,
-          "Failed to close pallet, Please try again.",
+          "Failed to close the pallet. Please try again.",
           Colors.red.shade300,
+          true,
         );
+        return;
       }
+      showToast('').dismiss();
       customShowToast(
         context,
-        "Close pallet to succeed.",
+        "Pallet closed successfully.",
         Colors.blue.shade300,
+        true,
       );
     }
     setState(() {});
@@ -152,7 +159,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
                 side: BorderSide(width: 0.3, color: Colors.grey.shade600)),
             elevation: 5,
-            color: Colors.white,
+            color: customCardColorStatus(jobAssignedList[index].status),
             child: ListTile(
               isThreeLine: true,
               onTap: () {
@@ -182,7 +189,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                     jobAssignedList[index].palletActivityId),
                 icon: const Icon(
                   FluentIcons.clipboard_task_add_24_filled,
-                  size: 35,
+                  size: 40,
                 ),
               ),
             ),
@@ -228,7 +235,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                       jobConfirmList[index].palletActivityId),
                   icon: const Icon(
                     FluentIcons.clipboard_arrow_right_24_filled,
-                    size: 35,
+                    size: 40,
                   ),
                 ),
               )),
@@ -242,47 +249,39 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
                 side: BorderSide(width: 0.3, color: Colors.grey.shade600)),
             elevation: 5,
-            color: (jobLoadList[index].status == 'Loading To TruckTruck')
-                ? customCardColorStatus('Loading To TruckTruck')
-                : customCardColorStatus('Loaded To Truck/Close Pallet'),
+            color: customCardColorStatus('Loading To Truck'),
             child: ListTile(
-              isThreeLine: true,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => PalletDetailsView(
-                            palletActivityId:
-                                jobLoadList[index].palletActivityId,
-                          )),
-                );
-              },
-              title: Text(
-                jobLoadList[index].palletNo,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                isThreeLine: true,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (context) => PalletDetailsView(
+                              palletActivityId:
+                                  jobLoadingList[index].palletActivityId,
+                            )),
+                  );
+                },
+                title: Text(
+                  jobLoadingList[index].palletNo,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              subtitle: Text(
-                "${jobLoadList[index].openPalletLocation.capitalizeOnly()}\n${jobLoadList[index].status}",
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
+                subtitle: Text(
+                  "${jobLoadingList[index].openPalletLocation.capitalizeOnly()}\n${jobLoadingList[index].status}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 3,
                 ),
-                maxLines: 3,
-              ),
-              trailing: (jobLoadList[index].status == 'Loading To TruckTruck')
-                  ? IconButton(
-                      onPressed: () => closePalletDialogBox(index),
-                      icon: const Icon(
-                        FluentIcons.clipboard_more_24_filled,
-                        size: 35,
-                      ),
-                    )
-                  : const Icon(
-                      FluentIcons.clipboard_checkmark_24_filled,
-                      size: 35,
-                    ),
-            ),
+                trailing: IconButton(
+                  onPressed: () => closePalletDialogBox(index),
+                  icon: const Icon(
+                    FluentIcons.clipboard_more_24_filled,
+                    size: 40,
+                  ),
+                )),
           ),
         );
 
@@ -331,7 +330,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                 ),
                 Tab(
                   child: Text(
-                    'Loading/Loaded',
+                    'Loading Pallet',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -374,7 +373,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                 child: Padding(
                   padding: const EdgeInsets.only(top: 10),
                   child: ListView.builder(
-                      itemCount: jobLoadList.length,
+                      itemCount: jobLoadingList.length,
                       itemBuilder: ((context, index) =>
                           jobLoadsContent(index))),
                 ),
@@ -486,7 +485,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
       );
 
   // Create Signature pop up box
-  Future<void> closePalletDialogBox(int index) {
+  Future<void> closePalletDialogBox(index) {
     return showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -534,11 +533,17 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 5),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: _signature == false
-                        ? customTextErr(signatureErr)
-                        : const SizedBox.shrink(),
+                  //Listen to the signature value
+                  ValueListenableBuilder<bool>(
+                    valueListenable: _signatureValidNotifier,
+                    builder: (context, signatureValid, _) {
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: signatureValid
+                            ? const SizedBox.shrink()
+                            : customTextErr(signatureErr),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -575,7 +580,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      onTap: () => validateSiganture(index),
+                      onTap: () => validateSignature(index),
                     ),
                     Divider(
                       thickness: 2.0,
@@ -596,7 +601,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                       ),
                       onTap: () {
                         Navigator.pop(context);
-                        _signature = null;
+                        _signatureValidNotifier.value = true;
                       },
                     ),
                   ],
@@ -609,18 +614,18 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
     );
   }
 
-  //TODO: Amend validation
-  validateSiganture(index) {
-    if (_signature == null) {
+  void validateSignature(index) async {
+    if (_signature != null) {
+      await _sendSignature(jobLoadingList[index].palletActivityId).then((_) {
+        Navigator.pop(context);
+      });
+    } else {
       signatureErr = 'Please sign the pallet before submit.';
-      _signature = false;
+      _signatureValidNotifier.value = false;
     }
-    print(signatureErr);
   }
 
-  _sendSignature(int index) async {
-    Navigator.of(context).pop();
-
+  _sendSignature(index) async {
     // Save the signature as a file
     ui.Image signature = await signaturePadKey.currentState!.toImage();
 
@@ -631,33 +636,31 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
     //Create temporary directory to store the signature image
     final tempDir = await getTemporaryDirectory();
     File signatureFile =
-        File('${tempDir.path}/${jobLoadList[index].palletNo}.jpeg');
+        File('${tempDir.path}/${jobLoadingList[index].palletNo}.jpeg');
     await signatureFile.writeAsBytes(signatureBytes);
 
     var res = await ApiServices.signature.sendSignature(
-        jobLoadList[index].palletActivityId, signatureFile, isAccess);
+        jobLoadingList[index].palletActivityId, signatureFile, isAccess);
 
     if (mounted) {
       if (res.statusCode != HttpStatus.ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Failed to send signature. Please try again.'),
-            backgroundColor: Colors.red.shade300,
-            duration: const Duration(seconds: 5),
-          ),
+        customShowToast(
+          context,
+          'Failed to send signature. Please try again.',
+          Colors.red.shade300,
+          false,
         );
         return;
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Successfully sign the pallet.'),
-            backgroundColor: Colors.green.shade300,
-            duration: const Duration(seconds: 5),
-          ),
+        customShowToast(
+          context,
+          'Successfully sign the pallet.',
+          Colors.red.shade300,
+          false,
         );
 
         // Call the close pallet api
-        closePallet(jobLoadList[index].palletActivityId);
+        closePallet(jobLoadingList[index].palletActivityId);
         return;
       }
     }

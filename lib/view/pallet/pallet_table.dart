@@ -10,14 +10,12 @@ class ActivityDetailsTableView extends StatefulWidget {
   final int palletActivityId;
   final List<PalletActivityDetail>? activityItems;
   const ActivityDetailsTableView(
-      {super.key, this.activityItems, required this.palletActivityId});
+      {super.key, required this.palletActivityId, this.activityItems});
 
   @override
   State<ActivityDetailsTableView> createState() => _ActivityDetailsTableState();
 }
 
-// TODO: Amend validation for signature checking
-// TODO: Amend add, update api
 class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
   final _formKey = GlobalKey<FormState>();
 
@@ -27,7 +25,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
   List<PalletActivityDetail> activityDetailItem = List.empty(growable: true);
   List<String> autoCompleteCustName = List.empty(growable: true);
 
-  //testing purpose
   late int total;
 
   @override
@@ -66,20 +63,30 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
       if (res != true) {
         customShowToast(
           context,
-          'Failed To Add Item, Please Try Again.',
+          'Failed to add item. Please try again.',
           Colors.red.shade300,
+          false,
         );
         return;
       }
+      Navigator.of(context).pop();
       customShowToast(
         context,
         'Successfully Add Item.',
         Colors.green.shade300,
+        false,
       );
     }
-    setState(() {
-      _calculateTotal();
-    });
+    // setState(() {
+    //   activityDetailItem.add(
+    //     (PalletActivityDetail(
+    //         palletActivityDetailId: 0,
+    //         palletActivityId: palletActivityId,
+    //         customerId: customerId,
+    //         customerName: customerName,
+    //         qty: qty)),
+    //   );
+    // });
   }
 
   _updateItem(
@@ -98,23 +105,37 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
     );
     if (mounted) {
       if (res != true) {
-        customShowToast(context, 'Failed To Update Item, Please Try Again.',
-            Colors.red.shade300);
+        customShowToast(
+          context,
+          'Failed to update the item. Please try again.',
+          Colors.red.shade300,
+          false,
+        );
         return;
       }
+      Navigator.of(context).pop();
       customShowToast(
         context,
-        'Item Update Successful.',
+        'Item updated successfully.',
         Colors.green.shade300,
+        false,
       );
       return;
     }
     setState(() {
-      _calculateTotal();
+      activityDetailItem.add(
+        PalletActivityDetail(
+            palletActivityDetailId: palletActivityDetailId,
+            palletActivityId: palletActivityId,
+            customerId: customerId,
+            customerName: customerName,
+            qty: qty),
+      );
     });
   }
 
   _deleteItem(
+    int index,
     int palletActivityDetailId,
     int palletActivityId,
   ) async {
@@ -126,20 +147,23 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
       if (res != true) {
         customShowToast(
           context,
-          'Failed To Delete Item, Please Try Again.',
+          'Failed to delete the item. Please try again.',
           Colors.red.shade300,
+          false,
         );
         return;
       }
+      Navigator.of(context).pop();
       customShowToast(
         context,
-        ' Item Deleted Successful.',
+        ' Item deleted successfully.',
         Colors.green.shade300,
+        false,
       );
-      setState(() {
-        _calculateTotal();
-      });
     }
+    setState(() {
+      activityDetailItem.removeAt(index);
+    });
   }
 
   @override
@@ -477,15 +501,32 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
                         if (textEditingValue.text.isEmpty) {
                           return const Iterable<String>.empty();
                         } else {
-                          return autoCompleteCustName.where((String custName) =>
-                              custName.toLowerCase().contains(
-                                  textEditingValue.text.toLowerCase()));
+                          return Constant.custNameTest.where(
+                              (String custName) => custName
+                                  .toLowerCase()
+                                  .contains(
+                                      textEditingValue.text.toLowerCase()));
                         }
                       },
-                      onSelected: (String selected) {
-                        setState(() {
-                          custNameController.text = selected;
-                        });
+                      fieldViewBuilder: (context, textEditingController,
+                          focusNode, onFieldSubmitted) {
+                        return TextFormField(
+                          controller: textEditingController,
+                          cursorHeight: 22,
+                          style: const TextStyle(fontSize: 16),
+                          textAlign: TextAlign.center,
+                          decoration:
+                              customTextFormFieldDeco('Enter Customer Name'),
+                          validator: (value) {
+                            custNameController = textEditingController;
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter customer name';
+                            }
+                            return null;
+                          },
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          focusNode: focusNode,
+                        );
                       },
                       optionsViewBuilder: (context, onSelected, options) {
                         return Align(
@@ -516,25 +557,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
                               ),
                             ),
                           ),
-                        );
-                      },
-                      fieldViewBuilder: (context, textEditingController,
-                          focusNode, onFieldSubmitted) {
-                        return TextFormField(
-                          controller: textEditingController,
-                          cursorHeight: 22,
-                          style: const TextStyle(fontSize: 16),
-                          textAlign: TextAlign.center,
-                          decoration:
-                              customTextFormFieldDeco('Enter Customer Name'),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter customer name';
-                            }
-                            return null;
-                          },
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          focusNode: focusNode,
                         );
                       },
                     ),
@@ -610,18 +632,21 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
   // Check either the item already in the table or not
   _validateAddItem(palletActivityId) async {
     if (_formKey.currentState!.validate()) {
-      Navigator.of(context).pop();
-      int custId = -1;
+      Iterable<PalletActivityDetail> contain = [];
+      int custId = 0;
 
-      for (var i = 0; i < activityDetailItem.length; i++) {
-        if (activityDetailItem[i].customerName == custNameController.text) {
-          custId = activityDetailItem[i].customerId;
-          return;
+      for (var item in activityDetailItem) {
+        if (item.customerName == custNameController.text) {
+          custId = item.customerId;
+        } else {
+          custId = 0;
         }
       }
 
-      var contain =
-          activityDetailItem.where((element) => element.customerId == custId);
+      if (custId != 0) {
+        contain =
+            activityDetailItem.where((element) => element.customerId == custId);
+      }
 
       if (contain.isEmpty) {
         await _addItem(
@@ -635,10 +660,10 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
           context,
           "The item already in the table",
           Colors.red.shade300,
+          false,
         );
       }
       reset();
-      setState(() {});
     }
   }
 
@@ -663,10 +688,7 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
             ),
             actions: [
               TextButton(
-                onPressed: () => _deleteItem(
-                  widget.palletActivityId,
-                  activityDetailItem[index].palletActivityDetailId,
-                ),
+                onPressed: () => Navigator.of(context).pop(),
                 child: Text(
                   'Cancel',
                   style: TextStyle(
@@ -675,7 +697,11 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
                 ),
               ),
               TextButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => _deleteItem(
+                  index,
+                  activityDetailItem[index].palletActivityDetailId,
+                  widget.palletActivityId,
+                ),
                 child: Text(
                   'Confirm',
                   style: TextStyle(

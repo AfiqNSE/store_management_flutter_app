@@ -39,6 +39,7 @@ class _HomeViewState extends State<HomeView> {
             context,
             'Failed to get data from server, try again later.',
             Colors.red.shade300,
+            false,
           ),
         );
       }
@@ -311,7 +312,11 @@ class _HomeViewState extends State<HomeView> {
     } on PlatformException {
       if (mounted) {
         customShowToast(
-            context, 'Failed to get platform version.', Colors.red.shade300);
+          context,
+          'Failed to get platform version.',
+          Colors.red.shade300,
+          false,
+        );
       }
       barcodeScanRes = '-1';
     }
@@ -328,8 +333,12 @@ class _HomeViewState extends State<HomeView> {
 
     if (mounted) {
       if (res.containsKey("err")) {
-        customShowToast(context, 'No pallet number found in the database',
-            Colors.red.shade300);
+        customShowToast(
+          context,
+          'No pallet number found in the database',
+          Colors.red.shade300,
+          true,
+        );
       } else {
         pallet = Pallet.fromMap(res);
         Navigator.of(context).push(
@@ -402,9 +411,11 @@ class _HomeViewState extends State<HomeView> {
     _getSummary().then((value) {
       if (value > 0) {
         customShowToast(
-            context,
-            "Failed to get data from server, try again later.",
-            Colors.red.shade300);
+          context,
+          "Failed to get data from server, try again later.",
+          Colors.red.shade300,
+          true,
+        );
       }
     });
   }

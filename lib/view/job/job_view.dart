@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/models/color_model.dart';
@@ -24,6 +25,8 @@ class JobView extends StatefulWidget {
 
 class _JobViewState extends State<JobView> with TickerProviderStateMixin {
   final GlobalKey<SfSignaturePadState> signaturePadKey = GlobalKey();
+  final ValueNotifier<bool> _signatureValidNotifier = ValueNotifier<bool>(true);
+
   List<Pallet> jobAssignedList = List.empty(growable: true);
   List<Pallet> jobConfirmList = List.empty(growable: true);
   List<Pallet> jobLoadingList = List.empty(growable: true);
@@ -45,6 +48,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
   @override
   void dispose() {
     _tabController.dispose();
+    _signatureValidNotifier.dispose();
     super.dispose();
   }
 
@@ -69,12 +73,12 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
   }
 
   getJobLoads() async {
-    List<dynamic>? res = [];
+    List<dynamic>? res = await ApiServices.pallet.fetchLoadingJob();
 
-    res = await ApiServices.pallet.fetchLoadingJob();
     if (res != null && res.isNotEmpty) {
-      jobLoadingList.addAll(res.map((e) => Pallet.fromMap(e)));
+      jobLoadingList = res.map((e) => Pallet.fromMap(e)).toList();
     }
+
     setState(() {});
   }
 
@@ -86,6 +90,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
           context,
           "Failed to confirm the job. Please try again.",
           Colors.red.shade300,
+          false,
         );
         return;
       }
@@ -93,6 +98,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
         context,
         "Job confirmation successful.",
         Colors.blue.shade300,
+        false,
       );
     }
     setState(() {});
@@ -106,6 +112,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
           context,
           "Failed to load the pallet onto the truck. Please try again",
           Colors.red.shade300,
+          false,
         );
         return;
       }
@@ -113,6 +120,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
         context,
         "Loading this pallet onto the truck.",
         Colors.blue.shade300,
+        false,
       );
     }
     setState(() {});
@@ -126,13 +134,16 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
           context,
           "Failed to close the pallet. Please try again.",
           Colors.red.shade300,
+          true,
         );
         return;
       }
+      showToast('').dismiss();
       customShowToast(
         context,
         "Pallet closed successfully.",
         Colors.blue.shade300,
+        true,
       );
     }
     setState(() {});
@@ -474,7 +485,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
       );
 
   // Create Signature pop up box
-  Future<void> closePalletDialogBox(int index) {
+  Future<void> closePalletDialogBox(index) {
     return showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -522,11 +533,17 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 5),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: _signature == false
-                        ? customTextErr(signatureErr)
-                        : const SizedBox.shrink(),
+                  //Listen to the signature value
+                  ValueListenableBuilder<bool>(
+                    valueListenable: _signatureValidNotifier,
+                    builder: (context, signatureValid, _) {
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: signatureValid
+                            ? const SizedBox.shrink()
+                            : customTextErr(signatureErr),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -563,7 +580,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      onTap: () => validateSiganture(index),
+                      onTap: () => validateSignature(index),
                     ),
                     Divider(
                       thickness: 2.0,
@@ -584,7 +601,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                       ),
                       onTap: () {
                         Navigator.pop(context);
-                        _signature = null;
+                        _signatureValidNotifier.value = true;
                       },
                     ),
                   ],
@@ -597,19 +614,18 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
     );
   }
 
-  //TODO: Amend validation
-  validateSiganture(index) {
-    if (_signature == null) {
+  void validateSignature(index) async {
+    if (_signature != null) {
+      await _sendSignature(jobLoadingList[index].palletActivityId).then((_) {
+        Navigator.pop(context);
+      });
+    } else {
       signatureErr = 'Please sign the pallet before submit.';
-      _signature = false;
-
-      setState(() {});
-      return;
+      _signatureValidNotifier.value = false;
     }
-    _sendSignature(index);
   }
 
-  _sendSignature(int index) async {
+  _sendSignature(index) async {
     // Save the signature as a file
     ui.Image signature = await signaturePadKey.currentState!.toImage();
 
@@ -628,20 +644,19 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
 
     if (mounted) {
       if (res.statusCode != HttpStatus.ok) {
-        Navigator.of(context).pop();
-
         customShowToast(
           context,
           'Failed to send signature. Please try again.',
           Colors.red.shade300,
+          false,
         );
         return;
       } else {
-        Navigator.of(context).pop();
         customShowToast(
           context,
           'Successfully sign the pallet.',
           Colors.red.shade300,
+          false,
         );
 
         // Call the close pallet api

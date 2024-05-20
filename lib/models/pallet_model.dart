@@ -189,6 +189,14 @@ class PalletActivityDetail {
         qty: map["qty"],
       );
 
+  factory PalletActivityDetail.empty() => PalletActivityDetail(
+        palletActivityDetailId: 0,
+        palletActivityId: 0,
+        customerId: 0,
+        customerName: "",
+        qty: 0,
+      );
+
   Map<String, dynamic> toMap() => {
         "palletActivityDetailId": palletActivityDetailId,
         "palletActivityId": palletActivityId,
@@ -196,6 +204,13 @@ class PalletActivityDetail {
         "customerName": customerName,
         "qty": qty,
       };
+
+  bool isEmpty() =>
+      palletActivityDetailId == 0 &&
+      palletActivityId == 0 &&
+      customerId == 0 &&
+      customerName == "" &&
+      qty == 0;
 }
 
 class Attachment {

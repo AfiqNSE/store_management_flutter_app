@@ -70,20 +70,12 @@ InputDecoration customTextFormFieldDeco(
 }) =>
     InputDecoration(
       isDense: true,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       hintText: hintText,
       hintStyle: const TextStyle(fontSize: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: Colors.blue.shade600,
-          width: 1.7,
-        ),
+        borderSide: BorderSide(color: Colors.blue.shade600, width: 1.7),
         borderRadius: BorderRadius.circular(10.0),
       ),
       suffixIcon: onPressed != null
@@ -93,7 +85,8 @@ InputDecoration customTextFormFieldDeco(
               child: IconButton(
                 onPressed: onPressed,
                 icon: const Icon(FluentIcons.barcode_scanner_24_filled),
-              ))
+              ),
+            )
           : null,
     );
 

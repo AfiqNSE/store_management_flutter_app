@@ -219,7 +219,7 @@ class ApiPallet {
     return body;
   }
 
-  Future<bool> addItem(
+  Future<int> addItem(
     int customerId,
     String customerName,
     int qty,
@@ -235,10 +235,12 @@ class ApiPallet {
         'palletActivityId': palletActivityId,
       }),
     );
+
     if (res.statusCode != HttpStatus.ok) {
-      return false;
+      return 0;
     }
-    return true;
+
+    return jsonDecode(res.body);
   }
 
   Future<bool> updateItem(

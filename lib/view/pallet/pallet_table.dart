@@ -8,9 +8,13 @@ import 'package:store_management_system/utils/main_utils.dart';
 
 class ActivityDetailsTableView extends StatefulWidget {
   final int palletActivityId;
-  final List<PalletActivityDetail>? activityItems;
-  const ActivityDetailsTableView(
-      {super.key, required this.palletActivityId, this.activityItems});
+  final List<PalletActivityDetail> activityItems;
+
+  const ActivityDetailsTableView({
+    super.key,
+    required this.palletActivityId,
+    required this.activityItems,
+  });
 
   @override
   State<ActivityDetailsTableView> createState() => _ActivityDetailsTableState();
@@ -22,154 +26,59 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
   TextEditingController custNameController = TextEditingController();
   TextEditingController itemQuantityController = TextEditingController();
 
-  List<PalletActivityDetail> activityDetailItem = List.empty(growable: true);
   List<String> autoCompleteCustName = List.empty(growable: true);
+  List<int> customerIds = List.empty(growable: true);
 
   late int total;
+  late List<PalletActivityDetail> activityDetailItem;
 
   @override
   void initState() {
     super.initState();
-    activityDetailItem.addAll(widget.activityItems!);
-    total = _calculateTotal();
-    _getCustomerName();
-  }
+    activityDetailItem = widget.activityItems;
+    total = activityDetailItem.fold(0, (sum, item) => sum + item.qty);
 
-  int _calculateTotal() {
-    setState(() {});
-    return activityDetailItem.fold(0, (sum, item) => sum + item.qty);
+    _getCustomerName();
   }
 
   _getCustomerName() async {
     List<dynamic> res = await ApiServices.other.customers();
     for (var i = 0; i < res.length; i++) {
-      autoCompleteCustName.add(res[i].customerName);
+      autoCompleteCustName.add(res[i]["customerName"]);
+      customerIds.add(res[i]["customerId"]);
     }
-  }
-
-  _addItem(
-    int customerId,
-    String customerName,
-    int qty,
-    int palletActivityId,
-  ) async {
-    var res = await ApiServices.pallet.addItem(
-      customerId,
-      customerName,
-      qty,
-      palletActivityId,
-    );
-    if (mounted) {
-      if (res != true) {
-        customShowToast(
-          context,
-          'Failed to add item. Please try again.',
-          Colors.red.shade300,
-          false,
-        );
-        return;
-      }
-      Navigator.of(context).pop();
-      customShowToast(
-        context,
-        'Successfully Add Item.',
-        Colors.green.shade300,
-        false,
-      );
-    }
-    // setState(() {
-    //   activityDetailItem.add(
-    //     (PalletActivityDetail(
-    //         palletActivityDetailId: 0,
-    //         palletActivityId: palletActivityId,
-    //         customerId: customerId,
-    //         customerName: customerName,
-    //         qty: qty)),
-    //   );
-    // });
-  }
-
-  _updateItem(
-    int customerId,
-    String customerName,
-    int qty,
-    int palletActivityId,
-    int palletActivityDetailId,
-  ) async {
-    var res = await ApiServices.pallet.updateItem(
-      customerId,
-      customerName,
-      qty,
-      palletActivityId,
-      palletActivityDetailId,
-    );
-    if (mounted) {
-      if (res != true) {
-        customShowToast(
-          context,
-          'Failed to update the item. Please try again.',
-          Colors.red.shade300,
-          false,
-        );
-        return;
-      }
-      Navigator.of(context).pop();
-      customShowToast(
-        context,
-        'Item updated successfully.',
-        Colors.green.shade300,
-        false,
-      );
-      return;
-    }
-    setState(() {
-      activityDetailItem.add(
-        PalletActivityDetail(
-            palletActivityDetailId: palletActivityDetailId,
-            palletActivityId: palletActivityId,
-            customerId: customerId,
-            customerName: customerName,
-            qty: qty),
-      );
-    });
-  }
-
-  _deleteItem(
-    int index,
-    int palletActivityDetailId,
-    int palletActivityId,
-  ) async {
-    var res = await ApiServices.pallet.deleteItem(
-      palletActivityDetailId,
-      palletActivityId,
-    );
-    if (mounted) {
-      if (res != true) {
-        customShowToast(
-          context,
-          'Failed to delete the item. Please try again.',
-          Colors.red.shade300,
-          false,
-        );
-        return;
-      }
-      Navigator.of(context).pop();
-      customShowToast(
-        context,
-        ' Item deleted successfully.',
-        Colors.green.shade300,
-        false,
-      );
-    }
-    setState(() {
-      activityDetailItem.removeAt(index);
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    AppBar customAppBar = AppBar(
+      title: const Text(
+        'Item List',
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+      ),
+      centerTitle: true,
+      elevation: 0,
+      backgroundColor: AppColor().milkWhite,
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColor().blueZodiac,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: IconButton(
+              visualDensity: VisualDensity.compact,
+              onPressed: () => addItem(widget.palletActivityId),
+              icon: const Icon(Icons.add, color: Colors.white),
+            ),
+          ),
+        )
+      ],
+    );
+
     // Create list area to show item list
-    Widget activityDetail = Container(
+    Widget activityDetail = SizedBox(
       width: double.infinity,
       child: activityDetailItem.isEmpty
           ? const Center(
@@ -263,37 +172,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
             ),
     );
 
-    AppBar customAppBar = AppBar(
-      title: const Text(
-        'Item List',
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      centerTitle: true,
-      elevation: 0,
-      backgroundColor: AppColor().milkWhite,
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: Container(
-            decoration: BoxDecoration(
-                color: AppColor().blueZodiac,
-                borderRadius: BorderRadius.circular(30)),
-            child: IconButton(
-              visualDensity: VisualDensity.compact,
-              onPressed: () => addItem(widget.palletActivityId),
-              icon: const Icon(
-                Icons.add,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-
     Widget customBottomBar = BottomAppBar(
       elevation: 5,
       height: 60,
@@ -365,6 +243,315 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
       ),
       bottomNavigationBar: customBottomBar,
     );
+  }
+
+  addItem(palletActivityId) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          backgroundColor: Colors.white,
+          elevation: 3.0,
+          title: const Center(
+            child: Text(
+              'Fill the item form',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 10, bottom: 10),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RawAutocomplete<String>(
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text.isEmpty) {
+                        return const Iterable<String>.empty();
+                      } else {
+                        return autoCompleteCustName.where(
+                          (String custName) => custName
+                              .toLowerCase()
+                              .contains(textEditingValue.text.toLowerCase()),
+                        );
+                      }
+                    },
+                    fieldViewBuilder: (
+                      context,
+                      textEditingController,
+                      focusNode,
+                      onFieldSubmitted,
+                    ) {
+                      return TextFormField(
+                        controller: textEditingController,
+                        cursorHeight: 22,
+                        style: const TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                        decoration: customTextFormFieldDeco(
+                          'Enter Customer Name',
+                        ),
+                        validator: (value) {
+                          custNameController = textEditingController;
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter customer name';
+                          }
+                          return null;
+                        },
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        focusNode: focusNode,
+                      );
+                    },
+                    optionsViewBuilder: (context, onSelected, options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          child: SizedBox(
+                            width: 245,
+                            height: 200,
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final String option = options.elementAt(
+                                  index,
+                                );
+
+                                return ListTile(
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                      color: Colors.grey.shade100,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  title: Text(option),
+                                  onTap: () => onSelected(option),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: itemQuantityController,
+                    cursorHeight: 22,
+                    style: const TextStyle(fontSize: 16),
+                    textAlign: TextAlign.center,
+                    decoration: customTextFormFieldDeco('Enter Quantity'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter quantity';
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 40),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                backgroundColor: AppColor().blueZodiac,
+              ),
+              onPressed: () => saveItems(palletActivityId),
+              child: Text(
+                "Save Items",
+                style: TextStyle(
+                  color: AppColor().milkWhite,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 40),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(color: Colors.blue.shade600, width: 0.8),
+                ),
+                backgroundColor: AppColor().milkWhite,
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(0);
+                reset();
+              },
+              child: Text(
+                "Cancel",
+                style: TextStyle(
+                  color: Colors.blue.shade600,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  saveItems(int palletActivityId) {
+    if (!_formKey.currentState!.validate()) {
+      reset();
+      return;
+    }
+
+    var item = activityDetailItem.firstWhere(
+      (element) => element.customerName == custNameController.text,
+      orElse: () => PalletActivityDetail.empty(),
+    );
+
+    if (!item.isEmpty()) {
+      customShowToast(
+        context,
+        "The item already in the table",
+        Colors.red.shade300,
+        false,
+      );
+
+      reset();
+      return;
+    }
+
+    // Check if customer name is in the autocomplete
+    int custId = 0;
+    int index = autoCompleteCustName.indexOf(custNameController.text);
+    if (index >= 0) {
+      custId = customerIds[index];
+    }
+
+    String name = custNameController.text;
+    int qty = int.parse(itemQuantityController.text);
+    ApiServices.pallet.addItem(custId, name, qty, palletActivityId).then(
+      (value) {
+        if (value == 0) {
+          customShowToast(
+            context,
+            'Failed to add item. Please try again.',
+            Colors.red.shade300,
+            false,
+          );
+          return;
+        }
+
+        reset();
+        Navigator.of(context).pop();
+        customShowToast(
+          context,
+          'Successfully Add Item.',
+          Colors.green.shade300,
+          false,
+        );
+
+        activityDetailItem.add((PalletActivityDetail(
+          palletActivityDetailId: value,
+          palletActivityId: palletActivityId,
+          customerId: custId,
+          customerName: name,
+          qty: qty,
+        )));
+
+        setState(() {});
+      },
+    );
+  }
+
+  reset() {
+    custNameController.clear();
+    itemQuantityController.clear();
+  }
+
+  _updateItem(
+    int customerId,
+    String customerName,
+    int qty,
+    int palletActivityId,
+    int palletActivityDetailId,
+  ) async {
+    var res = await ApiServices.pallet.updateItem(
+      customerId,
+      customerName,
+      qty,
+      palletActivityId,
+      palletActivityDetailId,
+    );
+    if (mounted) {
+      if (res != true) {
+        customShowToast(
+          context,
+          'Failed to update the item. Please try again.',
+          Colors.red.shade300,
+          false,
+        );
+        return;
+      }
+      Navigator.of(context).pop();
+      customShowToast(
+        context,
+        'Item updated successfully.',
+        Colors.green.shade300,
+        false,
+      );
+      return;
+    }
+    setState(() {
+      activityDetailItem.add(
+        PalletActivityDetail(
+            palletActivityDetailId: palletActivityDetailId,
+            palletActivityId: palletActivityId,
+            customerId: customerId,
+            customerName: customerName,
+            qty: qty),
+      );
+    });
+  }
+
+  _deleteItem(
+    int index,
+    int palletActivityDetailId,
+    int palletActivityId,
+  ) async {
+    var res = await ApiServices.pallet.deleteItem(
+      palletActivityDetailId,
+      palletActivityId,
+    );
+    if (mounted) {
+      if (res != true) {
+        customShowToast(
+          context,
+          'Failed to delete the item. Please try again.',
+          Colors.red.shade300,
+          false,
+        );
+        return;
+      }
+      Navigator.of(context).pop();
+      customShowToast(
+        context,
+        ' Item deleted successfully.',
+        Colors.green.shade300,
+        false,
+      );
+    }
+    setState(() {
+      activityDetailItem.removeAt(index);
+    });
   }
 
   updateItem(index) => showDialog(
@@ -469,204 +656,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
         },
       );
 
-  addItem(palletActivityId) => showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog(
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            backgroundColor: Colors.white,
-            elevation: 3.0,
-            title: const Center(
-              child: Text(
-                'Fill the item form',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            content: Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 10),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    RawAutocomplete<String>(
-                      optionsBuilder: (TextEditingValue textEditingValue) {
-                        if (textEditingValue.text.isEmpty) {
-                          return const Iterable<String>.empty();
-                        } else {
-                          return Constant.custNameTest.where(
-                              (String custName) => custName
-                                  .toLowerCase()
-                                  .contains(
-                                      textEditingValue.text.toLowerCase()));
-                        }
-                      },
-                      fieldViewBuilder: (context, textEditingController,
-                          focusNode, onFieldSubmitted) {
-                        return TextFormField(
-                          controller: textEditingController,
-                          cursorHeight: 22,
-                          style: const TextStyle(fontSize: 16),
-                          textAlign: TextAlign.center,
-                          decoration:
-                              customTextFormFieldDeco('Enter Customer Name'),
-                          validator: (value) {
-                            custNameController = textEditingController;
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter customer name';
-                            }
-                            return null;
-                          },
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          focusNode: focusNode,
-                        );
-                      },
-                      optionsViewBuilder: (context, onSelected, options) {
-                        return Align(
-                          alignment: Alignment.topLeft,
-                          child: Material(
-                            child: SizedBox(
-                              width: 245,
-                              height: 200,
-                              child: ListView.builder(
-                                padding: EdgeInsets.zero,
-                                itemCount: options.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  final String option =
-                                      options.elementAt(index);
-                                  return ListTile(
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                        color: Colors.grey.shade100,
-                                        width: 1,
-                                      ),
-                                    ),
-                                    title: Text(option),
-                                    onTap: () {
-                                      onSelected(option);
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: itemQuantityController,
-                      cursorHeight: 22,
-                      style: const TextStyle(fontSize: 16),
-                      textAlign: TextAlign.center,
-                      decoration: customTextFormFieldDeco('Enter Quantity'),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter quantity';
-                        }
-                        return null;
-                      },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                ),
-              ),
-            ),
-            actions: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 40),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  backgroundColor: AppColor().blueZodiac,
-                ),
-                onPressed: () => _validateAddItem(palletActivityId),
-                child: Text(
-                  "Save Items",
-                  style: TextStyle(
-                    color: AppColor().milkWhite,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 40),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(
-                      color: Colors.blue.shade600,
-                      width: 0.8,
-                    ),
-                  ),
-                  backgroundColor: AppColor().milkWhite,
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  reset();
-                },
-                child: Text(
-                  "Cancel",
-                  style: TextStyle(
-                    color: Colors.blue.shade600,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      );
-
-  // Check either the item already in the table or not
-  _validateAddItem(palletActivityId) async {
-    if (_formKey.currentState!.validate()) {
-      Iterable<PalletActivityDetail> contain = [];
-      int custId = 0;
-
-      for (var item in activityDetailItem) {
-        if (item.customerName == custNameController.text) {
-          custId = item.customerId;
-        } else {
-          custId = 0;
-        }
-      }
-
-      if (custId != 0) {
-        contain =
-            activityDetailItem.where((element) => element.customerId == custId);
-      }
-
-      if (contain.isEmpty) {
-        await _addItem(
-          custId,
-          custNameController.text,
-          int.parse(itemQuantityController.text),
-          palletActivityId,
-        );
-      } else {
-        customShowToast(
-          context,
-          "The item already in the table",
-          Colors.red.shade300,
-          false,
-        );
-      }
-      reset();
-    }
-  }
-
   deleteItem(index) => showDialog(
         context: context,
         barrierDismissible: true,
@@ -714,9 +703,4 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
           );
         },
       );
-
-  void reset() {
-    custNameController.clear();
-    itemQuantityController.clear();
-  }
 }

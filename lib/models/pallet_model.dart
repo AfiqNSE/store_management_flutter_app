@@ -224,11 +224,7 @@ class Attachment {
 class PalletNotifier extends ChangeNotifier {
   Map<int, Pallet> _pallets = {};
 
-  final List<PalletActivityDetail> _activityDetailItems = [];
-
   Map<int, Pallet> get pallets => _pallets;
-
-  List<PalletActivityDetail> get items => _activityDetailItems;
 
   initialize() async {
     List<dynamic> res = await ApiServices.pallet.all();
@@ -251,37 +247,5 @@ class PalletNotifier extends ChangeNotifier {
 
     _pallets[id] = Pallet.fromMap(res);
     notifyListeners();
-  }
-
-  addItem(int palletActivityId, PalletActivityDetail item) {
-    if (_pallets.containsKey(palletActivityId)) {
-      _pallets[palletActivityId]!.items!.add(item);
-      notifyListeners();
-    }
-  }
-
-  updateItem(
-    int palletActivityId,
-    int index,
-    PalletActivityDetail updatedItem,
-  ) {
-    if (_pallets.containsKey(palletActivityId) &&
-        index > 0 &&
-        index < _pallets[palletActivityId]!.items!.length) {
-      _pallets[palletActivityId]!.items![index] = updatedItem;
-      notifyListeners();
-    }
-  }
-
-  delete(
-    int palletActivityId,
-    int index,
-  ) {
-    if (_pallets.containsKey(palletActivityId) &&
-        index > 0 &&
-        index < _pallets[palletActivityId]!.items!.length) {
-      _pallets[palletActivityId]!.items!.removeAt(index);
-      notifyListeners();
-    }
   }
 }

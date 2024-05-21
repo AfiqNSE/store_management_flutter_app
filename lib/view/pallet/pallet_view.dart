@@ -8,7 +8,7 @@ import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 
-// TODO: Search bar need to be update to function properly.
+// TODO: Search bar need to be update to function properly, hold it right now.
 
 class PalletView extends StatefulWidget {
   const PalletView({super.key});
@@ -34,7 +34,7 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    Provider.of<PalletNotifier>(context, listen: false).initialize();
+    // Provider.of<PalletNotifier>(context, listen: false).initialize();
   }
 
   @override
@@ -99,8 +99,7 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                       ),
                       Row(children: [
                         GestureDetector(
-                          onTap: () =>
-                              showQuickItemInfo(context, Constant.itemTest),
+                          onTap: () => showQuickItemInfo(context, pallet.items),
                           child: const Icon(
                             FluentIcons.clipboard_task_list_ltr_24_filled,
                             size: 30,
@@ -168,29 +167,29 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
         appBar: AppBar(
           title: Padding(
             padding: const EdgeInsets.only(left: 5.0),
-            child: searchMode ? searchBar : appBarTitle,
+            child: appBarTitle,
           ),
           backgroundColor: AppColor().milkWhite,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: (!searchMode)
-                  ? IconButton(
-                      onPressed: () => setState(() => searchMode = true),
-                      icon: const Icon(FluentIcons.search_24_filled, size: 28),
-                    )
-                  : TextButton(
-                      onPressed: () => setState(() => searchMode = false),
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: AppColor().yaleBlue,
-                        ),
-                      ),
-                    ),
-            ),
-          ],
+          // actions: [
+          //   Padding(
+          //     padding: const EdgeInsets.only(right: 16),
+          //     child: (!searchMode)
+          //         ? IconButton(
+          //             onPressed: () => setState(() => searchMode = true),
+          //             icon: const Icon(FluentIcons.search_24_filled, size: 28),
+          //           )
+          //         : TextButton(
+          //             onPressed: () => setState(() => searchMode = false),
+          //             child: Text(
+          //               'Cancel',
+          //               style: TextStyle(
+          //                 fontWeight: FontWeight.w600,
+          //                 color: AppColor().yaleBlue,
+          //               ),
+          //             ),
+          //           ),
+          //   ),
+          // ],
           bottom: TabBar(
             labelColor: AppColor().blueZodiac,
             indicatorColor: AppColor().blueZodiac,
@@ -217,74 +216,99 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
             ],
           ),
         ),
-        body: Consumer<PalletNotifier>(builder: (context, value, child) {
-          List<Pallet> allPalletList =
-              value.pallets.entries.map((e) => e.value).toList();
+        body: FutureBuilder<void>(
+          future:
+              Provider.of<PalletNotifier>(context, listen: false).initialize(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    color: AppColor().blueZodiac,
+                  ),
+                  const Text('Loading data..'),
+                ],
+              ));
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text('Error: ${snapshot.error}'),
+              );
+            } else {
+              return Consumer<PalletNotifier>(
+                builder: (context, value, child) {
+                  List<Pallet> allPalletList =
+                      value.pallets.entries.map((e) => e.value).toList();
 
-          List<Pallet> inBoundPalletList = List.empty(growable: true);
-          List<Pallet> outBoundPalletList = List.empty(growable: true);
+                  List<Pallet> inBoundPalletList = List.empty(growable: true);
+                  List<Pallet> outBoundPalletList = List.empty(growable: true);
 
-          for (var i = 0; i < allPalletList.length; i++) {
-            if (allPalletList[i].palletLocation == "inbound") {
-              inBoundPalletList.add(allPalletList[i]);
+                  for (var i = 0; i < allPalletList.length; i++) {
+                    if (allPalletList[i].palletLocation == "inbound") {
+                      inBoundPalletList.add(allPalletList[i]);
+                    }
+                    if (allPalletList[i].palletLocation == "outbound") {
+                      outBoundPalletList.add(allPalletList[i]);
+                    }
+                  }
+
+                  return TabBarView(
+                    controller: _tabController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: <Widget>[
+                      Container(
+                        color: AppColor().milkWhite,
+                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                        child: allPalletList.isEmpty
+                            ? const Center(child: Text('No pallets for today'))
+                            : ListView.builder(
+                                itemCount: allPalletList.length,
+                                itemBuilder: ((context, index) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 5),
+                                      child: createPalletCard(
+                                        allPalletList[index],
+                                      ),
+                                    )),
+                              ),
+                      ),
+                      Container(
+                        color: AppColor().milkWhite,
+                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                        child: inBoundPalletList.isEmpty
+                            ? const Center(child: Text('No inBound pallet'))
+                            : ListView.builder(
+                                itemCount: inBoundPalletList.length,
+                                itemBuilder: ((context, index) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 5),
+                                      child: createPalletCard(
+                                        inBoundPalletList[index],
+                                      ),
+                                    )),
+                              ),
+                      ),
+                      Container(
+                        color: AppColor().milkWhite,
+                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                        child: outBoundPalletList.isEmpty
+                            ? const Center(child: Text('No outBound Pallet'))
+                            : ListView.builder(
+                                itemCount: outBoundPalletList.length,
+                                itemBuilder: ((context, index) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 5),
+                                      child: createPalletCard(
+                                        outBoundPalletList[index],
+                                      ),
+                                    )),
+                              ),
+                      ),
+                    ],
+                  );
+                },
+              );
             }
-            if (allPalletList[i].palletLocation == "outbound") {
-              outBoundPalletList.add(allPalletList[i]);
-            }
-          }
-
-          return TabBarView(
-            controller: _tabController,
-            physics: const NeverScrollableScrollPhysics(),
-            children: <Widget>[
-              Container(
-                color: AppColor().milkWhite,
-                padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                child: allPalletList.isEmpty
-                    ? const Center(child: Text('No pallets for today'))
-                    : ListView.builder(
-                        itemCount: allPalletList.length,
-                        itemBuilder: ((context, index) => Padding(
-                              padding: const EdgeInsets.only(bottom: 5),
-                              child: createPalletCard(
-                                allPalletList[index],
-                              ),
-                            )),
-                      ),
-              ),
-              Container(
-                color: AppColor().milkWhite,
-                padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                child: inBoundPalletList.isEmpty
-                    ? const Center(child: Text('No inBound pallet'))
-                    : ListView.builder(
-                        itemCount: inBoundPalletList.length,
-                        itemBuilder: ((context, index) => Padding(
-                              padding: const EdgeInsets.only(bottom: 5),
-                              child: createPalletCard(
-                                inBoundPalletList[index],
-                              ),
-                            )),
-                      ),
-              ),
-              Container(
-                color: AppColor().milkWhite,
-                padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                child: outBoundPalletList.isEmpty
-                    ? const Center(child: Text('No outBound Pallet'))
-                    : ListView.builder(
-                        itemCount: outBoundPalletList.length,
-                        itemBuilder: ((context, index) => Padding(
-                              padding: const EdgeInsets.only(bottom: 5),
-                              child: createPalletCard(
-                                outBoundPalletList[index],
-                              ),
-                            )),
-                      ),
-              ),
-            ],
-          );
-        }),
+          },
+        ),
       ),
     );
   }

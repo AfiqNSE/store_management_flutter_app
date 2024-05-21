@@ -279,9 +279,11 @@ class ApiPallet {
         'palletActivityId': palletActivityId,
       }),
     );
+
     if (res.statusCode != HttpStatus.ok) {
       return false;
     }
+
     return true;
   }
 

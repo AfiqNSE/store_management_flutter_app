@@ -727,83 +727,79 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
     );
   }
 
-  _deleteItem(
-    int index,
-    int palletActivityDetailId,
-    int palletActivityId,
-  ) async {
-    var res = await ApiServices.pallet.deleteItem(
-      palletActivityDetailId,
-      palletActivityId,
-    );
-    if (mounted) {
-      if (res != true) {
-        customShowToast(
-          context,
-          'Failed to delete the item. Please try again.',
-          Colors.red.shade300,
-          false,
+  deleteItem(index) {
+    return showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return AlertDialog(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          backgroundColor: Colors.white,
+          elevation: 3.0,
+          title: const Center(
+            child: Text(
+              'Confirm to delete this item?',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: AppColor().yaleBlue),
+              ),
+            ),
+            TextButton(
+              onPressed: () => _deleteItem(index),
+              child: Text(
+                'Confirm',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: AppColor().yaleBlue,
+                ),
+              ),
+            ),
+          ],
         );
-        return;
-      }
-      Navigator.of(context).pop();
-      customShowToast(
-        context,
-        ' Item deleted successfully.',
-        Colors.green.shade300,
-        false,
-      );
-    }
-    setState(() {
-      activityDetailItem.removeAt(index);
-    });
+      },
+    );
   }
 
-  deleteItem(index) => showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (context) {
-          return AlertDialog(
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            backgroundColor: Colors.white,
-            elevation: 3.0,
-            title: const Center(
-              child: Text(
-                'Confirm to delete this item?',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(
-                    color: AppColor().yaleBlue,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () => _deleteItem(
-                  index,
-                  activityDetailItem[index].palletActivityDetailId,
-                  widget.palletActivityId,
-                ),
-                child: Text(
-                  'Confirm',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: AppColor().yaleBlue,
-                  ),
-                ),
-              ),
-            ],
+  _deleteItem(int index) {
+    ApiServices.pallet
+        .deleteItem(
+      activityDetailItem[index].palletActivityDetailId,
+      widget.palletActivityId,
+    )
+        .then(
+      (value) {
+        if (value != true) {
+          customShowToast(
+            context,
+            'Failed to delete the item. Please try again.',
+            Colors.red.shade300,
+            false,
           );
-        },
-      );
+
+          return;
+        }
+
+        Navigator.of(context).pop();
+        customShowToast(
+          context,
+          ' Item deleted successfully.',
+          Colors.green.shade300,
+          false,
+        );
+
+        activityDetailItem.removeAt(index);
+
+        reset();
+        setState(() {});
+      },
+    );
+  }
 }

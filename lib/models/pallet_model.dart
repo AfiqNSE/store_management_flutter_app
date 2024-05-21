@@ -254,6 +254,32 @@ class PalletNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  jobInitialize() async {
+    try {
+      List<dynamic> assignRes = await ApiServices.pallet.fetchAssignedJob();
+      List<dynamic> confirmRes = await ApiServices.pallet.fetchConfirmedJob();
+      List<dynamic> loadingRes = await ApiServices.pallet.fetchLoadingJob();
+
+      final allJobs = [
+        if (assignRes.isNotEmpty) ...assignRes,
+        if (confirmRes.isNotEmpty) ...confirmRes,
+        if (loadingRes.isNotEmpty) ...loadingRes,
+      ];
+
+      if (allJobs.isNotEmpty) {
+        _pallets = {
+          for (var v in allJobs) v["palletActivityId"]: Pallet.fromMap(v)
+        };
+      } else {
+        _pallets = {};
+      }
+
+      notifyListeners();
+    } catch (e) {
+      // print(e);
+    }
+  }
+
   update(int id) async {
     var res = await ApiServices.pallet.getById(id);
 

@@ -1,21 +1,17 @@
-import 'dart:io';
-
-import 'dart:ui' as ui;
+import 'dart:typed_data';
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:store_management_system/components/pallet_assign_job_form.dart';
+import 'package:store_management_system/components/pallet_signature_component.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/view/pallet/pallet_table.dart';
-import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
 
 //TODO: Change snackbar to customToast
 
@@ -38,14 +34,12 @@ class PalletDetailsView extends StatefulWidget {
 
 class _PalletDetailsViewState extends State<PalletDetailsView> {
   final GlobalKey<AssignJobFormState> assignKey = GlobalKey();
-  final GlobalKey<SfSignaturePadState> signaturePadKey = GlobalKey();
 
   Pallet? pallet;
   int itemTotal = 0;
 
   List<dynamic> drivers = List.empty();
 
-  bool _signature = false;
   bool expanded = false;
 
   bool loading = false;
@@ -66,7 +60,6 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         );
       }
     });
-
     loadDrivers();
   }
 
@@ -98,12 +91,24 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     drivers = await ApiServices.user.getDrivers();
   }
 
+  Future<Image?> _signatureImage(String? signaturePath) async {
+    Uint8List? imageBytes =
+        await ApiServices.pallet.getSignatureImage(signaturePath!);
+
+    if (imageBytes != null) {
+      return Image.memory(imageBytes);
+    } else {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Get pallet from provider
     if (widget.palletActivityId != 0) {
       pallet =
           Provider.of<PalletNotifier>(context).pallets[widget.palletActivityId];
+      itemTotal = pallet!.items.fold(0, (sum, item) => sum + item.qty);
     }
 
     // Create section for pallet general info
@@ -218,7 +223,39 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         ),
         children: [
           Container(
-            child: pallet == null ? null : const Text('Signature'),
+            child: pallet == null
+                ? null
+                : pallet!.signature.attachmentFullPath != ""
+                    ? FutureBuilder<Image?>(
+                        future: _signatureImage(
+                            pallet!.signature.attachmentFullPath),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Column(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 300,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: snapshot.data!.image,
+                                        fit: BoxFit.fitWidth,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                const Text('Signed by: '),
+                              ],
+                            );
+                          }
+                          return const Text('Signature Error');
+                        },
+                      )
+                    : const Text('No Signature Available'),
           ),
           const SizedBox(height: 20),
         ],
@@ -293,13 +330,17 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   child: TextButton.icon(
                     onPressed: (pallet == null)
                         ? null
-                        : () => Navigator.of(context).push(SlideRoute(
+                        : () => Navigator.of(context)
+                                .push(SlideRoute(
                               page: ActivityDetailsTableView(
                                 palletActivityId: pallet!.palletActivityId,
                                 activityItems: pallet!.items,
                               ),
                               toRight: true,
-                            )),
+                            ))
+                                .then((_) {
+                              setState(() {});
+                            }),
                     icon: const Icon(
                       FluentIcons.edit_24_filled,
                       color: Colors.white,
@@ -425,8 +466,14 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   : AppColor().blueZodiac,
               elevation: pallet?.status != 'Loading To Truck' ? 0 : 3,
             ),
-            onPressed: pallet?.status == 'Loading To Truck'
-                ? _signatureBox
+            onPressed: pallet!.status == 'Loading To Truck'
+                ? () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => PalletSignature(
+                          palletNo: pallet!.palletNo,
+                          palletActivityId: pallet!.palletActivityId),
+                    ));
+                  }
                 : () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -765,180 +812,5 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         );
       },
     );
-  }
-
-  // Create Signature pop up box
-  Future<void> _signatureBox() {
-    return showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: '',
-      pageBuilder: (context, animation1, animation2) {
-        return Container();
-      },
-      transitionBuilder: (context, a1, a2, widget) {
-        return ScaleTransition(
-          scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
-          child: FadeTransition(
-            opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
-            child: AlertDialog(
-              elevation: 3.0,
-              backgroundColor: AppColor().milkWhite,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(10),
-                ),
-              ),
-              title: const Center(
-                child: Text(
-                  'Pallet Signature',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-              content: SizedBox(
-                height: 280,
-                width: double.maxFinite,
-                child: SfSignaturePad(
-                  key: signaturePadKey,
-                  minimumStrokeWidth: 1,
-                  maximumStrokeWidth: 3,
-                  strokeColor: Colors.blue,
-                  backgroundColor: Colors.white,
-                  onDrawEnd: () {
-                    _signature = true;
-                  },
-                ),
-              ),
-              actions: <Widget>[
-                Column(
-                  children: [
-                    ListTile(
-                      title: Text('Clear Signature',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.blue.shade500,
-                            fontWeight: FontWeight.w600,
-                          )),
-                      onTap: () {
-                        _signature = false;
-                        signaturePadKey.currentState!.clear();
-                      },
-                    ),
-                    Divider(
-                      thickness: 2.0,
-                      indent: 20.0,
-                      endIndent: 20.0,
-                      height: 0.1,
-                      color: Colors.grey.shade300,
-                    ),
-                    ListTile(
-                      title: Text(
-                        'Submit Signature',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 17,
-                          color: Colors.blue.shade500,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      onTap: () async {
-                        if (_signature) {
-                          await _sendSignature(pallet!.palletActivityId);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text(
-                                  'Please sign the pallet before submit.'),
-                              backgroundColor: Colors.red.shade300,
-                              duration: const Duration(seconds: 5),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    Divider(
-                      thickness: 2.0,
-                      indent: 20.0,
-                      endIndent: 20.0,
-                      height: 0.1,
-                      color: Colors.grey.shade300,
-                    ),
-                    ListTile(
-                      title: const Text(
-                        'Cancel',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                        _signature = false;
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  _sendSignature(int palletActivityId) async {
-    Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Sending the signature..'),
-        backgroundColor: Colors.blue.shade300,
-        duration: const Duration(seconds: 5),
-      ),
-    );
-
-    // Save the signature as a file
-    ui.Image signature = await signaturePadKey.currentState!.toImage();
-
-    ByteData? byteData =
-        await signature.toByteData(format: ui.ImageByteFormat.png);
-    Uint8List signatureBytes = byteData!.buffer.asUint8List();
-
-    //Create temporary directory to store the signature image
-    final tempDir = await getTemporaryDirectory();
-    File signatureFile = File('${tempDir.path}/${pallet!.palletNo}.jpeg');
-    await signatureFile.writeAsBytes(signatureBytes);
-
-    var res = await ApiServices.signature
-        .sendSignature(palletActivityId, signatureFile, isAccess);
-
-    if (mounted) {
-      if (res.statusCode != HttpStatus.ok) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Failed to send signature. Please try again.'),
-            backgroundColor: Colors.red.shade300,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-        return;
-      } else {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Successfully sign the pallet.'),
-            backgroundColor: Colors.green.shade300,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-        return;
-      }
-    }
   }
 }

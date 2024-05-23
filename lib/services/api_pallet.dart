@@ -114,7 +114,7 @@ class ApiPallet {
     return true;
   }
 
-  Future<bool> confirmJob(int palletActivityId) async {
+  Future<bool> confirm(palletActivityId) async {
     Response res = await ApiServices.call(
       Method.patch,
       Uri.parse("$path/confirm"),
@@ -159,25 +159,40 @@ class ApiPallet {
     return true;
   }
 
-  Future<dynamic> fetchAssignedJob() async {
-    Response res =
-        await ApiServices.call(Method.get, Uri.parse("$path/assigned"));
+  Future<List> fetchAssignedJob() async {
+    Response res = await ApiServices.call(
+      Method.get,
+      Uri.parse("$path/assigned"),
+    );
 
     if (res.statusCode != HttpStatus.ok) {
       return List.empty();
     }
 
-    return json.decode(res.body);
+    var body = json.decode(res.body);
+    if (body == null) {
+      return List.empty();
+    }
+
+    return body;
   }
 
-  Future<dynamic> fetchConfirmedJob() async {
-    Response res =
-        await ApiServices.call(Method.get, Uri.parse("$path/confirmed"));
+  Future<List> fetchConfirmedJob() async {
+    Response res = await ApiServices.call(
+      Method.get,
+      Uri.parse("$path/confirmed"),
+    );
 
     if (res.statusCode != HttpStatus.ok) {
       return List.empty();
     }
-    return json.decode(res.body);
+
+    var body = json.decode(res.body);
+    if (body == null) {
+      return List.empty();
+    }
+
+    return body;
   }
 
   Future<dynamic> fetchLoadingJob() async {
@@ -195,10 +210,16 @@ class ApiPallet {
     if (res.statusCode != HttpStatus.ok) {
       return List.empty();
     }
-    return json.decode(res.body);
+
+    var body = json.decode(res.body);
+    if (body == null) {
+      return List.empty();
+    }
+
+    return body;
   }
 
-  Future<bool> addItem(
+  Future<int> addItem(
     int customerId,
     String customerName,
     int qty,
@@ -214,10 +235,12 @@ class ApiPallet {
         'palletActivityId': palletActivityId,
       }),
     );
+
     if (res.statusCode != HttpStatus.ok) {
-      return false;
+      return 0;
     }
-    return true;
+
+    return jsonDecode(res.body);
   }
 
   Future<bool> updateItem(
@@ -256,9 +279,11 @@ class ApiPallet {
         'palletActivityId': palletActivityId,
       }),
     );
+
     if (res.statusCode != HttpStatus.ok) {
       return false;
     }
+
     return true;
   }
 

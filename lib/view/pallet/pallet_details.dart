@@ -87,7 +87,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
       err = 1;
     } else {
       pallet = Pallet.fromMap(res);
-      itemTotal = pallet!.items!.fold(0, (sum, item) => sum + item.qty);
+      itemTotal = pallet!.items.fold(0, (sum, item) => sum + item.qty);
     }
 
     setState(() {});
@@ -218,7 +218,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         ),
         children: [
           Container(
-            child: pallet == null ? null : Text('Signature'),
+            child: pallet == null ? null : const Text('Signature'),
           ),
           const SizedBox(height: 20),
         ],
@@ -236,7 +236,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         ],
         rows: [
           if (pallet != null)
-            ...pallet!.items!
+            ...pallet!.items
                 .map(
                   (item) => DataRow(cells: [
                     DataCell(
@@ -279,44 +279,39 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
           borderRadius: BorderRadius.circular(10),
         ),
         title: (expanded)
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Items List:',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                const Text(
+                  'Items List:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColor().blueZodiac,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                        color: AppColor().blueZodiac,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: TextButton.icon(
-                      onPressed: (pallet == null)
-                          ? null
-                          : () => Navigator.of(context).push(SlideRoute(
-                                page: ActivityDetailsTableView(
-                                  palletActivityId: pallet!.palletActivityId,
-                                  activityItems: pallet!.items,
-                                ),
-                                toRight: true,
-                              )),
-                      icon: const Icon(
-                        FluentIcons.edit_24_filled,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                      label: const Text(
-                        'Edit',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
-                      ),
+                  child: TextButton.icon(
+                    onPressed: (pallet == null)
+                        ? null
+                        : () => Navigator.of(context).push(SlideRoute(
+                              page: ActivityDetailsTableView(
+                                palletActivityId: pallet!.palletActivityId,
+                                activityItems: pallet!.items,
+                              ),
+                              toRight: true,
+                            )),
+                    icon: const Icon(
+                      FluentIcons.edit_24_filled,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    label: const Text(
+                      'Edit',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
-                ],
-              )
+                ),
+              ])
             : const Text(
                 'Items List:',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -324,11 +319,11 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 20, bottom: 20),
-            child: pallet!.items!.isNotEmpty
-                ? palletActivityItems
-                : const Center(
-                    child: Text('No pallet items available'),
-                  ),
+            child: pallet == null
+                ? null
+                : pallet!.items.isNotEmpty
+                    ? palletActivityItems
+                    : const Center(child: Text('No pallet items available')),
           )
         ],
       ),
@@ -425,12 +420,12 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(140, 50),
-              backgroundColor: (pallet!.status != 'Loading To Truck')
+              backgroundColor: (pallet?.status != 'Loading To Truck')
                   ? AppColor().greyGoose.withOpacity(0.8)
                   : AppColor().blueZodiac,
-              elevation: pallet!.status != 'Loading To Truck' ? 0 : 3,
+              elevation: pallet?.status != 'Loading To Truck' ? 0 : 3,
             ),
-            onPressed: pallet!.status == 'Loading To Truck'
+            onPressed: pallet?.status == 'Loading To Truck'
                 ? _signatureBox
                 : () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();

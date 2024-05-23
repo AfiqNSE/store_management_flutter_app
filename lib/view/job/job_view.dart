@@ -83,7 +83,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
   }
 
   confirmJob(int palletActivityId) async {
-    bool res = await ApiServices.pallet.confirmJob(palletActivityId);
+    bool res = await ApiServices.pallet.confirm(palletActivityId);
     if (mounted) {
       if (res != true) {
         customShowToast(

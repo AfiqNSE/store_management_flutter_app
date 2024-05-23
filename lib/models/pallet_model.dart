@@ -21,7 +21,7 @@ class Pallet {
   String? loadByUserName;
   String status;
   String palletLocation;
-  List<PalletActivityDetail>? items;
+  List<PalletActivityDetail> items;
   Attachment signature;
 
   Pallet({
@@ -120,7 +120,8 @@ class Pallet {
         "loadByUserName": loadByUserName,
         "status": status,
         "palletLocation": palletLocation,
-        "items": items?.map((item) => item.toMap()).toList(),
+        "items":
+            items.isNotEmpty ? items.map((item) => item.toMap()).toList() : [],
         "signature": Attachment(
           attachmentUrl: signature.attachmentUrl,
           attachmentFullPath: signature.attachmentFullPath,
@@ -147,7 +148,7 @@ class Pallet {
         loadByUserName == "" &&
         status == "" &&
         palletLocation == "" &&
-        items!.isEmpty &&
+        items.isEmpty &&
         signature.attachmentUrl == "" &&
         signature.attachmentFullPath == "" &&
         signature.createdByUserName == "";
@@ -188,6 +189,14 @@ class PalletActivityDetail {
         qty: map["qty"],
       );
 
+  factory PalletActivityDetail.empty() => PalletActivityDetail(
+        palletActivityDetailId: 0,
+        palletActivityId: 0,
+        customerId: 0,
+        customerName: "",
+        qty: 0,
+      );
+
   Map<String, dynamic> toMap() => {
         "palletActivityDetailId": palletActivityDetailId,
         "palletActivityId": palletActivityId,
@@ -195,6 +204,13 @@ class PalletActivityDetail {
         "customerName": customerName,
         "qty": qty,
       };
+
+  bool isEmpty() =>
+      palletActivityDetailId == 0 &&
+      palletActivityId == 0 &&
+      customerId == 0 &&
+      customerName == "" &&
+      qty == 0;
 }
 
 class Attachment {

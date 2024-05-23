@@ -51,13 +51,15 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     super.initState();
     loadPallet().then((value) {
       if (value != null && value > 0) {
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Pallet not found."),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
-          )),
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.of(context).pop();
+          customShowToast(
+            context,
+            "Pallet not found.",
+            Colors.red.shade300,
+            true,
+          );
+        });
       }
     });
     loadDrivers();
@@ -381,10 +383,16 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(150, 50),
-              backgroundColor: pallet?.palletLocation == "outbound"
+              backgroundColor: pallet == null
                   ? AppColor().greyGoose.withOpacity(0.8)
-                  : AppColor().blueZodiac,
-              elevation: pallet?.palletLocation == "outbound" ? 0 : 3,
+                  : pallet?.palletLocation == "outbound"
+                      ? AppColor().greyGoose.withOpacity(0.8)
+                      : AppColor().blueZodiac,
+              elevation: pallet == null
+                  ? 0
+                  : pallet?.palletLocation == "outbound"
+                      ? 0
+                      : 3,
             ),
             onPressed: pallet == null
                 ? null
@@ -461,12 +469,18 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(140, 50),
-              backgroundColor: (pallet?.status != 'Loading To Truck')
+              backgroundColor: pallet == null
                   ? AppColor().greyGoose.withOpacity(0.8)
-                  : AppColor().blueZodiac,
-              elevation: pallet?.status != 'Loading To Truck' ? 0 : 3,
+                  : pallet?.status != 'Loading To Truck'
+                      ? AppColor().greyGoose.withOpacity(0.8)
+                      : AppColor().blueZodiac,
+              elevation: pallet == null
+                  ? 0
+                  : pallet?.status != 'Loading To Truck'
+                      ? 0
+                      : 3,
             ),
-            onPressed: pallet!.status == 'Loading To Truck'
+            onPressed: pallet?.status == 'Loading To Truck'
                 ? () {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => PalletSignature(
@@ -475,15 +489,11 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                     ));
                   }
                 : () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
-                            'This pallet status need to be --Loading To Truck--'),
-                        backgroundColor: Colors.grey.shade600,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
+                    customShowToast(
+                        context,
+                        'This pallet status need to be "Loading To Truck"',
+                        Colors.yellow.shade700,
+                        true);
                   },
             icon: const Icon(
               FluentIcons.signature_24_filled,
@@ -507,7 +517,14 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
               backgroundColor: AppColor().blueZodiac,
               elevation: 3,
             ),
-            onPressed: pallet == null ? null : () {},
+            onPressed: pallet == null
+                ? null
+                : () => customShowToast(
+                      context,
+                      "This feature will be available soon",
+                      Colors.yellow.shade700,
+                      true,
+                    ),
             icon: const Icon(Icons.print_outlined, color: Colors.white),
             label: const Text(
               'Print',
@@ -673,35 +690,23 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
   }
 
   movePalletToOutBound() {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: const Text('Sending request...'),
-      backgroundColor: Colors.blue.shade300,
-      duration: const Duration(seconds: 5),
-    ));
-
     setState(() {
       reqLoading = true;
     });
 
     ApiServices.pallet.move(pallet!.palletActivityId).then((value) {
       if (!value) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: const Text(
+        customShowToast(
+            context,
             'Move pallet request failed. Please try again.',
-          ),
-          backgroundColor: Colors.red.shade300,
-          duration: const Duration(seconds: 5),
-        ));
+            Colors.red.shade300,
+            false);
       } else {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Move pallet request successfull.'),
-            backgroundColor: Colors.blue.shade300,
-            duration: const Duration(seconds: 5),
-          ),
+        customShowToast(
+          context,
+          'Move pallet request successfull.',
+          Colors.blue.shade300,
+          false,
         );
       }
 
@@ -709,6 +714,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         reqLoading = false;
       });
     });
+
+    Provider.of<PalletNotifier>(context, listen: false)
+        .move(pallet!.palletActivityId);
   }
 
   void _assignJob() {

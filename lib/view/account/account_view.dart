@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/global_utils.dart';
-import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
-import 'package:store_management_system/view/account/user_profile_view.dart';
 import 'package:store_management_system/view/login/login_view.dart';
 
 class AccountView extends StatefulWidget {
@@ -23,7 +21,7 @@ class _AccountViewState extends State<AccountView> {
         title: const Text(
           'My Account',
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 22,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -68,32 +66,20 @@ class _AccountViewState extends State<AccountView> {
                       Icons.manage_accounts_outlined,
                       size: 25,
                     ),
-                    title: const Text(
-                      "Account Information",
+                    title: Text(
+                      "Username",
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 15,
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
                       ),
                     ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios_outlined,
-                      size: 16,
-                    ),
-                    onTap: () {
-                      Navigator.of(context).push(SlideRoute(
-                          page: const UserProfile(), toRight: false));
-                    },
-                  ),
-                  Divider(
-                    color: Colors.grey.shade200,
-                  ),
-                  const SizedBox(height: 30),
-                  Text(
-                    "Need Help?",
-                    style: TextStyle(
-                      color: AppColor().yaleBlue,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                    subtitle: const Text(
+                      "Admin",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                   Divider(
@@ -102,65 +88,24 @@ class _AccountViewState extends State<AccountView> {
                   ListTile(
                     visualDensity: const VisualDensity(vertical: -4),
                     leading: const Icon(
-                      Icons.question_mark_outlined,
+                      Icons.supervisor_account_rounded,
                       size: 25,
                     ),
-                    title: const Text(
-                      "FAQ",
+                    title: Text(
+                      "Role",
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 15,
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
                       ),
                     ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios_outlined,
-                      size: 16,
-                    ),
-                    onTap: () {},
-                  ),
-                  Divider(
-                    color: Colors.grey.shade200,
-                  ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -4),
-                    leading: const Icon(
-                      Icons.sticky_note_2_sharp,
-                      size: 25,
-                    ),
-                    title: const Text(
-                      "Application Manual",
+                    subtitle: const Text(
+                      "Administrator",
                       style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
                       ),
                     ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios_outlined,
-                      size: 16,
-                    ),
-                    onTap: () {},
-                  ),
-                  Divider(
-                    color: Colors.grey.shade200,
-                  ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -4),
-                    leading: const Icon(
-                      Icons.question_answer_outlined,
-                      size: 25,
-                    ),
-                    title: const Text(
-                      "Feedback",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 15,
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios_outlined,
-                      size: 16,
-                    ),
-                    onTap: () {},
                   ),
                   Divider(
                     color: Colors.grey.shade200,

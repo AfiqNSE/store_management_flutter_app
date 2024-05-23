@@ -5,6 +5,7 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:store_management_system/components/search_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/models/summary.dart';
@@ -14,7 +15,6 @@ import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/home/notification_view.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 import 'package:store_management_system/view/pallet/pallet_form.dart';
-import 'package:store_management_system/view/search/search_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -24,6 +24,11 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  final TextEditingController searchController = TextEditingController();
+
+  List<dynamic> pallets = List.empty();
+  List<dynamic> searchPallet = List.empty();
+
   late String formattedDate;
   String greetingMessage = "";
 
@@ -116,15 +121,17 @@ class _HomeViewState extends State<HomeView> {
             ),
             createQuickAction(
               'Search',
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const SearchPalletView()));
-              },
+              onTap: search,
               icon: FluentIcons.search_24_filled,
             ),
             createQuickAction(
               'More',
-              onTap: () {},
+              onTap: () => customShowToast(
+                context,
+                "This feature will be available soon.",
+                Colors.yellow.shade700,
+                true,
+              ),
               icon: FluentIcons.grid_dots_24_filled,
             ),
           ],
@@ -350,6 +357,29 @@ class _HomeViewState extends State<HomeView> {
       }
     }
   }
+
+  void search() => showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return AlertDialog(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            backgroundColor: AppColor().greyGoose.withOpacity(0.3),
+            elevation: 3.0,
+            insetPadding: EdgeInsets.zero,
+            contentPadding: EdgeInsets.zero,
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            content: PalletSearch(
+              controller: searchController,
+              onSearch: (value) {
+                setState(() {});
+              },
+            ),
+          );
+        },
+      );
 
   Widget createSummaryCard(String text, int value) {
     return Padding(

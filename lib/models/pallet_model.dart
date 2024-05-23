@@ -264,4 +264,9 @@ class PalletNotifier extends ChangeNotifier {
     _pallets[id] = Pallet.fromMap(res);
     notifyListeners();
   }
+
+  move(int id) {
+    _pallets[id]?.palletLocation = "outBound";
+    notifyListeners();
+  }
 }

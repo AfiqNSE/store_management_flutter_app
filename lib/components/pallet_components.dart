@@ -50,11 +50,6 @@ Widget customTextErr(String text) => Padding(
       ),
     );
 
-String formatedCustName(String custName) {
-  String formatText = "\u2022 ${custName.replaceRange(20, null, "...")}";
-  return formatText;
-}
-
 String formatDateString(String date) {
   try {
     DateTime parsedDate = DateTime.parse(date);
@@ -92,7 +87,7 @@ InputDecoration customTextFormFieldDeco(
 
 Future showQuickItemInfo(
   BuildContext context,
-  List<ItemTest>? activityDetailItem,
+  List<PalletActivityDetail> itemList,
 ) {
   return showGeneralDialog(
     context: context,
@@ -137,34 +132,36 @@ Future showQuickItemInfo(
                   ),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(15, 20, 15, 0),
-                    child: activityDetailItem!.isEmpty
+                    child: itemList.isEmpty
                         ? const Center(
-                            child: Text("\u2022 No Pallet Items Available"),
+                            child: Text("No Pallet Items Available"),
                           )
                         : ListView.builder(
                             padding: const EdgeInsets.only(bottom: 10),
-                            shrinkWrap: true,
-                            itemCount: activityDetailItem.length,
+                            itemCount: itemList.length,
                             itemBuilder: ((context, index) => Column(
                                   children: [
                                     Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                          formatedCustName(
-                                              activityDetailItem[index]
-                                                  .customerName),
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
+                                        Expanded(
+                                          flex: 3,
+                                          child: Text(
+                                            "\u2022 ${itemList[index].customerName}",
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        Text(
-                                          "[Qty:${activityDetailItem[index].qty}]",
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
+                                        Expanded(
+                                          flex: 1,
+                                          child: Text(
+                                            "[Qty:${itemList[index].qty}]",
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -404,26 +401,3 @@ Widget createPalletDetails(String detail, String? value, {int flex = 2}) {
     ),
   ]);
 }
-
-// No need for current version
-// Widget imgSliderContent() {
-//   return Container(
-//     child: CarouselSlider(
-//         items: [1, 2, 3].map((e) {
-//           return Container(
-//             width: MediaQuery.of(context).size.width,
-//             decoration: const BoxDecoration(
-//               color: Color.fromRGBO(102, 153, 204, 1),
-//             ),
-//             child: Center(
-//               child: Text('Image $e'),
-//             ),
-//           );
-//         }).toList(),
-//         options: CarouselOptions(
-//           autoPlay: true,
-//           autoPlayInterval: const Duration(seconds: 4),
-//           height: 200,
-//         )),
-//   );
-// }

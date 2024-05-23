@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:store_management_system/services/api_services.dart';
+import 'package:store_management_system/utils/main_utils.dart';
+import 'package:store_management_system/view/pallet/pallet_details.dart';
 
 class PalletSearch extends StatefulWidget {
   final EdgeInsets padding;
@@ -111,9 +114,27 @@ class _PalletSearchState extends State<PalletSearch> {
             return;
           }
 
-          widget.onSearch(value);
+          palletSearch(value);
+          setState(() {
+            widget.controller.clear();
+          });
         },
       ),
     );
+  }
+
+  palletSearch(palletNo) async {
+    Navigator.pop(context);
+    Map<String, dynamic> res = await ApiServices.pallet.getByNo(palletNo);
+
+    if (mounted) {
+      if (res.containsKey("err")) {
+        customShowToast(context, "No Pallet Found.", Colors.red.shade300, true);
+      } else {
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: ((context) =>
+                PalletDetailsView(palletNo: palletNo.toUpperCase()))));
+      }
+    }
   }
 }

@@ -289,15 +289,12 @@ class ApiPallet {
 
   Future<dynamic> getSignatureImage(String signaturePath) async {
     Response res = await ApiServices.call(
-      Method.post,
-      Uri.parse("$path/signature/image"),
-      body: jsonEncode({
-        'signaturePath': signaturePath,
-      }),
+      Method.get,
+      Uri.parse('$path/signature/path/$signaturePath'),
     );
     if (res.statusCode != HttpStatus.ok) {
-      return "";
+      return null;
     }
-    return json.decode(res.body);
+    return res.bodyBytes;
   }
 }

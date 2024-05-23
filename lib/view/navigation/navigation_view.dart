@@ -31,6 +31,7 @@ class _NavigationTabViewState extends State<NavigationTabView>
     // Run code required to handle interacted messages
     setupInteractedMessage();
     WidgetsBinding.instance.addObserver(this);
+    Provider.of<PalletNotifier>(context, listen: false).initialize();
   }
 
   // Handle notification interaction

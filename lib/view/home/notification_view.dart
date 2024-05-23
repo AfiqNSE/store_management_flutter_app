@@ -4,8 +4,6 @@ import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/notif.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 
-// TODO: design notifications list
-
 class NotificationView extends StatefulWidget {
   const NotificationView({super.key});
 
@@ -46,6 +44,8 @@ class _NotificationViewState extends State<NotificationView>
           ),
           backgroundColor: AppColor().milkWhite,
           bottom: TabBar(
+            labelColor: AppColor().blueZodiac,
+            indicatorColor: AppColor().blueZodiac,
             controller: _tabController,
             tabs: const <Widget>[
               Tab(

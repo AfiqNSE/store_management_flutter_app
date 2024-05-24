@@ -364,7 +364,7 @@ class _HomeViewState extends State<HomeView> {
         builder: (context) {
           return AlertDialog(
             shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20)),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
             backgroundColor: AppColor().greyGoose.withOpacity(0.3),
             elevation: 3.0,
@@ -391,10 +391,7 @@ class _HomeViewState extends State<HomeView> {
           height: 90,
           width: double.maxFinite,
           decoration: BoxDecoration(
-            border: Border.all(
-              color: AppColor().milkWhite,
-              width: 0.7,
-            ),
+            border: Border.all(width: 0.3, color: Colors.grey.shade600),
             borderRadius: BorderRadius.circular(10),
             color: customCardColor(text),
           ),

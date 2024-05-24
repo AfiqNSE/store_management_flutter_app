@@ -50,13 +50,13 @@ class _NotificationViewState extends State<NotificationView>
             tabs: const <Widget>[
               Tab(
                 child: Text(
-                  'General',
+                  'Pallets',
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                 ),
               ),
               Tab(
                 child: Text(
-                  'Pallets',
+                  'General',
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                 ),
               ),
@@ -67,15 +67,6 @@ class _NotificationViewState extends State<NotificationView>
           controller: _tabController,
           physics: const NeverScrollableScrollPhysics(),
           children: <Widget>[
-            Container(
-              color: AppColor().milkWhite,
-              child: const Center(
-                child: Text(
-                  "No New Notification",
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
-                ),
-              ),
-            ),
             Container(
               color: AppColor().milkWhite,
               child: Consumer<NotifNotifier>(
@@ -99,6 +90,15 @@ class _NotificationViewState extends State<NotificationView>
                     itemCount: notifier.notifs.length,
                   );
                 },
+              ),
+            ),
+            Container(
+              color: AppColor().milkWhite,
+              child: const Center(
+                child: Text(
+                  "No New Notification",
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                ),
               ),
             ),
           ],

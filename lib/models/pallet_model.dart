@@ -155,16 +155,6 @@ class Pallet {
   }
 }
 
-// Testing purpose
-class ItemTest {
-  String customerName;
-  int qty;
-  ItemTest({
-    required this.customerName,
-    required this.qty,
-  });
-}
-
 class PalletActivityDetail {
   int palletActivityDetailId;
   int palletActivityId;
@@ -269,4 +259,29 @@ class PalletNotifier extends ChangeNotifier {
     _pallets[id]?.palletLocation = "outBound";
     notifyListeners();
   }
+
+  confirm(int id) {
+    _pallets[id]?.status = "Load Job Confirmed";
+    notifyListeners();
+  }
+
+  load(int id) {
+    _pallets[id]?.status = "Loading To Truck";
+    notifyListeners();
+  }
+
+  close(int id) {
+    _pallets[id]?.status = "Loaded To Truck/Close Pallet";
+    notifyListeners();
+  }
+}
+
+// Testing purpose
+class ItemTest {
+  String customerName;
+  int qty;
+  ItemTest({
+    required this.customerName,
+    required this.qty,
+  });
 }

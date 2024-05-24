@@ -1,8 +1,8 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:provider/provider.dart';
 import 'package:store_management_system/components/pallet_signature_component.dart';
+import 'package:store_management_system/components/search_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/services/api_services.dart';
@@ -20,12 +20,15 @@ class JobView extends StatefulWidget {
 class _JobViewState extends State<JobView> with TickerProviderStateMixin {
   final GlobalKey<SfSignaturePadState> signaturePadKey = GlobalKey();
 
+  TextEditingController searchController = TextEditingController();
+
   late List<Pallet> jobAssignedList;
   late List<Pallet> jobConfirmList;
   late List<Pallet> jobLoadingList;
 
   late TabController _tabController;
   bool isAccess = true;
+  bool searchMode = false;
 
   @override
   void initState() {
@@ -57,8 +60,11 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
         Colors.blue.shade300,
         false,
       );
+      setState(() {});
+
+      Provider.of<PalletNotifier>(context, listen: false)
+          .confirm(palletActivityId);
     }
-    setState(() {});
   }
 
   loadJob(int palletActivityId) async {
@@ -79,31 +85,12 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
         Colors.blue.shade300,
         false,
       );
-    }
-    setState(() {});
-  }
 
-  closePallet(int palletActivityId) async {
-    bool res = await ApiServices.pallet.close(palletActivityId);
-    if (mounted) {
-      if (res != true) {
-        customShowToast(
-          context,
-          "Failed to close the pallet. Please try again.",
-          Colors.red.shade300,
-          true,
-        );
-        return;
-      }
-      showToast('').dismiss();
-      customShowToast(
-        context,
-        "Pallet closed successfully.",
-        Colors.blue.shade300,
-        true,
-      );
+      setState(() {});
+
+      Provider.of<PalletNotifier>(context, listen: false)
+          .load(palletActivityId);
     }
-    setState(() {});
   }
 
   @override
@@ -233,16 +220,12 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                 ),
                 trailing: IconButton(
                   onPressed: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(
-                            builder: (context) => PalletSignature(
-                                  palletNo: jobLoadingList[index].palletNo,
-                                  palletActivityId:
-                                      jobLoadingList[index].palletActivityId,
-                                )))
-                        .then((_) {
-                      setState(() {});
-                    });
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => PalletSignature(
+                              palletNo: jobLoadingList[index].palletNo,
+                              palletActivityId:
+                                  jobLoadingList[index].palletActivityId,
+                            )));
                   },
                   icon: const Icon(
                     FluentIcons.clipboard_more_24_filled,
@@ -262,6 +245,14 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
         ),
       );
 
+      Widget search = PalletSearch(
+        padding: const EdgeInsets.only(left: NavigationToolbar.kMiddleSpacing),
+        controller: searchController,
+        onSearch: (value) {
+          setState(() {});
+        },
+      );
+
       return DefaultTabController(
         initialIndex: 0,
         length: 2,
@@ -269,9 +260,30 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
           appBar: AppBar(
             title: Padding(
               padding: const EdgeInsets.only(left: 5.0),
-              child: appBarTitle,
+              child: searchMode ? search : appBarTitle,
             ),
             backgroundColor: AppColor().milkWhite,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: (!searchMode)
+                    ? IconButton(
+                        onPressed: () => setState(() => searchMode = true),
+                        icon:
+                            const Icon(FluentIcons.search_24_filled, size: 28),
+                      )
+                    : TextButton(
+                        onPressed: () => setState(() => searchMode = false),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: AppColor().yaleBlue,
+                          ),
+                        ),
+                      ),
+              ),
+            ],
             bottom: TabBar(
               controller: _tabController,
               labelColor: AppColor().blueZodiac,
@@ -334,7 +346,18 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: jobAssignedList.isEmpty
-                        ? const Center(child: Text('No job assign for today'))
+                        ? Center(
+                            child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/job-done-background.png',
+                                scale: 1.8,
+                              ),
+                              const SizedBox(height: 3),
+                              const Text('No assigned job for today.'),
+                            ],
+                          ))
                         : ListView.builder(
                             itemCount: jobAssignedList.length,
                             itemBuilder: ((context, index) =>
@@ -346,7 +369,18 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: jobConfirmList.isEmpty
-                        ? const Center(child: Text('No job confirm for today'))
+                        ? Center(
+                            child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/job-done-background.png',
+                                scale: 1.8,
+                              ),
+                              const SizedBox(height: 3),
+                              const Text('No confirm job for today.'),
+                            ],
+                          ))
                         : ListView.builder(
                             itemCount: jobConfirmList.length,
                             itemBuilder: ((context, index) =>
@@ -358,7 +392,18 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: jobLoadingList.isEmpty
-                        ? const Center(child: Text('No loading job for today'))
+                        ? Center(
+                            child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/job-done-background.png',
+                                scale: 1.8,
+                              ),
+                              const SizedBox(height: 3),
+                              const Text('No loading job for today.'),
+                            ],
+                          ))
                         : ListView.builder(
                             itemCount: jobLoadingList.length,
                             itemBuilder: ((context, index) =>

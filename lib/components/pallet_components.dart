@@ -9,25 +9,6 @@ import 'package:store_management_system/utils/main_utils.dart';
 class Constant {
   static List<String> palletLocations = ['Inbound', 'Outbound'];
   static List<String> palletTypes = ['Palletise', 'Loose'];
-
-  // testing purpose
-  static List<String> forkliftDriverTest = ['Driver A', 'Driver B', 'Driver C'];
-  static List<String> custNameTest = [
-    '7-ELEVEN MALAYSIA SDN BHD',
-    'Apex Pharmacy Marketing S/B- collection',
-    'ALPHA HOME APPLIANCES SDN BHD',
-    'APEX PHARMACY MARKETING SDN BHD',
-  ];
-
-  static List<ItemTest> itemTest = [
-    ItemTest(customerName: '7-ELEVEN MALAYSIA SDN BHD', qty: 15),
-    ItemTest(customerName: 'Apex Pharmacy Marketing S/B- collection', qty: 25),
-    ItemTest(customerName: 'ALPHA HOME APPLIANCES SDN BHD', qty: 35),
-    ItemTest(customerName: 'APEX PHARMACY MARKETING SDN BHD', qty: 35),
-  ];
-  static List<String> jobAssignedListTest = ['PTN0001'];
-  static List<String> confirmJobListTest = ['PTN0001'];
-  static List<String> palletLoadListTest = ['PTN0001', 'PTN002'];
 }
 
 Widget customTextLabel(String text) => Padding(

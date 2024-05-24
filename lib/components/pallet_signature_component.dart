@@ -4,7 +4,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:store_management_system/models/color_model.dart';
+import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
@@ -45,8 +47,11 @@ class _PalletSignatureState extends State<PalletSignature> {
         Colors.blue.shade300,
         true,
       );
+      setState(() {});
+
+      Provider.of<PalletNotifier>(context, listen: false)
+          .close(palletActivityId);
     }
-    setState(() {});
   }
 
   @override

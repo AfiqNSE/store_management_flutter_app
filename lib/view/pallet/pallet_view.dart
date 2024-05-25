@@ -5,6 +5,7 @@ import 'package:store_management_system/components/search_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/models/pallet_model.dart';
+import 'package:store_management_system/models/summary.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 
@@ -56,21 +57,55 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
       },
     );
 
+    Widget createTab(text, value) => Tab(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                text,
+                style:
+                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              ),
+              const SizedBox(width: 5),
+              value != 0
+                  ? Align(
+                      alignment: Alignment.topCenter,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade300,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: Text(
+                            value.toString(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                                color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ],
+          ),
+        );
+
     Widget createPalletCard(Pallet pallet) {
       return Card(
         elevation: 5,
         color: customCardColor(pallet.palletLocation),
         shadowColor: Colors.black,
         child: InkWell(
-          onTap: () => Navigator.of(context)
-              .push(
-                MaterialPageRoute(
-                  builder: (context) => PalletDetailsView(
-                    palletActivityId: pallet.palletActivityId,
-                  ),
-                ),
-              )
-              .then((_) => setState(() {})),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PalletDetailsView(
+                palletActivityId: pallet.palletActivityId,
+              ),
+            ),
+          ),
           child: Container(
             decoration: BoxDecoration(
                 border: Border.all(width: 0.3, color: Colors.grey.shade600),
@@ -189,25 +224,16 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
             labelColor: AppColor().blueZodiac,
             indicatorColor: AppColor().blueZodiac,
             controller: _tabController,
-            tabs: const <Widget>[
-              Tab(
-                child: Text(
-                  'All',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                ),
-              ),
-              Tab(
-                child: Text(
-                  'InBound',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                ),
-              ),
-              Tab(
-                child: Text(
-                  'OutBound',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                ),
-              ),
+            tabs: <Widget>[
+              Consumer<SummaryNotifier>(builder: (context, value, child) {
+                return createTab('All', value.pallets);
+              }),
+              Consumer<SummaryNotifier>(builder: (context, value, child) {
+                return createTab('InBound', value.inBound);
+              }),
+              Consumer<SummaryNotifier>(builder: (context, value, child) {
+                return createTab('OutBound', value.outBound);
+              })
             ],
           ),
         ),

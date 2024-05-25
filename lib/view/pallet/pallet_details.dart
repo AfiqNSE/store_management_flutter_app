@@ -397,17 +397,12 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
             onPressed: pallet == null
                 ? null
                 : pallet!.palletLocation == "outbound"
-                    ? () {
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content:
-                                const Text('This pallet is already outBound.'),
-                            backgroundColor: Colors.grey.shade600,
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      }
+                    ? () => customShowToast(
+                          context,
+                          'This pallet is already outBound.',
+                          AppColor().gamboge,
+                          true,
+                        )
                     : _movePallet,
             icon: const Icon(
               Icons.compare_arrows_sharp,
@@ -435,18 +430,23 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
             ),
             onPressed: pallet == null
                 ? null
-                : (pallet!.assignByUserName != '')
-                    ? () {
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: const Text(
-                            'This pallet is already been assigned.',
-                          ),
-                          backgroundColor: Colors.grey.shade600,
-                          duration: const Duration(seconds: 2),
-                        ));
-                      }
-                    : _assignJob,
+                : (pallet!.palletLocation != 'inbound')
+                    ? (pallet!.assignByUserName != '')
+                        ? () {
+                            customShowToast(
+                              context,
+                              'This pallet is already been assigned.',
+                              AppColor().gamboge,
+                              true,
+                            );
+                          }
+                        : _assignJob
+                    : () => customShowToast(
+                          context,
+                          'Please move this pallet to outBound',
+                          AppColor().gamboge,
+                          true,
+                        ),
             icon: const Icon(
               FluentIcons.person_add_24_filled,
               color: Colors.white,
@@ -490,10 +490,11 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   }
                 : () {
                     customShowToast(
-                        context,
-                        'This pallet status need to be "Loading To Truck"',
-                        Colors.yellow.shade700,
-                        true);
+                      context,
+                      'The pallet status need to be "Loading To Truck"',
+                      AppColor().gamboge,
+                      true,
+                    );
                   },
             icon: const Icon(
               FluentIcons.signature_24_filled,
@@ -522,7 +523,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 : () => customShowToast(
                       context,
                       "This feature will be available soon",
-                      Colors.yellow.shade700,
+                      Colors.grey.shade600,
                       true,
                     ),
             icon: const Icon(Icons.print_outlined, color: Colors.white),
@@ -540,34 +541,36 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     );
 
     return Scaffold(
-      appBar: customAppBar("Pallet Details"),
-      backgroundColor: AppColor().milkWhite,
-      body: Stack(children: [
-        SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 10, 8, 0),
-            child: Column(children: [
-              // Show pallet general info
-              palletDetails,
+        appBar: customAppBar("Pallet Details"),
+        backgroundColor: AppColor().milkWhite,
+        body: Consumer<PalletNotifier>(builder: (context, value, child) {
+          return Stack(children: [
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 10, 8, 0),
+                child: Column(children: [
+                  // Show pallet general info
+                  palletDetails,
 
-              // Show PIC Signature
-              signatureArea,
+                  // Show PIC Signature
+                  signatureArea,
 
-              // Show pallet item table info
-              palletItemsArea,
+                  // Show pallet item table info
+                  palletItemsArea,
 
-              // Show function button info
-              displayButton,
-            ]),
-          ),
-        ),
-        if (reqLoading)
-          Container(
-            color: const Color.fromRGBO(255, 255, 255, .8),
-            child: const Center(child: CircularProgressIndicator.adaptive()),
-          )
-      ]),
-    );
+                  // Show function button info
+                  displayButton,
+                ]),
+              ),
+            ),
+            if (reqLoading)
+              Container(
+                color: const Color.fromRGBO(255, 255, 255, .8),
+                child:
+                    const Center(child: CircularProgressIndicator.adaptive()),
+              )
+          ]);
+        }));
   }
 
   void _movePallet() {
@@ -712,6 +715,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
 
       setState(() {
         reqLoading = false;
+
+        Provider.of<PalletNotifier>(context, listen: false)
+            .update(pallet!.palletActivityId);
       });
     });
 

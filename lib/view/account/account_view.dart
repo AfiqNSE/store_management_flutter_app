@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/global_utils.dart';
+import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/login/login_view.dart';
 
@@ -14,6 +15,26 @@ class AccountView extends StatefulWidget {
 }
 
 class _AccountViewState extends State<AccountView> {
+  String displayName = '';
+  int userType = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    _getDisplayName();
+    _getUserType();
+  }
+
+  _getDisplayName() async {
+    displayName = await Storage.instance.getDisplayName();
+    setState(() {});
+  }
+
+  _getUserType() async {
+    userType = await Storage.instance.getUserType();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,6 +46,7 @@ class _AccountViewState extends State<AccountView> {
             fontWeight: FontWeight.w600,
           ),
         ),
+        backgroundColor: AppColor().milkWhite,
         centerTitle: true,
         elevation: 0.0,
         actions: [
@@ -63,7 +85,7 @@ class _AccountViewState extends State<AccountView> {
                   ListTile(
                     visualDensity: const VisualDensity(vertical: -4),
                     leading: const Icon(
-                      Icons.manage_accounts_outlined,
+                      Icons.account_circle_outlined,
                       size: 25,
                     ),
                     title: Text(
@@ -74,9 +96,9 @@ class _AccountViewState extends State<AccountView> {
                         color: Colors.grey.shade600,
                       ),
                     ),
-                    subtitle: const Text(
-                      "Admin",
-                      style: TextStyle(
+                    subtitle: Text(
+                      displayName,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),
@@ -88,7 +110,7 @@ class _AccountViewState extends State<AccountView> {
                   ListTile(
                     visualDensity: const VisualDensity(vertical: -4),
                     leading: const Icon(
-                      Icons.supervisor_account_rounded,
+                      Icons.manage_accounts_outlined,
                       size: 25,
                     ),
                     title: Text(
@@ -99,9 +121,9 @@ class _AccountViewState extends State<AccountView> {
                         color: Colors.grey.shade600,
                       ),
                     ),
-                    subtitle: const Text(
-                      "Administrator",
-                      style: TextStyle(
+                    subtitle: Text(
+                      getUserType(userType),
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),

@@ -31,6 +31,13 @@ class _NavigationTabViewState extends State<NavigationTabView>
     // Run code required to handle interacted messages
     setupInteractedMessage();
     WidgetsBinding.instance.addObserver(this);
+    Provider.of<PalletNotifier>(context, listen: false).initialize();
+  }
+
+  void _handleTabSelection() {
+    setState(() {
+      _currentIndex = _tabController.index;
+    });
   }
 
   // Handle notification interaction
@@ -77,12 +84,6 @@ class _NavigationTabViewState extends State<NavigationTabView>
     }
   }
 
-  void _handleTabSelection() {
-    setState(() {
-      _currentIndex = _tabController.index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,57 +106,44 @@ class _NavigationTabViewState extends State<NavigationTabView>
             borderRadius: const BorderRadius.all(Radius.circular(25)),
             color: AppColor().blueZodiac,
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 15,
-              vertical: 10,
-            ),
-            child: GNav(
-              style: GnavStyle.google,
-              curve: Curves.easeInCubic,
-              color: Colors.white,
-              activeColor: Colors.white,
-              tabBackgroundColor: Colors.white24,
-              gap: 5,
-              selectedIndex: _currentIndex,
-              padding: const EdgeInsets.all(11),
-              tabs: [
-                GButton(
-                  icon: Icons.home,
-                  text: 'Home',
-                  onPressed: () {
-                    _tabController.animateTo(0);
-                  },
-                ),
-                GButton(
-                  icon: Icons.format_list_bulleted_outlined,
-                  text: 'Pallets',
-                  onPressed: () {
-                    _tabController.animateTo(1);
-                  },
-                ),
-                GButton(
-                  icon: FluentIcons.clipboard_task_list_rtl_24_filled,
-                  text: 'Jobs',
-                  onPressed: () {
-                    _tabController.animateTo(2);
-                  },
-                ),
-                GButton(
-                  icon: FluentIcons.person_accounts_24_filled,
-                  text: 'Account',
-                  onPressed: () {
-                    _tabController.animateTo(3);
-                  },
-                ),
-              ],
-              onTabChange: (index) {
-                setState(() {
-                  _tabController.animateTo(index);
-                  _currentIndex = index;
-                });
-              },
-            ),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          child: GNav(
+            style: GnavStyle.google,
+            curve: Curves.easeInCubic,
+            color: Colors.white,
+            activeColor: Colors.white,
+            tabBackgroundColor: Colors.white24,
+            gap: 5,
+            selectedIndex: _currentIndex,
+            padding: const EdgeInsets.all(11),
+            tabs: [
+              GButton(
+                icon: Icons.home,
+                text: 'Home',
+                onPressed: () => _tabController.animateTo(0),
+              ),
+              GButton(
+                icon: Icons.format_list_bulleted_outlined,
+                text: 'Pallets',
+                onPressed: () => _tabController.animateTo(1),
+              ),
+              GButton(
+                icon: FluentIcons.clipboard_task_list_rtl_24_filled,
+                text: 'Jobs',
+                onPressed: () => _tabController.animateTo(2),
+              ),
+              GButton(
+                icon: FluentIcons.person_accounts_24_filled,
+                text: 'Account',
+                onPressed: () => _tabController.animateTo(3),
+              ),
+            ],
+            onTabChange: (index) {
+              setState(() {
+                _tabController.animateTo(index);
+                _currentIndex = index;
+              });
+            },
           ),
         ),
       ),

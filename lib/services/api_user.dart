@@ -26,7 +26,7 @@ class ApiUser {
         }),
       );
     } catch (e) {
-      debugPrint("[Login] ${e.toString()}");
+      debugPrint("Error: [Login] ${e.toString()}");
       return {"err": 2};
     }
 

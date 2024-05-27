@@ -45,28 +45,25 @@ class _NotificationViewState extends State<NotificationView>
             ),
           ),
           backgroundColor: AppColor().milkWhite,
-          bottom: TabBar(
-            controller: _tabController,
-            tabs: const <Widget>[
-              Tab(
-                child: Text(
-                  'General',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                ),
+          bottom: TabBar(controller: _tabController, tabs: const [
+            Tab(
+              child: Text(
+                'General',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
               ),
-              Tab(
-                child: Text(
-                  'Pallets',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                ),
+            ),
+            Tab(
+              child: Text(
+                'Pallets',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
               ),
-            ],
-          ),
+            ),
+          ]),
         ),
         body: TabBarView(
           controller: _tabController,
           physics: const NeverScrollableScrollPhysics(),
-          children: <Widget>[
+          children: [
             Container(
               color: AppColor().milkWhite,
               child: const Center(
@@ -153,9 +150,7 @@ class _NotificationViewState extends State<NotificationView>
       subtitle: Text(subtitle),
       trailing: Text(time),
       onTap: () => Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => PalletDetailsView(
-          palletNo: notif.palletNo,
-        ),
+        builder: (context) => PalletDetailsView(palletNo: notif.palletNo),
       )),
     );
   }

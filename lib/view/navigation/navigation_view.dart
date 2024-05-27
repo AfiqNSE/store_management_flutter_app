@@ -5,6 +5,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
+import 'package:store_management_system/models/summary.dart';
 import 'package:store_management_system/view/job/job_view.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 import 'package:store_management_system/view/pallet/pallet_view.dart';
@@ -81,6 +82,7 @@ class _NavigationTabViewState extends State<NavigationTabView>
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
       Provider.of<PalletNotifier>(context, listen: false).initialize();
+      Provider.of<SummaryNotifier>(context, listen: false).update();
     }
   }
 

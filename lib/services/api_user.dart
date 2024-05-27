@@ -46,11 +46,17 @@ class ApiUser {
   Future<bool> authorized() async {
     String fcmToken = await Storage.instance.getFcmToken();
 
-    Response response = await post(
-      Uri.parse("${ApiServices.base}/authorized"),
-      body: jsonEncode({"fcmToken": fcmToken}),
-      headers: await ApiServices.getHeaders(isAccess: false),
-    );
+    Response response;
+    try {
+      response = await post(
+        Uri.parse("${ApiServices.base}/authorized"),
+        body: jsonEncode({"fcmToken": fcmToken}),
+        headers: await ApiServices.getHeaders(isAccess: false),
+      );
+    } catch (e) {
+      debugPrint("Error: [Login] ${e.toString()}");
+      return false;
+    }
 
     if (response.statusCode != HttpStatus.ok) {
       return false;

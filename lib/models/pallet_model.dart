@@ -14,11 +14,13 @@ class Pallet {
   String? movePalletDateTime;
   String? moveByUserName;
   String? assignPalletDateTime;
-  String assignToUserGuid;
-  String assignToUserName;
+  String? assignToUserGuid;
+  String? assignToUserName;
   String? assignByUserName;
   String? loadPalletDateTime;
   String? loadByUserName;
+  String? closePalletDateTime;
+  String? closeByUserName;
   String status;
   String palletLocation;
   List<PalletActivityDetail> items;
@@ -42,6 +44,8 @@ class Pallet {
     required this.assignByUserName,
     required this.loadPalletDateTime,
     required this.loadByUserName,
+    required this.closePalletDateTime,
+    required this.closeByUserName,
     required this.status,
     required this.palletLocation,
     required this.items,
@@ -61,11 +65,13 @@ class Pallet {
         moveByUserName: map["moveByUserName"] ?? "",
         openPalletLocation: map["openPalletLocation"],
         assignPalletDateTime: map["assignPalletDateTime"] ?? "",
-        assignToUserGuid: map["assignToUserGuid"],
-        assignToUserName: map["assignToUserName"],
-        assignByUserName: map["assignToUserName"] ?? "",
+        assignToUserGuid: map["assignToUserGuid"] ?? "",
+        assignToUserName: map["assignToUserName"] ?? "",
+        assignByUserName: map["assignByUserName"] ?? "",
         loadPalletDateTime: map["loadPalletDateTime"] ?? "",
         loadByUserName: map["loadByUserName"] ?? "",
+        closePalletDateTime: map["closedPalletDateTime"] ?? "",
+        closeByUserName: map["closeByUserName"] ?? "",
         status: map["status"],
         palletLocation: map["palletLocation"],
         items: (map['items'] as List?)
@@ -93,6 +99,8 @@ class Pallet {
         assignByUserName: "",
         loadPalletDateTime: "",
         loadByUserName: "",
+        closePalletDateTime: "",
+        closeByUserName: "",
         status: "",
         palletLocation: "",
         items: List.empty(),
@@ -118,6 +126,8 @@ class Pallet {
         "assignByUserName": assignByUserName,
         "loadPalletDateTime": loadPalletDateTime,
         "loadByUserName": loadByUserName,
+        "closePalletDateTime": closePalletDateTime,
+        "closeByUserName": closeByUserName,
         "status": status,
         "palletLocation": palletLocation,
         "items":
@@ -146,6 +156,8 @@ class Pallet {
         assignByUserName == "" &&
         loadPalletDateTime == "" &&
         loadByUserName == "" &&
+        closePalletDateTime == "" &&
+        closeByUserName == "" &&
         status == "" &&
         palletLocation == "" &&
         items.isEmpty &&

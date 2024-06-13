@@ -35,13 +35,12 @@ Color customCardColor(String palletLocation) {
       return AppColor().greyGoose;
     case "outbound":
       return AppColor().lightMustard;
-    case "Pallet":
     default:
       return AppColor().milkWhite;
   }
 }
 
-// custom card color based on pallet status
+// custom card color based on job status
 Color customCardColorStatus(String palletStatus) {
   switch (palletStatus) {
     case "Load Job Pending":
@@ -50,10 +49,10 @@ Color customCardColorStatus(String palletStatus) {
       return const Color.fromRGBO(242, 193, 141, 1);
     case "Loading To Truck":
       return const Color.fromRGBO(170, 215, 217, 1);
-    // case "Loaded To Truck/Close Pallet":
-    //   return Colors.green.shade300;
+    case "Loaded To Truck/Close Pallet":
+      return const Color.fromRGBO(41, 171, 135, 1);
     default:
-      return AppColor().milkWhite;
+      return AppColor().greyGoose;
   }
 }
 
@@ -119,22 +118,18 @@ class SlideRoute extends PageRouteBuilder {
 }
 
 // Create custome App bar
-AppBar customAppBar(
-  String title,
-) {
-  return AppBar(
-    title: Text(
-      title,
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
+AppBar customAppBar(String title) => AppBar(
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
       ),
-    ),
-    elevation: 0.0,
-    centerTitle: true,
-    backgroundColor: AppColor().milkWhite,
-  );
-}
+      elevation: 0.0,
+      centerTitle: true,
+      backgroundColor: AppColor().milkWhite,
+    );
 
 extension StringExtension on String {
   String capitalize() =>

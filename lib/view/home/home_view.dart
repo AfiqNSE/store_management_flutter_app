@@ -15,6 +15,7 @@ import 'package:store_management_system/utils/storage_utils.dart';
 import 'package:store_management_system/view/home/notification_view.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 import 'package:store_management_system/view/pallet/pallet_form.dart';
+import 'package:store_management_system/view/search/search_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -121,7 +122,8 @@ class _HomeViewState extends State<HomeView> {
             ),
             createQuickAction(
               'Search',
-              onTap: search,
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const SearchPalletView())),
               icon: FluentIcons.search_24_filled,
             ),
             createQuickAction(

@@ -5,6 +5,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/utils/main_utils.dart';
+import 'package:store_management_system/view/pallet/pallet_details.dart';
 
 class Constant {
   static List<String> palletLocations = ['Inbound', 'Outbound'];
@@ -65,6 +66,119 @@ InputDecoration customTextFormFieldDeco(
             )
           : null,
     );
+
+Widget createPalletCard(
+  BuildContext context,
+  Pallet pallet, {
+  bool searchView = false,
+}) {
+  return Card(
+    elevation: 5,
+    color: searchView
+        ? customCardColorStatus(pallet.status)
+        : customCardColor(pallet.palletLocation),
+    shadowColor: Colors.black,
+    child: InkWell(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) =>
+              PalletDetailsView(palletActivityId: pallet.palletActivityId),
+        ),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+            border: Border.all(width: 0.3, color: Colors.grey.shade600),
+            borderRadius: const BorderRadius.all(Radius.circular(10))),
+        height: 135,
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text(
+                pallet.palletNo,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 25,
+                ),
+              ),
+              Row(children: [
+                GestureDetector(
+                  onTap: () => showQuickItemInfo(context, pallet.items),
+                  child: const Icon(
+                    FluentIcons.clipboard_task_list_ltr_24_filled,
+                    size: 30,
+                  ),
+                ),
+                const SizedBox(width: 18),
+                GestureDetector(
+                  onTap: () => showQuickPICInfo(context, pallet),
+                  child: const Icon(
+                    FluentIcons.person_clock_24_filled,
+                    size: 30,
+                  ),
+                ),
+              ]),
+            ]),
+            const SizedBox(height: 5),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                pallet.palletType.capitalizeOnly(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              (pallet.lorryNo != "")
+                  ? Text(
+                      pallet.lorryNo.capitalizeOnly(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    )
+                  : const Text(
+                      "No Lorry Assign",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+              Text(
+                pallet.palletLocation.capitalizeOnly(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              )
+            ]),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Text(
+                pallet.destination.capitalizeOnly(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+              Text(
+                pallet.status,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ])
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
 Future showQuickItemInfo(
   BuildContext context,
@@ -308,7 +422,9 @@ Future showQuickPICInfo(
                           const Text('Load On:'),
                           pallet.loadPalletDateTime!.isEmpty
                               ? customEmptyValue
-                              : Text(pallet.loadPalletDateTime!),
+                              : Text(formatDateString(
+                                  pallet.loadPalletDateTime!,
+                                )),
                         ],
                       ),
                       Divider(
@@ -316,7 +432,9 @@ Future showQuickPICInfo(
                       ),
                       const SizedBox(height: 16),
                       const Text('Received & Signed by: '),
-                      const Text(''),
+                      pallet.closeByUserName!.isEmpty
+                          ? customEmptyValue
+                          : Text(pallet.closeByUserName!),
                       const SizedBox(height: 5),
                     ],
                   ),

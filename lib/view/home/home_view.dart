@@ -129,7 +129,7 @@ class _HomeViewState extends State<HomeView> {
               onTap: () => customShowToast(
                 context,
                 "This feature will be available soon.",
-                Colors.yellow.shade700,
+                Colors.grey.shade600,
                 true,
               ),
               icon: FluentIcons.grid_dots_24_filled,

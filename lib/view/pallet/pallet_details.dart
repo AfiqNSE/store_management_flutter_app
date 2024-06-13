@@ -2,10 +2,13 @@ import 'dart:typed_data';
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_esc_pos_network/flutter_esc_pos_network.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:store_management_system/components/pallet_assign_job_form.dart';
 import 'package:store_management_system/components/pallet_signature_component.dart';
+import 'package:store_management_system/components/print_BLE_components.dart';
+import 'package:store_management_system/components/print_Wifi_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/services/api_services.dart';
@@ -18,6 +21,7 @@ import 'package:store_management_system/view/pallet/pallet_table.dart';
 class PalletDetailsView extends StatefulWidget {
   final int palletActivityId;
   final String palletNo;
+  final String palletActivityNo;
 
   /// Create a pallet details view, either palletActivityId or palletNo is required.
   /// If palletActivityId is given, palletNo will be ignored. Otherwise, it will search
@@ -26,6 +30,7 @@ class PalletDetailsView extends StatefulWidget {
     super.key,
     this.palletActivityId = 0,
     this.palletNo = "",
+    this.palletActivityNo = "",
   });
 
   @override
@@ -72,21 +77,42 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     }
 
     // Search pallet with palletNo
-    Map<String, dynamic> res = await ApiServices.pallet.getByNo(
-      widget.palletNo,
-    );
+    if (widget.palletNo != "") {
+      Map<String, dynamic> res = await ApiServices.pallet.getByNo(
+        widget.palletNo,
+      );
 
-    int err = 0;
-    if (res.containsKey("err")) {
-      pallet = Pallet.empty();
-      err = 1;
-    } else {
-      pallet = Pallet.fromMap(res);
-      itemTotal = pallet!.items.fold(0, (sum, item) => sum + item.qty);
+      int err = 0;
+      if (res.containsKey("err")) {
+        pallet = Pallet.empty();
+        err = 1;
+      } else {
+        pallet = Pallet.fromMap(res);
+        itemTotal = pallet!.items.fold(0, (sum, item) => sum + item.qty);
+      }
+
+      setState(() {});
+      return err;
     }
 
-    setState(() {});
-    return err;
+    // Search pallet with activityNo
+    if (widget.palletActivityNo != "") {
+      Map<String, dynamic> res = await ApiServices.pallet.getByActivityNo(
+        widget.palletActivityNo,
+      );
+
+      int err = 0;
+      if (res.containsKey("err")) {
+        pallet = Pallet.empty();
+        err = 1;
+      } else {
+        pallet = Pallet.fromMap(res);
+        itemTotal = pallet!.items.fold(0, (sum, item) => sum + item.qty);
+      }
+
+      setState(() {});
+      return err;
+    }
   }
 
   loadDrivers() async {
@@ -197,7 +223,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
           const SizedBox(height: 5),
           createPalletDetails(
             'Forklift Driver',
-            pallet?.assignToUserName.capitalize(),
+            pallet?.assignToUserName?.capitalize(),
           ),
           const SizedBox(height: 5),
         ]),
@@ -397,17 +423,12 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
             onPressed: pallet == null
                 ? null
                 : pallet!.palletLocation == "outbound"
-                    ? () {
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content:
-                                const Text('This pallet is already outBound.'),
-                            backgroundColor: Colors.grey.shade600,
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      }
+                    ? () => customShowToast(
+                          context,
+                          'This pallet is already outBound.',
+                          AppColor().gamboge,
+                          true,
+                        )
                     : _movePallet,
             icon: const Icon(
               Icons.compare_arrows_sharp,
@@ -435,18 +456,23 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
             ),
             onPressed: pallet == null
                 ? null
-                : (pallet!.assignByUserName != '')
-                    ? () {
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: const Text(
-                            'This pallet is already been assigned.',
-                          ),
-                          backgroundColor: Colors.grey.shade600,
-                          duration: const Duration(seconds: 2),
-                        ));
-                      }
-                    : _assignJob,
+                : (pallet!.palletLocation != 'inbound')
+                    ? (pallet!.assignByUserName != '')
+                        ? () {
+                            customShowToast(
+                              context,
+                              'This pallet is already been assigned.',
+                              AppColor().gamboge,
+                              true,
+                            );
+                          }
+                        : _assignJob
+                    : () => customShowToast(
+                          context,
+                          'Please move this pallet to outBound',
+                          AppColor().gamboge,
+                          true,
+                        ),
             icon: const Icon(
               FluentIcons.person_add_24_filled,
               color: Colors.white,
@@ -490,10 +516,11 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   }
                 : () {
                     customShowToast(
-                        context,
-                        'This pallet status need to be "Loading To Truck"',
-                        Colors.yellow.shade700,
-                        true);
+                      context,
+                      'The pallet status need to be "Loading To Truck"',
+                      AppColor().gamboge,
+                      true,
+                    );
                   },
             icon: const Icon(
               FluentIcons.signature_24_filled,
@@ -519,12 +546,22 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
             ),
             onPressed: pallet == null
                 ? null
-                : () => customShowToast(
-                      context,
-                      "This feature will be available soon",
-                      Colors.yellow.shade700,
-                      true,
-                    ),
+                : () {
+                    if (pallet?.palletType == 'palletise') {
+                      // Print 'palletise' using BLE printer
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(
+                              builder: (context) =>
+                                  BLEPalletPrintView(pallet: pallet!)))
+                          .then(
+                            (value) => ScaffoldMessenger.of(context)
+                                .hideCurrentSnackBar(),
+                          );
+                    } else {
+                      // Print 'loose' using Wifi printer
+                      printReceiptDialog();
+                    }
+                  },
             icon: const Icon(Icons.print_outlined, color: Colors.white),
             label: const Text(
               'Print',
@@ -540,34 +577,36 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     );
 
     return Scaffold(
-      appBar: customAppBar("Pallet Details"),
-      backgroundColor: AppColor().milkWhite,
-      body: Stack(children: [
-        SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 10, 8, 0),
-            child: Column(children: [
-              // Show pallet general info
-              palletDetails,
+        appBar: customAppBar("Pallet Details"),
+        backgroundColor: AppColor().milkWhite,
+        body: Consumer<PalletNotifier>(builder: (context, value, child) {
+          return Stack(children: [
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 10, 8, 0),
+                child: Column(children: [
+                  // Show pallet general info
+                  palletDetails,
 
-              // Show PIC Signature
-              signatureArea,
+                  // Show PIC Signature
+                  signatureArea,
 
-              // Show pallet item table info
-              palletItemsArea,
+                  // Show pallet item table info
+                  palletItemsArea,
 
-              // Show function button info
-              displayButton,
-            ]),
-          ),
-        ),
-        if (reqLoading)
-          Container(
-            color: const Color.fromRGBO(255, 255, 255, .8),
-            child: const Center(child: CircularProgressIndicator.adaptive()),
-          )
-      ]),
-    );
+                  // Show function button info
+                  displayButton,
+                ]),
+              ),
+            ),
+            if (reqLoading)
+              Container(
+                color: const Color.fromRGBO(255, 255, 255, .8),
+                child:
+                    const Center(child: CircularProgressIndicator.adaptive()),
+              )
+          ]);
+        }));
   }
 
   void _movePallet() {
@@ -712,6 +751,9 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
 
       setState(() {
         reqLoading = false;
+
+        Provider.of<PalletNotifier>(context, listen: false)
+            .update(pallet!.palletActivityId);
       });
     });
 
@@ -821,4 +863,52 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
       },
     );
   }
+
+  printReceiptDialog() => showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return AlertDialog(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            backgroundColor: Colors.white,
+            elevation: 3.0,
+            title: const Text(
+              'Confirm to print pallet receipt?',
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: AppColor().yaleBlue,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+
+                  var receipt =
+                      await NetworkPrinter().testTicket(pallet!, itemTotal);
+
+                  NetworkPrinter().printTicket(receipt);
+                },
+                child: Text(
+                  'Confirm',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: AppColor().yaleBlue,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
 }

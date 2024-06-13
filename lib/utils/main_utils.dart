@@ -2,28 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:store_management_system/models/color_model.dart';
 
-AppBar customAppBar(
-  String title,
-) {
-  return AppBar(
-    title: Text(
-      title,
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-      ),
-    ),
-    elevation: 0.0,
-    centerTitle: true,
-    backgroundColor: AppColor().milkWhite,
-  );
-}
-
 double getScreenWidth(BuildContext context) =>
     MediaQuery.of(context).size.width;
 
 double getScreenHeight(BuildContext context) =>
     MediaQuery.of(context).size.height;
+
+// Get user type
+String getUserType(int userType) {
+  switch (userType) {
+    case 0:
+      return "System Administrator";
+    case 1:
+      return "Admin";
+    case 2:
+      return "InBound Store Keeper";
+    case 3:
+      return "InBound Forklift Driver";
+    case 4:
+      return "OutBound Store Keeper";
+    case 5:
+      return "OutBound Forklift Driver";
+    default:
+      return "";
+  }
+}
 
 // custom card color based on pallet location
 Color customCardColor(String palletLocation) {
@@ -54,11 +57,13 @@ Color customCardColorStatus(String palletStatus) {
   }
 }
 
+// Create custom empty value for quick PIC info
 Widget customEmptyValue = const Padding(
   padding: EdgeInsets.only(right: 3),
   child: Text('N/A'),
 );
 
+// Create custome show toast
 ToastFuture customShowToast(
   context,
   String text,
@@ -111,6 +116,24 @@ class SlideRoute extends PageRouteBuilder {
           },
           transitionDuration: const Duration(milliseconds: 600),
         );
+}
+
+// Create custome App bar
+AppBar customAppBar(
+  String title,
+) {
+  return AppBar(
+    title: Text(
+      title,
+      style: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    elevation: 0.0,
+    centerTitle: true,
+    backgroundColor: AppColor().milkWhite,
+  );
 }
 
 extension StringExtension on String {

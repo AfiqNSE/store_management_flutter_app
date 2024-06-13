@@ -10,4 +10,5 @@ class AppColor {
   Color lightMustard = const Color.fromRGBO(249, 205, 82, 1);
   Color greyGoose = const Color.fromRGBO(211, 211, 211, 1);
   Color milkWhite = const Color.fromRGBO(252, 252, 252, 1);
+  Color gamboge = const Color.fromRGBO(232, 150, 17, 1);
 }

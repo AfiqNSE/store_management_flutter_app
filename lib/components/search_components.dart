@@ -1,21 +1,22 @@
+import 'dart:async';
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:store_management_system/services/api_services.dart';
-import 'package:store_management_system/utils/main_utils.dart';
-import 'package:store_management_system/view/pallet/pallet_details.dart';
 
 class PalletSearch extends StatefulWidget {
   final EdgeInsets padding;
   final TextEditingController controller;
+  final bool enabled;
   final Function(String value) onSearch;
-  final List<String> palletNo;
+  final Duration waitTime;
 
   const PalletSearch({
     super.key,
     this.padding = const EdgeInsets.all(0),
     required this.controller,
+    this.enabled = true,
+    this.waitTime = const Duration(seconds: 1),
     required this.onSearch,
-    this.palletNo = const [],
   });
 
   @override
@@ -23,6 +24,8 @@ class PalletSearch extends StatefulWidget {
 }
 
 class _PalletSearchState extends State<PalletSearch> {
+  Timer? stopTyping;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -83,36 +86,34 @@ class _PalletSearchState extends State<PalletSearch> {
         onChanged: (value) {
           setState(() {});
 
+          if (stopTyping != null) {
+            stopTyping!.cancel();
+          }
+
           if (value == "") {
             return;
           }
+
+          if (value.length < 3) {
+            return;
+          }
+
+          stopTyping = Timer(widget.waitTime, () {
+            widget.onSearch(value);
+          });
         },
         onSubmitted: (value) {
+          if (stopTyping != null) {
+            stopTyping!.cancel();
+          }
+
           if (value == "") {
             return;
           }
 
-          palletSearch(value);
-
-          setState(() {
-            widget.controller.clear();
-          });
+          widget.onSearch(value);
         },
       ),
     );
-  }
-
-  palletSearch(palletNo) async {
-    Map<String, dynamic> res = await ApiServices.pallet.getByNo(palletNo);
-
-    if (mounted) {
-      if (res.containsKey("err")) {
-        customShowToast(context, "No Pallet Found.", Colors.red.shade300, true);
-      } else {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: ((context) =>
-                PalletDetailsView(palletNo: palletNo.toUpperCase()))));
-      }
-    }
   }
 }

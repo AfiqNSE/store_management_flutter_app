@@ -417,7 +417,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
         context,
         "The item already in the table",
         Colors.red.shade300,
-        false,
       );
 
       reset();
@@ -440,7 +439,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
             context,
             'Failed to add item. Please try again.',
             Colors.red.shade300,
-            false,
           );
           return;
         }
@@ -450,7 +448,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
           context,
           'Successfully Add Item.',
           Colors.green.shade300,
-          false,
         );
 
         activityDetailItem.add((PalletActivityDetail(
@@ -638,7 +635,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
         context,
         "Please fill at least one field",
         Colors.red.shade300,
-        false,
       );
 
       return;
@@ -664,7 +660,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
           context,
           "The item already in the table",
           Colors.red.shade300,
-          false,
         );
 
         return;
@@ -704,7 +699,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
             context,
             'Failed to update the item. Please try again.',
             Colors.red.shade300,
-            false,
           );
 
           return;
@@ -715,7 +709,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
           context,
           'Item updated successfully.',
           Colors.green.shade300,
-          false,
         );
 
         activityDetailItem[index].customerId = custId;
@@ -781,7 +774,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
             context,
             'Failed to delete the item. Please try again.',
             Colors.red.shade300,
-            false,
           );
 
           return;
@@ -792,7 +784,6 @@ class _ActivityDetailsTableState extends State<ActivityDetailsTableView> {
           context,
           ' Item deleted successfully.',
           Colors.green.shade300,
-          false,
         );
 
         activityDetailItem.removeAt(index);

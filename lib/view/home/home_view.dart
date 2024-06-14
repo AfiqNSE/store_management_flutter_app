@@ -45,7 +45,6 @@ class _HomeViewState extends State<HomeView> {
             context,
             'Failed to get data from server, try again later.',
             Colors.red.shade300,
-            false,
           ),
         );
       }
@@ -132,7 +131,7 @@ class _HomeViewState extends State<HomeView> {
                 context,
                 "This feature will be available soon.",
                 Colors.grey.shade600,
-                true,
+                dismiss: true,
               ),
               icon: FluentIcons.grid_dots_24_filled,
             ),
@@ -324,7 +323,6 @@ class _HomeViewState extends State<HomeView> {
           context,
           'Failed to get platform version.',
           Colors.red.shade300,
-          false,
         );
       }
       barcodeScanRes = '-1';
@@ -346,7 +344,7 @@ class _HomeViewState extends State<HomeView> {
           context,
           'No pallet number found in the database',
           Colors.red.shade300,
-          true,
+          dismiss: true,
         );
       } else {
         pallet = Pallet.fromMap(res);
@@ -443,7 +441,7 @@ class _HomeViewState extends State<HomeView> {
           context,
           "Failed to get data from server, try again later.",
           Colors.red.shade300,
-          true,
+          dismiss: true,
         );
       }
     });

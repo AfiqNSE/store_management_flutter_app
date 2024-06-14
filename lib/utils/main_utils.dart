@@ -66,9 +66,9 @@ Widget customEmptyValue = const Padding(
 ToastFuture customShowToast(
   context,
   String text,
-  Color color,
-  bool dismiss,
-) =>
+  Color color, {
+  bool dismiss = false,
+}) =>
     showToast(
       dismissOtherToast: dismiss,
       text,
@@ -119,16 +119,19 @@ class SlideRoute extends PageRouteBuilder {
 
 // Create custome App bar
 AppBar customAppBar(String title) => AppBar(
+      iconTheme: IconThemeData(
+        color: AppColor().milkWhite,
+      ),
       title: Text(
         title,
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
+        style: TextStyle(
+          fontSize: 23,
+          color: AppColor().milkWhite,
         ),
       ),
-      elevation: 0.0,
+      elevation: 3.0,
       centerTitle: true,
-      backgroundColor: AppColor().milkWhite,
+      backgroundColor: AppColor().blueZodiac,
     );
 
 extension StringExtension on String {

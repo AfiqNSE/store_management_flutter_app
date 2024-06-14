@@ -37,7 +37,7 @@ class _PalletSignatureState extends State<PalletSignature> {
           context,
           "Failed to close the pallet. Please try again.",
           Colors.red.shade300,
-          true,
+          dismiss: true,
         );
         return;
       }
@@ -45,7 +45,7 @@ class _PalletSignatureState extends State<PalletSignature> {
         context,
         "Pallet closed successfully.",
         Colors.blue.shade300,
-        true,
+        dismiss: true,
       );
       setState(() {});
 
@@ -195,8 +195,11 @@ class _PalletSignatureState extends State<PalletSignature> {
     if (_signature != null) {
       await _sendSignature(widget.palletActivityId);
     } else {
-      customShowToast(context, 'Please sign the pallet before press submit',
-          Colors.red.shade300, false);
+      customShowToast(
+        context,
+        'Please sign the pallet before press submit',
+        Colors.red.shade300,
+      );
     }
   }
 
@@ -222,7 +225,6 @@ class _PalletSignatureState extends State<PalletSignature> {
           context,
           'Failed to send signature. Please try again.',
           Colors.red.shade300,
-          false,
         );
         return;
       } else {
@@ -230,7 +232,6 @@ class _PalletSignatureState extends State<PalletSignature> {
           context,
           'Successfully sign the pallet.',
           Colors.red.shade300,
-          false,
         );
 
         // Call the close pallet api

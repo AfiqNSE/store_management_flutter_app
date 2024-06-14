@@ -210,7 +210,7 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              'assets/images/no-pallet-background.png',
+                              'assets/images/pallet-background.png',
                               scale: 2.3,
                             ),
                             const SizedBox(height: 5),
@@ -235,7 +235,7 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              'assets/images/no-inbound-background.png',
+                              'assets/images/inbound-background.png',
                               scale: 1.8,
                             ),
                             const SizedBox(height: 3),
@@ -260,7 +260,7 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              'assets/images/no-outbound-background.png',
+                              'assets/images/outbound-background.png',
                               scale: 1.8,
                             ),
                             const SizedBox(height: 3),

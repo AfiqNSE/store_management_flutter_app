@@ -3,6 +3,7 @@ import 'package:store_management_system/services/api_services.dart';
 
 class Pallet {
   int palletActivityId;
+  String palletActivityNo;
   int palletID;
   String palletNo;
   String lorryNo;
@@ -28,6 +29,7 @@ class Pallet {
 
   Pallet({
     required this.palletActivityId,
+    required this.palletActivityNo,
     required this.palletID,
     required this.palletNo,
     required this.lorryNo,
@@ -54,6 +56,7 @@ class Pallet {
 
   factory Pallet.fromMap(Map<String, dynamic> map) => Pallet(
         palletActivityId: map["palletActivityId"],
+        palletActivityNo: map["palletActivityNo"],
         palletID: map["palletId"],
         palletNo: map["palletNo"],
         lorryNo: map["lorryNo"],
@@ -83,6 +86,7 @@ class Pallet {
 
   factory Pallet.empty() => Pallet(
         palletActivityId: 0,
+        palletActivityNo: "",
         palletID: 0,
         palletNo: "",
         lorryNo: "",
@@ -110,6 +114,7 @@ class Pallet {
 
   Map<String, dynamic> toMap() => {
         "palletActivityId": palletActivityId,
+        "palletActivityNo": palletActivityNo,
         "palletId": palletID,
         "palletNo": palletNo,
         "lorryNo": lorryNo,
@@ -141,6 +146,7 @@ class Pallet {
 
   bool isEmpty() {
     return palletActivityId == 0 &&
+        palletActivityNo == "" &&
         palletID == 0 &&
         palletNo == "" &&
         lorryNo == "" &&

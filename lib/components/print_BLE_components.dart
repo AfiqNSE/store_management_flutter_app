@@ -21,7 +21,7 @@ class _BLEPalletPrintViewState extends State<BLEPalletPrintView> {
   BluetoothDevice? _selectedDevice;
 
   bool _connected = false;
-  bool _loading = false;
+  bool reqLoading = false;
 
   @override
   void initState() {
@@ -34,71 +34,73 @@ class _BLEPalletPrintViewState extends State<BLEPalletPrintView> {
     List<BluetoothDevice> devices = [];
     try {
       devices = await bluetooth.getBondedDevices();
-    } on PlatformException {}
+    } on PlatformException {
+      show("Cannot get paired bluetooth device", Colors.red.shade300);
+    }
 
     bluetooth.onStateChanged().listen((state) {
       switch (state) {
         case BlueThermalPrinter.CONNECTED:
           setState(() {
             _connected = true;
-            _loading = false;
-            show("bluetooth device state: connected", Colors.green.shade300,
+            reqLoading = false;
+            show("Bluetooth device state: connected", Colors.green.shade300,
                 hide: true);
           });
           break;
         case BlueThermalPrinter.DISCONNECTED:
           setState(() {
             _connected = false;
-            _loading = false;
-            show("bluetooth device state: disconnected", Colors.red.shade300,
+            reqLoading = false;
+            show("Bluetooth device state: disconnected", Colors.red.shade300,
                 hide: true);
           });
           break;
         case BlueThermalPrinter.DISCONNECT_REQUESTED:
           setState(() {
             _connected = false;
-            _loading = false;
-            show("bluetooth device state: disconnect requested", Colors.grey,
+            reqLoading = false;
+            show("Bluetooth device state: disconnect requested", Colors.grey,
                 hide: true);
           });
           break;
         case BlueThermalPrinter.STATE_TURNING_OFF:
           setState(() {
             _connected = false;
-            _loading = false;
-            show("bluetooth device state: bluetooth turning off", Colors.grey);
+            reqLoading = false;
+            show("Bluetooth device state: bluetooth turning off", Colors.grey);
           });
           break;
         case BlueThermalPrinter.STATE_OFF:
           setState(() {
             _connected = false;
-            _loading = false;
-            show("bluetooth device state: bluetooth off", Colors.red.shade300,
+            reqLoading = false;
+            show("Bluetooth device state: bluetooth off", Colors.red.shade300,
                 hide: true);
           });
           break;
         case BlueThermalPrinter.STATE_ON:
           setState(() {
             _connected = false;
-            _loading = false;
-            show("bluetooth device state: bluetooth on", Colors.green.shade300,
+            reqLoading = false;
+            show("Bluetooth device state: bluetooth on", Colors.green.shade300,
                 hide: true);
           });
           break;
         case BlueThermalPrinter.STATE_TURNING_ON:
           setState(() {
             _connected = false;
-            _loading = false;
-            show("bluetooth device state: bluetooth turning on",
-                Colors.blue.shade300,
+            reqLoading = false;
+            show("Bluetooth device state: bluetooth turning on",
+                Colors.blue.shade400,
                 hide: true);
           });
           break;
         case BlueThermalPrinter.ERROR:
           setState(() {
             _connected = false;
-            _loading = false;
-            show("bluetooth device state: error", Colors.red.shade300,
+            reqLoading = false;
+            show("Bluetooth device state: error", Colors.red.shade300,
                 hide: true);
           });
           break;
@@ -118,7 +120,7 @@ class _BLEPalletPrintViewState extends State<BLEPalletPrintView> {
 
     if (isConnected == true) {
       setState(() {
-        _loading = false;
+        reqLoading = false;
         _connected = true;
       });
     }
@@ -137,12 +139,9 @@ class _BLEPalletPrintViewState extends State<BLEPalletPrintView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 const SizedBox(height: 20),
-                Text(
-                  (widget.pallet.palletType == "palletise")
-                      ? 'Select Available Label Printer:'
-                      : 'Select Available Receipt Printer:',
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.bold),
+                const Text(
+                  'Select Available Label Printer:',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 const Divider(),
@@ -161,7 +160,7 @@ class _BLEPalletPrintViewState extends State<BLEPalletPrintView> {
                             ? const Icon(Icons.check)
                             : null,
                       )
-                    : const Text('Not Available'),
+                    : const Text('Not Device Available'),
                 const Divider(),
                 const SizedBox(height: 20),
                 Row(
@@ -176,7 +175,7 @@ class _BLEPalletPrintViewState extends State<BLEPalletPrintView> {
                         ),
                         onPressed: () {
                           setState(() {
-                            _loading = true;
+                            reqLoading = true;
                             _selectedDevice = null;
                           });
 
@@ -200,21 +199,8 @@ class _BLEPalletPrintViewState extends State<BLEPalletPrintView> {
                                   : Colors.green,
                           elevation: 3,
                         ),
-                        onPressed: _connected
-                            ? () {
-                                setState(() {
-                                  _loading = true;
-                                });
-
-                                _disconnect();
-                              }
-                            : () {
-                                setState(() {
-                                  _loading = true;
-                                });
-
-                                _connect();
-                              },
+                        onPressed:
+                            _connected ? () => _disconnect() : () => _connect(),
                         child: Text(
                           _connected ? 'Disconnect' : 'Connect',
                           style: const TextStyle(color: Colors.white),
@@ -244,11 +230,12 @@ class _BLEPalletPrintViewState extends State<BLEPalletPrintView> {
                 ),
               ],
             ),
-            if (_loading) ...[
-              const Center(
-                child: CircularProgressIndicator.adaptive(),
+            if (reqLoading)
+              Container(
+                color: const Color.fromRGBO(255, 255, 255, .8),
+                child:
+                    const Center(child: CircularProgressIndicator.adaptive()),
               )
-            ]
           ],
         ),
       ),
@@ -256,6 +243,10 @@ class _BLEPalletPrintViewState extends State<BLEPalletPrintView> {
   }
 
   void _connect() {
+    setState(() {
+      reqLoading = true;
+    });
+
     if (_selectedDevice != null) {
       bluetooth.isConnected.then((isConnected) {
         if (isConnected == false) {
@@ -270,14 +261,13 @@ class _BLEPalletPrintViewState extends State<BLEPalletPrintView> {
     }
 
     setState(() {
-      _loading = false;
+      reqLoading = false;
     });
   }
 
   void _disconnect() {
     bluetooth.disconnect();
     setState(() {
-      _loading = false;
       _selectedDevice = null;
       _connected = false;
     });
@@ -306,18 +296,25 @@ class _BLEPalletPrintViewState extends State<BLEPalletPrintView> {
     }
   }
 
-  // Print Label for palletise type
+  // Print Label
   void printPalletLabel(Pallet pallet) async {
     final now = DateTime.now();
     String dateTime = formatDateString(now.toString());
 
     String tsplCommands =
         "CLS\nSIZE 101.00 mm, 152.00 mm\nDENSITY 10\nGAP 3.0 mm, 0.0 mm\nDIRECTION 1,0\nREFERENCE 0,0\nOFFSET 0.0 mm\nCODEPAGE UTF-8\nTEXT 100,200,\"3\",0, 2, 2,\"Pallet Information\"\r\nTEXT 100,300,\"3\",0,1,1,\"Pallet No: ${pallet.palletNo}\"\r\nTEXT 100,380,\"3\",0,1,1,\"Status: ${pallet.status}\"\r\nTEXT 100,460,\"3\",0,1,1,\"Destination: ${pallet.destination.capitalize()}\"\r\nTEXT 100,540,\"3\",0,1,1,\"Lorry No: ${pallet.lorryNo}\"\r\nTEXT 100,620,\"3\",0,1,1,\"Date & Time: $dateTime\"\r\nBARCODE 100,700,\"128M\" ,90 ,1 ,0 ,4, 12,\"1234567890\"\r\nPRINT 1, 1\n";
+
     try {
       await bluetooth.writeBytes(Uint8List.fromList(tsplCommands.codeUnits));
-      show('Print success', Colors.green.shade300);
+
+      if (mounted) {
+        customShowToast(context, 'Print Success', Colors.green.shade300);
+      }
     } catch (e) {
-      show('Error during printing: $e', Colors.red.shade300);
+      if (mounted) {
+        customShowToast(
+            context, 'Error during printing: $e', Colors.red.shade300);
+      }
     }
   }
 }

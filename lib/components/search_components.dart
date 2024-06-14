@@ -9,6 +9,7 @@ class PalletSearch extends StatefulWidget {
   final bool enabled;
   final Function(String value) onSearch;
   final Duration waitTime;
+  final bool activePalletOnly;
 
   const PalletSearch({
     super.key,
@@ -17,6 +18,7 @@ class PalletSearch extends StatefulWidget {
     this.enabled = true,
     this.waitTime = const Duration(seconds: 1),
     required this.onSearch,
+    this.activePalletOnly = false,
   });
 
   @override
@@ -86,23 +88,30 @@ class _PalletSearchState extends State<PalletSearch> {
         onChanged: (value) {
           setState(() {});
 
-          if (stopTyping != null) {
-            stopTyping!.cancel();
+          if (!widget.activePalletOnly) {
+            if (stopTyping != null) {
+              stopTyping!.cancel();
+            }
+
+            if (value.length < 3) {
+              return;
+            }
+
+            stopTyping = Timer(widget.waitTime, () {
+              widget.onSearch(value);
+            });
           }
 
           if (value == "") {
             return;
           }
-
-          if (value.length < 3) {
-            return;
-          }
-
-          stopTyping = Timer(widget.waitTime, () {
-            widget.onSearch(value);
-          });
         },
         onSubmitted: (value) {
+          // Only for Pallet view
+          if (widget.activePalletOnly) {
+            widget.controller.clear();
+          }
+
           if (stopTyping != null) {
             stopTyping!.cancel();
           }

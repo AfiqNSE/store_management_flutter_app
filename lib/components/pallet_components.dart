@@ -79,100 +79,179 @@ Widget createPalletCard(
         : customCardColor(pallet.palletLocation),
     shadowColor: Colors.black,
     child: InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) =>
-              PalletDetailsView(palletActivityId: pallet.palletActivityId),
-        ),
-      ),
+      onTap: () {
+        //Send palletActivityNo for closed pallet
+        if (pallet.status == "Loaded To Truck/Close Pallet") {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  PalletDetailsView(palletActivityNo: pallet.palletActivityNo),
+            ),
+          );
+        } else {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  PalletDetailsView(palletActivityId: pallet.palletActivityId),
+            ),
+          );
+        }
+      },
       child: Container(
         decoration: BoxDecoration(
             border: Border.all(width: 0.3, color: Colors.grey.shade600),
             borderRadius: const BorderRadius.all(Radius.circular(10))),
-        height: 135,
+        height: 155,
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(
-                pallet.palletNo,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 25,
-                ),
-              ),
-              Row(children: [
-                GestureDetector(
-                  onTap: () => showQuickItemInfo(context, pallet.items),
-                  child: const Icon(
-                    FluentIcons.clipboard_task_list_ltr_24_filled,
-                    size: 30,
-                  ),
-                ),
-                const SizedBox(width: 18),
-                GestureDetector(
-                  onTap: () => showQuickPICInfo(context, pallet),
-                  child: const Icon(
-                    FluentIcons.person_clock_24_filled,
-                    size: 30,
-                  ),
-                ),
-              ]),
-            ]),
-            const SizedBox(height: 5),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                pallet.palletType.capitalizeOnly(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 5, 8, 0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ClipRRect(
+                      clipBehavior: Clip.antiAlias,
+                      borderRadius: BorderRadius.circular(50.0),
+                      child: (pallet.palletLocation == 'inbound')
+                          ? Container(
+                              height: 100.0,
+                              width: 100.0,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(50),
+                                border: Border.all(
+                                    color: Colors.grey.shade200, width: 2),
+                                image: const DecorationImage(
+                                  image: AssetImage(
+                                      'assets/images/inbound-background.png'),
+                                  fit: BoxFit.fill,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              height: 100.0,
+                              width: 100.0,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(50),
+                                border: Border.all(
+                                    color: Colors.grey.shade200, width: 2),
+                                image: const DecorationImage(
+                                  image: AssetImage(
+                                      'assets/images/outbound-background.png'),
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        pallet.palletLocation.capitalizeOnly(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              (pallet.lorryNo != "")
-                  ? Text(
-                      pallet.lorryNo.capitalizeOnly(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
+            Expanded(
+              flex: 2,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        pallet.palletNo,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 25,
+                        ),
                       ),
-                    )
-                  : const Text(
-                      "No Lorry Assign",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                      Row(children: [
+                        GestureDetector(
+                          onTap: () => showQuickItemInfo(context, pallet.items),
+                          child: const Icon(
+                            FluentIcons.clipboard_task_list_ltr_24_filled,
+                            size: 30,
+                          ),
+                        ),
+                        const SizedBox(width: 18),
+                        GestureDetector(
+                          onTap: () => showQuickPICInfo(context, pallet),
+                          child: const Icon(
+                            FluentIcons.person_clock_24_filled,
+                            size: 30,
+                          ),
+                        ),
+                      ]),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '\u2022 ${pallet.palletType.capitalizeOnly()}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
                       ),
                     ),
-              Text(
-                pallet.palletLocation.capitalizeOnly(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              )
-            ]),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(
-                pallet.destination.capitalizeOnly(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
+                  ),
+                  (pallet.lorryNo != "")
+                      ? Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '\u2022 ${pallet.lorryNo.capitalizeOnly()}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                          ),
+                        )
+                      : const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "\u2022 No Lorry Assign",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '\u2022 ${pallet.destination.capitalizeOnly()}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '\u2022 ${pallet.status}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                pallet.status,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-            ])
+            ),
           ],
         ),
       ),
@@ -197,7 +276,7 @@ Future showQuickItemInfo(
         child: FadeTransition(
           opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
           child: AlertDialog(
-            backgroundColor: AppColor().milkWhite,
+            backgroundColor: AppColor().greyGoose,
             shadowColor: Colors.black,
             elevation: 3.0,
             shape: OutlineInputBorder(
@@ -311,7 +390,7 @@ Future showQuickPICInfo(
         child: FadeTransition(
           opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
           child: AlertDialog(
-            backgroundColor: AppColor().milkWhite,
+            backgroundColor: AppColor().greyGoose,
             elevation: 3.0,
             shape: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.0),

@@ -144,24 +144,19 @@ class _AccountViewState extends State<AccountView> {
                   Divider(
                     color: Colors.grey.shade200,
                   ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -4),
-                    leading: const Icon(
+                  const ListTile(
+                    visualDensity: VisualDensity(vertical: -4),
+                    leading: Icon(
                       Icons.info_outline_rounded,
                       size: 25,
                     ),
-                    title: const Text(
-                      "Version Info",
+                    title: Text(
+                      "Version 1.0.0",
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: 15,
                       ),
                     ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios_outlined,
-                      size: 16,
-                    ),
-                    onTap: () {},
                   ),
                   Divider(
                     color: Colors.grey.shade200,

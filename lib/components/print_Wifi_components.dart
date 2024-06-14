@@ -113,20 +113,23 @@ class NetworkPrinter {
     return bytes;
   }
 
-  Future<void> printTicket(List<int> ticket) async {
+  Future<String> printTicket(List<int> ticket) async {
+    String status = "";
     final printer = PrinterNetworkManager('192.168.10.100');
 
     try {
       PosPrintResult connect = await printer.connect();
       if (connect == PosPrintResult.success) {
         await printer.printTicket(ticket);
+        status = "Success Print";
       } else {
-        print(connect.msg);
+        status = "Cannot Print Recipt:${connect.msg}";
       }
     } catch (e) {
-      print('Error sending data: $e');
+      status = 'Error sending data: $e';
     } finally {
       printer.disconnect();
     }
+    return status;
   }
 }

@@ -15,8 +15,6 @@ import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/view/pallet/pallet_table.dart';
 
-//TODO: Change snackbar to customToast
-
 class PalletDetailsView extends StatefulWidget {
   final int palletActivityId;
   final String palletNo;
@@ -61,7 +59,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
             context,
             "Pallet not found.",
             Colors.red.shade300,
-            true,
+            dismiss: true,
           );
         });
       }
@@ -426,7 +424,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                           context,
                           'This pallet is already outBound.',
                           AppColor().gamboge,
-                          true,
+                          dismiss: true,
                         )
                     : _movePallet,
             icon: const Icon(
@@ -462,7 +460,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                               context,
                               'This pallet is already been assigned.',
                               AppColor().gamboge,
-                              true,
+                              dismiss: true,
                             );
                           }
                         : _assignJob
@@ -470,7 +468,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                           context,
                           'Please move this pallet to outBound',
                           AppColor().gamboge,
-                          true,
+                          dismiss: true,
                         ),
             icon: const Icon(
               FluentIcons.person_add_24_filled,
@@ -518,7 +516,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                       context,
                       'The pallet status need to be "Loading To Truck"',
                       AppColor().gamboge,
-                      true,
+                      dismiss: true,
                     );
                   },
             icon: const Icon(
@@ -735,16 +733,15 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     ApiServices.pallet.move(pallet!.palletActivityId).then((value) {
       if (!value) {
         customShowToast(
-            context,
-            'Move pallet request failed. Please try again.',
-            Colors.red.shade300,
-            false);
+          context,
+          'Move pallet request failed. Please try again.',
+          Colors.red.shade300,
+        );
       } else {
         customShowToast(
           context,
           'Move pallet request successfull.',
           Colors.blue.shade300,
-          false,
         );
       }
 
@@ -890,14 +887,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 ),
               ),
               TextButton(
-                onPressed: () async {
-                  Navigator.pop(context);
-
-                  var receipt =
-                      await NetworkPrinter().testTicket(pallet!, itemTotal);
-
-                  NetworkPrinter().printTicket(receipt);
-                },
+                onPressed: () => printReceipt(),
                 child: Text(
                   'Confirm',
                   style: TextStyle(
@@ -910,4 +900,40 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
           );
         },
       );
+
+  printReceipt() async {
+    Navigator.pop(context);
+
+    setState(() {
+      reqLoading = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: const Text('Connecting to printer...'),
+      backgroundColor: Colors.blue.shade400,
+      duration: const Duration(seconds: 20),
+    ));
+
+    var receipt = await NetworkPrinter().testTicket(pallet!, itemTotal);
+
+    await NetworkPrinter().printTicket(receipt).then((value) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+
+      if (value != "Success Print") {
+        setState(() {
+          reqLoading = false;
+        });
+
+        customShowToast(context, value, Colors.red.shade300);
+
+        return;
+      }
+
+      customShowToast(context, value, Colors.green.shade300);
+
+      setState(() {
+        reqLoading = false;
+      });
+    });
+  }
 }

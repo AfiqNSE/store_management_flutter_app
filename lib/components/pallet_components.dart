@@ -79,12 +79,24 @@ Widget createPalletCard(
         : customCardColor(pallet.palletLocation),
     shadowColor: Colors.black,
     child: InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) =>
-              PalletDetailsView(palletActivityId: pallet.palletActivityId),
-        ),
-      ),
+      onTap: () {
+        //Send palletActivityNo for closed pallet
+        if (pallet.status == "Loaded To Truck/Close Pallet") {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  PalletDetailsView(palletActivityNo: pallet.palletActivityNo),
+            ),
+          );
+        } else {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  PalletDetailsView(palletActivityId: pallet.palletActivityId),
+            ),
+          );
+        }
+      },
       child: Container(
         decoration: BoxDecoration(
             border: Border.all(width: 0.3, color: Colors.grey.shade600),

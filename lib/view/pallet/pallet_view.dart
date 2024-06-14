@@ -6,6 +6,9 @@ import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/models/summary.dart';
+import 'package:store_management_system/services/api_services.dart';
+import 'package:store_management_system/utils/main_utils.dart';
+import 'package:store_management_system/view/pallet/pallet_details.dart';
 
 class PalletView extends StatefulWidget {
   const PalletView({super.key});
@@ -24,11 +27,28 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
   bool searchMode = false;
   bool isLoading = false;
 
+  late String _searchValue = "";
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     Provider.of<PalletNotifier>(context, listen: false).initialize();
+  }
+
+  // Only to search active pallet at Pallet View
+  searchActivePallet(String palletNo) async {
+    Map<String, dynamic> res = await ApiServices.pallet.getByNo(palletNo);
+
+    if (mounted) {
+      if (res.containsKey("err")) {
+        customShowToast(context, "No Pallet Found", Colors.red.shade300);
+        return;
+      }
+
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => PalletDetailsView(palletNo: palletNo)));
+    }
   }
 
   @override
@@ -48,10 +68,12 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
     );
 
     Widget search = PalletSearch(
+      activePalletOnly: true,
       padding: const EdgeInsets.only(left: NavigationToolbar.kMiddleSpacing),
       controller: searchController,
-      onSearch: (value) {
-        setState(() {});
+      onSearch: (value) async {
+        _searchValue = value;
+        await searchActivePallet(_searchValue);
       },
     );
 
@@ -122,155 +144,142 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
                     ),
             ),
           ],
-          bottom: searchMode
-              ? null
-              : TabBar(
-                  labelColor: AppColor().blueZodiac,
-                  indicatorColor: AppColor().blueZodiac,
-                  controller: _tabController,
-                  tabs: <Widget>[
-                    if (searchMode == true) ...{
-                      const Text('Pallet List'),
-                    } else ...{
-                      Consumer<SummaryNotifier>(
-                          builder: (context, value, child) {
-                        return createTab('All', value.pallets);
-                      }),
-                      Consumer<SummaryNotifier>(
-                          builder: (context, value, child) {
-                        return createTab('InBound', value.inBound);
-                      }),
-                      Consumer<SummaryNotifier>(
-                          builder: (context, value, child) {
-                        return createTab('OutBound', value.outBound);
-                      })
-                    }
-                  ],
-                ),
+          bottom: TabBar(
+            labelColor: AppColor().blueZodiac,
+            indicatorColor: AppColor().blueZodiac,
+            controller: _tabController,
+            tabs: <Widget>[
+              Consumer<SummaryNotifier>(builder: (context, value, child) {
+                return createTab('All', value.pallets);
+              }),
+              Consumer<SummaryNotifier>(builder: (context, value, child) {
+                return createTab('InBound', value.inBound);
+              }),
+              Consumer<SummaryNotifier>(builder: (context, value, child) {
+                return createTab('OutBound', value.outBound);
+              })
+            ],
+          ),
         ),
-        body: searchMode
-            ? const Center(
-                child: Text('Search'),
-              )
-            : Consumer<PalletNotifier>(
-                builder: (context, value, child) {
-                  List<Pallet> allPalletList =
-                      value.pallets.entries.map((e) => e.value).toList();
+        body: Consumer<PalletNotifier>(
+          builder: (context, value, child) {
+            List<Pallet> allPalletList =
+                value.pallets.entries.map((e) => e.value).toList();
 
-                  if (allPalletList.isNotEmpty) {
-                    isLoading = true;
-                  }
+            if (allPalletList.isNotEmpty) {
+              isLoading = true;
+            }
 
-                  List<Pallet> inBoundPalletList = List.empty(growable: true);
-                  List<Pallet> outBoundPalletList = List.empty(growable: true);
+            List<Pallet> inBoundPalletList = List.empty(growable: true);
+            List<Pallet> outBoundPalletList = List.empty(growable: true);
 
-                  for (var i = 0; i < allPalletList.length; i++) {
-                    if (allPalletList[i].palletLocation == "inbound") {
-                      inBoundPalletList.add(allPalletList[i]);
-                    }
-                    if (allPalletList[i].palletLocation == "outbound") {
-                      outBoundPalletList.add(allPalletList[i]);
-                    }
-                  }
+            for (var i = 0; i < allPalletList.length; i++) {
+              if (allPalletList[i].palletLocation == "inbound") {
+                inBoundPalletList.add(allPalletList[i]);
+              }
+              if (allPalletList[i].palletLocation == "outbound") {
+                outBoundPalletList.add(allPalletList[i]);
+              }
+            }
 
-                  if (isLoading == true) {
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Center(
-                          child: CircularProgressIndicator(
-                            color: AppColor().blueZodiac,
-                          ),
+            if (isLoading == true) {
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Center(
+                    child: CircularProgressIndicator(
+                      color: AppColor().blueZodiac,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text('Loading data...'),
+                ],
+              );
+            }
+
+            return TabBarView(
+              controller: _tabController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: <Widget>[
+                Container(
+                  color: AppColor().milkWhite,
+                  padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                  child: allPalletList.isEmpty
+                      ? Center(
+                          child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/images/no-pallet-background.png',
+                              scale: 2.3,
+                            ),
+                            const SizedBox(height: 5),
+                            const Text('No pallet for today.'),
+                          ],
+                        ))
+                      : ListView.builder(
+                          itemCount: allPalletList.length,
+                          itemBuilder: ((context, index) => Padding(
+                                padding: const EdgeInsets.only(bottom: 5),
+                                child: createPalletCard(
+                                    context, allPalletList[index]),
+                              )),
                         ),
-                        const SizedBox(height: 10),
-                        const Text('Loading data...'),
-                      ],
-                    );
-                  }
-
-                  return TabBarView(
-                    controller: _tabController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: <Widget>[
-                      Container(
-                        color: AppColor().milkWhite,
-                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                        child: allPalletList.isEmpty
-                            ? Center(
-                                child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/images/no-pallet-background.png',
-                                    scale: 2.3,
-                                  ),
-                                  const SizedBox(height: 5),
-                                  const Text('No pallet for today.'),
-                                ],
-                              ))
-                            : ListView.builder(
-                                itemCount: allPalletList.length,
-                                itemBuilder: ((context, index) => Padding(
-                                      padding: const EdgeInsets.only(bottom: 5),
-                                      child: createPalletCard(
-                                          context, allPalletList[index]),
-                                    )),
-                              ),
-                      ),
-                      Container(
-                        color: AppColor().milkWhite,
-                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                        child: inBoundPalletList.isEmpty
-                            ? Center(
-                                child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/images/no-inbound-background.png',
-                                    scale: 1.8,
-                                  ),
-                                  const SizedBox(height: 3),
-                                  const Text('No inbound pallet for today.'),
-                                ],
-                              ))
-                            : ListView.builder(
-                                itemCount: inBoundPalletList.length,
-                                itemBuilder: ((context, index) => Padding(
-                                      padding: const EdgeInsets.only(bottom: 5),
-                                      child: createPalletCard(
-                                          context, inBoundPalletList[index]),
-                                    )),
-                              ),
-                      ),
-                      Container(
-                        color: AppColor().milkWhite,
-                        padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                        child: outBoundPalletList.isEmpty
-                            ? Center(
-                                child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/images/no-outbound-background.png',
-                                    scale: 1.8,
-                                  ),
-                                  const SizedBox(height: 3),
-                                  const Text('No outbound pallet for today.'),
-                                ],
-                              ))
-                            : ListView.builder(
-                                itemCount: outBoundPalletList.length,
-                                itemBuilder: ((context, index) => Padding(
-                                      padding: const EdgeInsets.only(bottom: 5),
-                                      child: createPalletCard(
-                                          context, outBoundPalletList[index]),
-                                    )),
-                              ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                ),
+                Container(
+                  color: AppColor().milkWhite,
+                  padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                  child: inBoundPalletList.isEmpty
+                      ? Center(
+                          child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/images/no-inbound-background.png',
+                              scale: 1.8,
+                            ),
+                            const SizedBox(height: 3),
+                            const Text('No inbound pallet for today.'),
+                          ],
+                        ))
+                      : ListView.builder(
+                          itemCount: inBoundPalletList.length,
+                          itemBuilder: ((context, index) => Padding(
+                                padding: const EdgeInsets.only(bottom: 5),
+                                child: createPalletCard(
+                                    context, inBoundPalletList[index]),
+                              )),
+                        ),
+                ),
+                Container(
+                  color: AppColor().milkWhite,
+                  padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                  child: outBoundPalletList.isEmpty
+                      ? Center(
+                          child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/images/no-outbound-background.png',
+                              scale: 1.8,
+                            ),
+                            const SizedBox(height: 3),
+                            const Text('No outbound pallet for today.'),
+                          ],
+                        ))
+                      : ListView.builder(
+                          itemCount: outBoundPalletList.length,
+                          itemBuilder: ((context, index) => Padding(
+                                padding: const EdgeInsets.only(bottom: 5),
+                                child: createPalletCard(
+                                    context, outBoundPalletList[index]),
+                              )),
+                        ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

@@ -4,8 +4,6 @@ import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/notif.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 
-// TODO: design notifications list
-
 class NotificationView extends StatefulWidget {
   const NotificationView({super.key});
 
@@ -45,34 +43,30 @@ class _NotificationViewState extends State<NotificationView>
             ),
           ),
           backgroundColor: AppColor().milkWhite,
-          bottom: TabBar(controller: _tabController, tabs: const [
-            Tab(
-              child: Text(
-                'General',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          bottom: TabBar(
+            labelColor: AppColor().blueZodiac,
+            indicatorColor: AppColor().blueZodiac,
+            controller: _tabController,
+            tabs: const <Widget>[
+              Tab(
+                child: Text(
+                  'Pallets',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
               ),
-            ),
-            Tab(
-              child: Text(
-                'Pallets',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              Tab(
+                child: Text(
+                  'General',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
         ),
         body: TabBarView(
           controller: _tabController,
           physics: const NeverScrollableScrollPhysics(),
           children: [
-            Container(
-              color: AppColor().milkWhite,
-              child: const Center(
-                child: Text(
-                  "No New Notification",
-                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
-                ),
-              ),
-            ),
             Container(
               color: AppColor().milkWhite,
               child: Consumer<NotifNotifier>(
@@ -96,6 +90,15 @@ class _NotificationViewState extends State<NotificationView>
                     itemCount: notifier.notifs.length,
                   );
                 },
+              ),
+            ),
+            Container(
+              color: AppColor().milkWhite,
+              child: const Center(
+                child: Text(
+                  "No New Notification",
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                ),
               ),
             ),
           ],

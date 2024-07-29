@@ -3,6 +3,7 @@ import 'package:store_management_system/services/api_services.dart';
 
 class Pallet {
   int palletActivityId;
+  String palletActivityNo;
   int palletID;
   String palletNo;
   String lorryNo;
@@ -10,15 +11,17 @@ class Pallet {
   String destination;
   String openPalletDateTime;
   String openPalletLocation;
-  String openByUserName;
-  String movePalletDateTime;
-  String moveByUserName;
-  String assignPalletDateTime;
-  String assignToUserGuid;
+  String? openByUserName;
+  String? movePalletDateTime;
+  String? moveByUserName;
+  String? assignPalletDateTime;
+  String? assignToUserGuid;
   String assignToUserName;
-  String assignByUserName;
-  String loadPalletDateTime;
-  String loadByUserName;
+  String? assignByUserName;
+  String? loadPalletDateTime;
+  String? loadByUserName;
+  String? closePalletDateTime;
+  String? closeByUserName;
   String status;
   String palletLocation;
   List<PalletActivityDetail> items;
@@ -26,6 +29,7 @@ class Pallet {
 
   Pallet({
     required this.palletActivityId,
+    required this.palletActivityNo,
     required this.palletID,
     required this.palletNo,
     required this.lorryNo,
@@ -42,6 +46,8 @@ class Pallet {
     required this.assignByUserName,
     required this.loadPalletDateTime,
     required this.loadByUserName,
+    required this.closePalletDateTime,
+    required this.closeByUserName,
     required this.status,
     required this.palletLocation,
     required this.items,
@@ -50,6 +56,7 @@ class Pallet {
 
   factory Pallet.fromMap(Map<String, dynamic> map) => Pallet(
         palletActivityId: map["palletActivityId"],
+        palletActivityNo: map["palletActivityNo"],
         palletID: map["palletId"],
         palletNo: map["palletNo"],
         lorryNo: map["lorryNo"],
@@ -61,11 +68,13 @@ class Pallet {
         moveByUserName: map["moveByUserName"] ?? "",
         openPalletLocation: map["openPalletLocation"],
         assignPalletDateTime: map["assignPalletDateTime"] ?? "",
-        assignToUserGuid: map["assignToUserGuid"],
-        assignToUserName: map["assignToUserName"],
-        assignByUserName: map["assignToUserName"] ?? "",
+        assignToUserGuid: map["assignToUserGuid"] ?? "",
+        assignToUserName: map["assignToUserName"] ?? "",
+        assignByUserName: map["assignByUserName"] ?? "",
         loadPalletDateTime: map["loadPalletDateTime"] ?? "",
         loadByUserName: map["loadByUserName"] ?? "",
+        closePalletDateTime: map["closedPalletDateTime"] ?? "",
+        closeByUserName: map["closeByUserName"] ?? "",
         status: map["status"],
         palletLocation: map["palletLocation"],
         items: (map['items'] as List?)
@@ -77,6 +86,7 @@ class Pallet {
 
   factory Pallet.empty() => Pallet(
         palletActivityId: 0,
+        palletActivityNo: "",
         palletID: 0,
         palletNo: "",
         lorryNo: "",
@@ -93,6 +103,8 @@ class Pallet {
         assignByUserName: "",
         loadPalletDateTime: "",
         loadByUserName: "",
+        closePalletDateTime: "",
+        closeByUserName: "",
         status: "",
         palletLocation: "",
         items: List.empty(),
@@ -102,6 +114,7 @@ class Pallet {
 
   Map<String, dynamic> toMap() => {
         "palletActivityId": palletActivityId,
+        "palletActivityNo": palletActivityNo,
         "palletId": palletID,
         "palletNo": palletNo,
         "lorryNo": lorryNo,
@@ -118,6 +131,8 @@ class Pallet {
         "assignByUserName": assignByUserName,
         "loadPalletDateTime": loadPalletDateTime,
         "loadByUserName": loadByUserName,
+        "closePalletDateTime": closePalletDateTime,
+        "closeByUserName": closeByUserName,
         "status": status,
         "palletLocation": palletLocation,
         "items":
@@ -131,6 +146,7 @@ class Pallet {
 
   bool isEmpty() {
     return palletActivityId == 0 &&
+        palletActivityNo == "" &&
         palletID == 0 &&
         palletNo == "" &&
         lorryNo == "" &&
@@ -146,6 +162,8 @@ class Pallet {
         assignByUserName == "" &&
         loadPalletDateTime == "" &&
         loadByUserName == "" &&
+        closePalletDateTime == "" &&
+        closeByUserName == "" &&
         status == "" &&
         palletLocation == "" &&
         items.isEmpty &&
@@ -153,16 +171,6 @@ class Pallet {
         signature.attachmentFullPath == "" &&
         signature.createdByUserName == "";
   }
-}
-
-// Testing purpose
-class ItemTest {
-  String customerName;
-  int qty;
-  ItemTest({
-    required this.customerName,
-    required this.qty,
-  });
 }
 
 class PalletActivityDetail {
@@ -264,4 +272,34 @@ class PalletNotifier extends ChangeNotifier {
     _pallets[id] = Pallet.fromMap(res);
     notifyListeners();
   }
+
+  move(int id) {
+    _pallets[id]?.palletLocation = "outBound";
+    notifyListeners();
+  }
+
+  confirm(int id) {
+    _pallets[id]?.status = "Load Job Confirmed";
+    notifyListeners();
+  }
+
+  load(int id) {
+    _pallets[id]?.status = "Loading To Truck";
+    notifyListeners();
+  }
+
+  close(int id) {
+    _pallets[id]?.status = "Loaded To Truck/Close Pallet";
+    notifyListeners();
+  }
+}
+
+// Testing purpose
+class ItemTest {
+  String customerName;
+  int qty;
+  ItemTest({
+    required this.customerName,
+    required this.qty,
+  });
 }

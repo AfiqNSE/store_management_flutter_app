@@ -2,28 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:store_management_system/models/color_model.dart';
 
-AppBar customAppBar(
-  String title,
-) {
-  return AppBar(
-    title: Text(
-      title,
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-      ),
-    ),
-    elevation: 0.0,
-    centerTitle: true,
-    backgroundColor: AppColor().milkWhite,
-  );
-}
-
 double getScreenWidth(BuildContext context) =>
     MediaQuery.of(context).size.width;
 
 double getScreenHeight(BuildContext context) =>
     MediaQuery.of(context).size.height;
+
+// Get user type
+String getUserType(int userType) {
+  switch (userType) {
+    case 0:
+      return "System Administrator";
+    case 1:
+      return "Admin";
+    case 2:
+      return "InBound Store Keeper";
+    case 3:
+      return "InBound Forklift Driver";
+    case 4:
+      return "OutBound Store Keeper";
+    case 5:
+      return "OutBound Forklift Driver";
+    default:
+      return "";
+  }
+}
 
 // custom card color based on pallet location
 Color customCardColor(String palletLocation) {
@@ -32,13 +35,12 @@ Color customCardColor(String palletLocation) {
       return AppColor().greyGoose;
     case "outbound":
       return AppColor().lightMustard;
-    case "Pallet":
     default:
       return AppColor().milkWhite;
   }
 }
 
-// custom card color based on pallet status
+// custom card color based on job status
 Color customCardColorStatus(String palletStatus) {
   switch (palletStatus) {
     case "Load Job Pending":
@@ -47,50 +49,51 @@ Color customCardColorStatus(String palletStatus) {
       return const Color.fromRGBO(242, 193, 141, 1);
     case "Loading To Truck":
       return const Color.fromRGBO(170, 215, 217, 1);
-    // case "Loaded To Truck/Close Pallet":
-    //   return Colors.green.shade300;
+    case "Loaded To Truck/Close Pallet":
+      return const Color.fromRGBO(41, 171, 135, 1);
     default:
-      return AppColor().milkWhite;
+      return AppColor().greyGoose;
   }
 }
 
+// Create custom empty value for quick PIC info
 Widget customEmptyValue = const Padding(
   padding: EdgeInsets.only(right: 3),
   child: Text('N/A'),
 );
 
+// Create custome show toast
 ToastFuture customShowToast(
   context,
   String text,
-  Color color,
-  bool dismiss, {
+  Color color, {
+  bool dismiss = false,
   void Function()? onDismiss,
-}) {
-  return showToast(
-    text,
-    context: context,
-    dismissOtherToast: dismiss,
-    onDismiss: onDismiss,
-    axis: Axis.horizontal,
-    alignment: Alignment.center,
-    borderRadius: const BorderRadius.all(Radius.circular(5)),
-    animation: StyledToastAnimation.slideFromTopFade,
-    reverseAnimation: StyledToastAnimation.slideToTopFade,
-    position: const StyledToastPosition(
-      align: Alignment.topCenter,
-      offset: 0.0,
-    ),
-    startOffset: const Offset(0.0, -3.0),
-    reverseEndOffset: const Offset(0.0, -3.0),
-    duration: const Duration(seconds: 3),
-    animDuration: const Duration(seconds: 1),
-    curve: Curves.fastLinearToSlowEaseIn,
-    reverseCurve: Curves.fastOutSlowIn,
-    backgroundColor: color,
-    fullWidth: true,
-    textAlign: TextAlign.justify,
-  );
-}
+}) =>
+    showToast(
+      dismissOtherToast: dismiss,
+      onDismiss: onDismiss,
+      text,
+      context: context,
+      axis: Axis.horizontal,
+      alignment: Alignment.center,
+      borderRadius: const BorderRadius.all(
+        Radius.circular(5),
+      ),
+      animation: StyledToastAnimation.slideFromTopFade,
+      reverseAnimation: StyledToastAnimation.slideToTopFade,
+      position:
+          const StyledToastPosition(align: Alignment.topCenter, offset: 0.0),
+      startOffset: const Offset(0.0, -3.0),
+      reverseEndOffset: const Offset(0.0, -3.0),
+      duration: const Duration(seconds: 3),
+      animDuration: const Duration(seconds: 1),
+      curve: Curves.fastLinearToSlowEaseIn,
+      reverseCurve: Curves.fastOutSlowIn,
+      backgroundColor: color,
+      fullWidth: true,
+      textAlign: TextAlign.justify,
+    );
 
 class SlideRoute extends PageRouteBuilder {
   final Widget page;
@@ -115,6 +118,23 @@ class SlideRoute extends PageRouteBuilder {
           transitionDuration: const Duration(milliseconds: 600),
         );
 }
+
+// Create custome App bar
+AppBar customAppBar(String title) => AppBar(
+      iconTheme: IconThemeData(
+        color: AppColor().milkWhite,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 23,
+          color: AppColor().milkWhite,
+        ),
+      ),
+      elevation: 3.0,
+      centerTitle: true,
+      backgroundColor: AppColor().blueZodiac,
+    );
 
 extension StringExtension on String {
   String capitalize() =>

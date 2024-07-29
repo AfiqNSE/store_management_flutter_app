@@ -6,8 +6,6 @@ import 'package:http/http.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/storage_utils.dart';
 
-//TODO: Fix the logout
-
 class ApiUser {
   String path = "${ApiServices.base}/user";
 

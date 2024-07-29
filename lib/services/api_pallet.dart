@@ -53,6 +53,38 @@ class ApiPallet {
     return json.decode(res.body);
   }
 
+  Future<Map<String, dynamic>> getByActivityNo(String activityNo) async {
+    Response res = await ApiServices.call(
+      Method.get,
+      Uri.parse("$path/activityNo/$activityNo"),
+    );
+
+    if (res.statusCode != HttpStatus.ok) {
+      return {"err": 1};
+    }
+    return json.decode(res.body);
+  }
+
+  Future<List<dynamic>> search(int page, int fetch, String value) async {
+    if (value.isEmpty) {
+      return List.empty();
+    }
+
+    Response res = await ApiServices.call(
+        Method.get, Uri.parse("$path/search?q=$value&page=$page&fetch=$fetch"));
+
+    if (res.statusCode != HttpStatus.ok) {
+      return List.empty();
+    }
+
+    var v = jsonDecode(res.body);
+    if (v != null) {
+      return v;
+    } else {
+      return List.empty();
+    }
+  }
+
   Future<int> open(
     String palletNo,
     String palletLocation,
@@ -289,15 +321,12 @@ class ApiPallet {
 
   Future<dynamic> getSignatureImage(String signaturePath) async {
     Response res = await ApiServices.call(
-      Method.post,
-      Uri.parse("$path/signature/image"),
-      body: jsonEncode({
-        'signaturePath': signaturePath,
-      }),
+      Method.get,
+      Uri.parse('$path/signature/path/$signaturePath'),
     );
     if (res.statusCode != HttpStatus.ok) {
-      return "";
+      return null;
     }
-    return json.decode(res.body);
+    return res.bodyBytes;
   }
 }

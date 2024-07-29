@@ -1,9 +1,8 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:store_management_system/components/pagination_components.dart';
 import 'package:store_management_system/components/search_components.dart';
 import 'package:store_management_system/models/color_model.dart';
-
-// TODO: Search bar need to be update to function properly.
+import 'package:store_management_system/services/api_services.dart';
 
 class SearchPalletView extends StatefulWidget {
   const SearchPalletView({super.key});
@@ -13,72 +12,107 @@ class SearchPalletView extends StatefulWidget {
 }
 
 class _SearchPalletViewState extends State<SearchPalletView> {
+  GlobalKey<PaginationState> paginationKey = GlobalKey();
   final TextEditingController searchController = TextEditingController();
 
-  List<dynamic> pallets = List.empty();
-  List<dynamic> searchPallet = List.empty();
+  List<dynamic>? _pallets;
 
-  bool searchMode = false;
-  bool loading = true;
+  String _searchValue = "";
+
+  bool searchMode = true;
+  bool _loading = false;
+
+  final int _itemsPerPage = 10;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_searchValue != "") palletSearch();
+  }
+
+  palletSearch() async {
+    setState(() => _loading = true);
+    _pallets = await ApiServices.pallet.search(
+      0,
+      _itemsPerPage,
+      _searchValue,
+    );
+    if (mounted) setState(() => _loading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
-    Widget appBarTitle = Text(
-      "Search Pallet History",
-      style: TextStyle(
-        color: AppColor().matteBlack,
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-
-    Widget searchBar = PalletSearch(
-      padding: const EdgeInsets.only(left: NavigationToolbar.kMiddleSpacing),
-      controller: searchController,
-      onSearch: (value) {
-        searchPallet = pallets
-            .where((element) =>
-                element[""].contains(value) || element[""].contains(value))
-            .toList();
-
-        setState(() {});
-      },
-    );
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Padding(
-          padding: const EdgeInsets.only(left: 5.0),
-          child: searchMode ? searchBar : appBarTitle,
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          scrolledUnderElevation: 0.0,
+          backgroundColor: AppColor().milkWhite,
+          centerTitle: true,
+          actions: [
+            const SizedBox(width: 35),
+            Expanded(
+              child: PalletSearch(
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                controller: searchController,
+                enabled: !_loading,
+                waitTime: const Duration(seconds: 1),
+                onSearch: (String value) async {
+                  _searchValue = value;
+                  paginationKey.currentState?.reset();
+                  await palletSearch();
+                },
+              ),
+            ),
+          ],
         ),
         backgroundColor: AppColor().milkWhite,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: (!searchMode)
-                ? IconButton(
-                    onPressed: () => setState(() => searchMode = true),
-                    icon: const Icon(
-                      FluentIcons.search_24_filled,
-                      size: 28,
-                    ),
-                  )
-                : TextButton(
-                    onPressed: () => setState(() => searchMode = false),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppColor().yaleBlue,
-                      ),
-                    ),
-                  ),
-          ),
-        ],
-      ),
-      backgroundColor: AppColor().milkWhite,
-      body: const Center(
-        child: Text('Search History View Page'),
+        body: Builder(
+          builder: (context) {
+            if (_loading) {
+              return Center(
+                child: CircularProgressIndicator.adaptive(
+                  valueColor: AlwaysStoppedAnimation(AppColor().blueZodiac),
+                ),
+              );
+            }
+
+            if (_searchValue == "") {
+              return Container(
+                alignment: Alignment.topCenter,
+                padding: const EdgeInsets.only(top: 30),
+                child: const Text('Enter pallet number to search pallet.'),
+              );
+            }
+
+            if (_pallets == null) {
+              return const SizedBox.shrink();
+            }
+
+            if (_pallets!.isEmpty) {
+              return Container(
+                alignment: Alignment.topCenter,
+                padding: const EdgeInsets.only(top: 30),
+                child: const Text('No pallets found.'),
+              );
+            }
+
+            return Pagination(
+              key: paginationKey,
+              itemsPerPage: _itemsPerPage,
+              pallets: _pallets!,
+              onLoadMore: (page) async {
+                _pallets!.addAll(await ApiServices.pallet.search(
+                  page,
+                  _itemsPerPage,
+                  _searchValue,
+                ));
+
+                setState(() {});
+              },
+            );
+          },
+        ),
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:store_management_system/components/search_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/models/summary.dart';
@@ -24,6 +25,11 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  final TextEditingController searchController = TextEditingController();
+
+  List<dynamic> pallets = List.empty();
+  List<dynamic> searchPallet = List.empty();
+
   late String formattedDate;
   String greetingMessage = "";
 
@@ -39,7 +45,6 @@ class _HomeViewState extends State<HomeView> {
             context,
             'Failed to get data from server, try again later.',
             Colors.red.shade300,
-            false,
           ),
         );
       }
@@ -121,7 +126,12 @@ class _HomeViewState extends State<HomeView> {
             ),
             createQuickAction(
               'More',
-              onTap: () {},
+              onTap: () => customShowToast(
+                context,
+                "This feature will be available soon.",
+                Colors.grey.shade600,
+                dismiss: true,
+              ),
               icon: FluentIcons.grid_dots_24_filled,
             ),
           ],
@@ -285,7 +295,6 @@ class _HomeViewState extends State<HomeView> {
           context,
           'Failed to get platform version.',
           Colors.red.shade300,
-          false,
         );
       }
 
@@ -301,7 +310,7 @@ class _HomeViewState extends State<HomeView> {
           context,
           'No pallet number found in the database',
           Colors.red.shade300,
-          true,
+          dismiss: true,
         );
       } else {
         Pallet pallet = Pallet.fromMap(res);
@@ -314,6 +323,29 @@ class _HomeViewState extends State<HomeView> {
     }
   }
 
+  void search() => showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return AlertDialog(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            backgroundColor: AppColor().greyGoose.withOpacity(0.3),
+            elevation: 3.0,
+            insetPadding: EdgeInsets.zero,
+            contentPadding: EdgeInsets.zero,
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            content: PalletSearch(
+              controller: searchController,
+              onSearch: (value) {
+                setState(() {});
+              },
+            ),
+          );
+        },
+      );
+
   Widget createSummaryCard(String text, int value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 5),
@@ -324,7 +356,7 @@ class _HomeViewState extends State<HomeView> {
           height: 90,
           width: double.maxFinite,
           decoration: BoxDecoration(
-            border: Border.all(color: AppColor().milkWhite, width: 0.7),
+            border: Border.all(width: 0.3, color: Colors.grey.shade600),
             borderRadius: BorderRadius.circular(10),
             color: customCardColor(text),
           ),
@@ -374,7 +406,7 @@ class _HomeViewState extends State<HomeView> {
           context,
           "Failed to get data from server, try again later.",
           Colors.red.shade300,
-          true,
+          dismiss: true,
         );
       }
     });

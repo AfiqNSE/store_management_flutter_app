@@ -360,8 +360,11 @@ class _LoginViewState extends State<LoginView> {
     Storage.instance.setUsername(username.text);
     Storage.instance.setPassword(password.text);
     Storage.instance.setDisplayName(res["user"]["displayName"]);
+    Storage.instance.setUserType(res["user"]["userType"]);
     Storage.instance.setAccessToken(res["token"]["access"]);
     Storage.instance.setRefreshToken(res["token"]["refresh"]);
+
+    print(res["user"]["userType"]);
 
     return 0;
   }

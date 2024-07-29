@@ -1,7 +1,9 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/models/color_model.dart';
+import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 
@@ -190,11 +192,14 @@ class AssignJobFormState extends State<AssignJobForm> {
           });
 
           ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: const Text('Server error, please try again later.'),
-            backgroundColor: Colors.red.shade300,
-            duration: const Duration(seconds: 5),
-          ));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(
+                content: const Text('Server error, please try again later.'),
+                backgroundColor: Colors.red.shade300,
+                duration: const Duration(seconds: 5),
+              ))
+              .closed
+              .then((value) => Navigator.pop(context));
 
           return;
         }
@@ -207,7 +212,13 @@ class AssignJobFormState extends State<AssignJobForm> {
               duration: const Duration(seconds: 5),
             ))
             .closed
-            .then((value) => Navigator.pop(context));
+            .then((value) {
+          Navigator.pop(context);
+          setState(() {
+            Provider.of<PalletNotifier>(context, listen: false)
+                .update(widget.palletActivityId);
+          });
+        });
       },
     );
   }

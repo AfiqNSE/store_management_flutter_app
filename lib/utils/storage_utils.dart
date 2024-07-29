@@ -6,6 +6,7 @@ class Storage {
 
   String _guid = "";
   String _displayName = "";
+  int _userType = 0;
   String _accessToken = "";
   String _refreshToken = "";
   String _fcmToken = "";
@@ -37,9 +38,19 @@ class Storage {
     _storage.write(key: "display-name", value: displayName);
   }
 
+  void setUserType(int userType) {
+    _userType = userType;
+    _storage.write(key: "user-type", value: userType.toString());
+  }
+
   Future<String> getDisplayName() async {
     if (_displayName != "") return _displayName;
     return (await _storage.read(key: "display-name")) ?? "";
+  }
+
+  Future<int> getUserType() async {
+    if (_userType != -1) return _userType;
+    return (int.parse(_storage.read(key: "user-type").toString()));
   }
 
   void setAccessToken(String accessToken) {

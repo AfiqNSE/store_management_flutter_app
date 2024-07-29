@@ -7,8 +7,9 @@ class PalletSearch extends StatefulWidget {
   final EdgeInsets padding;
   final TextEditingController controller;
   final bool enabled;
-  final Duration waitTime;
   final Function(String value) onSearch;
+  final Duration waitTime;
+  final bool activePalletOnly;
 
   const PalletSearch({
     super.key,
@@ -17,6 +18,7 @@ class PalletSearch extends StatefulWidget {
     this.enabled = true,
     this.waitTime = const Duration(seconds: 1),
     required this.onSearch,
+    this.activePalletOnly = false,
   });
 
   @override
@@ -25,6 +27,7 @@ class PalletSearch extends StatefulWidget {
 
 class _PalletSearchState extends State<PalletSearch> {
   Timer? stopTyping;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -32,18 +35,17 @@ class _PalletSearchState extends State<PalletSearch> {
       child: TextField(
         controller: widget.controller,
         autofocus: true,
-        enabled: widget.enabled,
         decoration: InputDecoration(
           isDense: true,
           filled: true,
           fillColor: Colors.grey.shade200,
           focusedBorder: OutlineInputBorder(
             borderSide: const BorderSide(color: Colors.white, width: 0),
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(10),
           ),
           enabledBorder: OutlineInputBorder(
             borderSide: const BorderSide(color: Colors.white, width: 0),
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(10),
           ),
           prefixIcon: Padding(
             padding: const EdgeInsets.only(left: 8, right: 4),
@@ -53,8 +55,8 @@ class _PalletSearchState extends State<PalletSearch> {
             ),
           ),
           prefixIconConstraints: const BoxConstraints(
-            minHeight: 24,
-            minWidth: 24,
+            minHeight: 26,
+            minWidth: 26,
           ),
           contentPadding: const EdgeInsets.symmetric(vertical: 8),
           hintText: "Search Pallet...",
@@ -86,23 +88,30 @@ class _PalletSearchState extends State<PalletSearch> {
         onChanged: (value) {
           setState(() {});
 
-          if (stopTyping != null) {
-            stopTyping!.cancel();
+          if (!widget.activePalletOnly) {
+            if (stopTyping != null) {
+              stopTyping!.cancel();
+            }
+
+            if (value.length < 3) {
+              return;
+            }
+
+            stopTyping = Timer(widget.waitTime, () {
+              widget.onSearch(value);
+            });
           }
 
           if (value == "") {
             return;
           }
-
-          if (value.length < 4) {
-            return;
-          }
-
-          stopTyping = Timer(widget.waitTime, () {
-            widget.onSearch(value);
-          });
         },
         onSubmitted: (value) {
+          // Only for Pallet view
+          if (widget.activePalletOnly) {
+            widget.controller.clear();
+          }
+
           if (stopTyping != null) {
             stopTyping!.cancel();
           }

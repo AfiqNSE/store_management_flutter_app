@@ -1,27 +1,24 @@
-import 'dart:io';
-
-import 'dart:ui' as ui;
+import 'dart:typed_data';
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:store_management_system/components/pallet_assign_job_form.dart';
+import 'package:store_management_system/components/pallet_signature_component.dart';
+import 'package:store_management_system/components/print_BLE_components.dart';
+import 'package:store_management_system/components/print_Wifi_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/components/pallet_components.dart';
 import 'package:store_management_system/view/pallet/pallet_table.dart';
-import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
-
-//TODO: Change snackbar to customToast
 
 class PalletDetailsView extends StatefulWidget {
   final int palletActivityId;
   final String palletNo;
+  final String palletActivityNo;
 
   /// Create a pallet details view, either palletActivityId or palletNo is required.
   /// If palletActivityId is given, palletNo will be ignored. Otherwise, it will search
@@ -30,6 +27,7 @@ class PalletDetailsView extends StatefulWidget {
     super.key,
     this.palletActivityId = 0,
     this.palletNo = "",
+    this.palletActivityNo = "",
   });
 
   @override
@@ -38,14 +36,12 @@ class PalletDetailsView extends StatefulWidget {
 
 class _PalletDetailsViewState extends State<PalletDetailsView> {
   final GlobalKey<AssignJobFormState> assignKey = GlobalKey();
-  final GlobalKey<SfSignaturePadState> signaturePadKey = GlobalKey();
 
   Pallet? pallet;
   int itemTotal = 0;
 
   List<dynamic> drivers = List.empty();
 
-  bool _signature = false;
   bool expanded = false;
 
   bool loading = false;
@@ -57,18 +53,18 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     super.initState();
     loadPallet().then((value) {
       if (value > 0) {
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) => customShowToast(
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.of(context).pop();
+          customShowToast(
             context,
             "Pallet not found.",
             Colors.red.shade300,
-            false,
+            dismiss: true,
             onDismiss: () => Navigator.pop(context),
-          ),
-        );
+          );
+        });
       }
     });
-
     loadDrivers();
   }
 
@@ -77,25 +73,59 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     if (widget.palletActivityId != 0) return 0;
 
     // Search pallet with palletNo
-    Map<String, dynamic> res = await ApiServices.pallet.getByNo(
-      widget.palletNo,
-    );
+    if (widget.palletNo != "") {
+      Map<String, dynamic> res = await ApiServices.pallet.getByNo(
+        widget.palletNo,
+      );
 
-    int err = 0;
-    if (res.containsKey("err")) {
-      pallet = Pallet.empty();
-      err = 1;
-    } else {
-      pallet = Pallet.fromMap(res);
-      itemTotal = pallet!.items.fold(0, (sum, item) => sum + item.qty);
+      int err = 0;
+      if (res.containsKey("err")) {
+        pallet = Pallet.empty();
+        err = 1;
+      } else {
+        pallet = Pallet.fromMap(res);
+        itemTotal = pallet!.items.fold(0, (sum, item) => sum + item.qty);
+      }
+
+      setState(() {});
+      return err;
     }
 
-    setState(() {});
-    return err;
+    // Search pallet with activityNo
+    if (widget.palletActivityNo != "") {
+      Map<String, dynamic> res = await ApiServices.pallet.getByActivityNo(
+        widget.palletActivityNo,
+      );
+
+      int err = 0;
+      if (res.containsKey("err")) {
+        pallet = Pallet.empty();
+        err = 1;
+      } else {
+        pallet = Pallet.fromMap(res);
+        itemTotal = pallet!.items.fold(0, (sum, item) => sum + item.qty);
+      }
+
+      setState(() {});
+      return err;
+    }
+
+    return 0;
   }
 
   loadDrivers() async {
     drivers = await ApiServices.user.getDrivers();
+  }
+
+  Future<Image?> _signatureImage(String? signaturePath) async {
+    Uint8List? imageBytes =
+        await ApiServices.pallet.getSignatureImage(signaturePath!);
+
+    if (imageBytes != null) {
+      return Image.memory(imageBytes);
+    } else {
+      return null;
+    }
   }
 
   @override
@@ -104,6 +134,7 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     if (widget.palletActivityId != 0) {
       pallet =
           Provider.of<PalletNotifier>(context).pallets[widget.palletActivityId];
+      itemTotal = pallet!.items.fold(0, (sum, item) => sum + item.qty);
     }
 
     // Create section for pallet general info
@@ -147,37 +178,52 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
               ),
         Divider(color: Colors.grey.shade400, indent: 10, endIndent: 10),
         Row(children: [
-          const Text(
-            'Status: ',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          (pallet == null)
-              ? Shimmer.fromColors(
-                  baseColor: Colors.grey.shade300,
-                  highlightColor: Colors.grey.shade100,
-                  child: Container(
-                    width: 130,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
+          Divider(color: Colors.grey.shade400, indent: 10, endIndent: 10),
+          Row(children: [
+            const Text(
+              'Status: ',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            (pallet == null)
+                ? Shimmer.fromColors(
+                    baseColor: Colors.grey.shade300,
+                    highlightColor: Colors.grey.shade100,
+                    child: Container(
+                      width: 130,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  )
+                : Text(
+                    pallet!.status,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColor().tealBlue,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                )
-              : Text(
-                  pallet!.status,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColor().tealBlue,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-          IconButton(
-            onPressed: (pallet == null)
-                ? null
-                : () => showQuickPICInfo(context, pallet!),
-            icon: Icon(Icons.info_outline, color: AppColor().tealBlue),
-          )
+            IconButton(
+              onPressed: (pallet == null)
+                  ? null
+                  : () => showQuickPICInfo(context, pallet!),
+              icon: Icon(Icons.info_outline, color: AppColor().tealBlue),
+            )
+          ]),
+          const SizedBox(height: 10),
+          createPalletDetails('Type', pallet?.palletType.capitalize()),
+          const SizedBox(height: 5),
+          createPalletDetails('Destination', pallet?.destination.capitalize()),
+          const SizedBox(height: 5),
+          createPalletDetails('Lorry No', pallet?.lorryNo),
+          const SizedBox(height: 5),
+          createPalletDetails(
+            'Forklift Driver',
+            pallet?.assignToUserName.capitalize(),
+          ),
+          const SizedBox(height: 5),
         ]),
         const SizedBox(height: 10),
         createPalletDetails('Type', pallet?.palletType.capitalize()),
@@ -215,7 +261,39 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
         ),
         children: [
           Container(
-            child: pallet == null ? null : const Text('Signature'),
+            child: pallet == null
+                ? null
+                : pallet!.signature.attachmentFullPath != ""
+                    ? FutureBuilder<Image?>(
+                        future: _signatureImage(
+                            pallet!.signature.attachmentFullPath),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Column(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 300,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: snapshot.data!.image,
+                                        fit: BoxFit.fitWidth,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                const Text('Signed by: '),
+                              ],
+                            );
+                          }
+                          return const Text('Signature Error');
+                        },
+                      )
+                    : const Text('No Signature Available'),
           ),
           const SizedBox(height: 20),
         ],
@@ -290,13 +368,17 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   child: TextButton.icon(
                     onPressed: (pallet == null)
                         ? null
-                        : () => Navigator.of(context).push(SlideRoute(
+                        : () => Navigator.of(context)
+                                .push(SlideRoute(
                               page: ActivityDetailsTableView(
                                 palletActivityId: pallet!.palletActivityId,
                                 activityItems: pallet!.items,
                               ),
                               toRight: true,
-                            )),
+                            ))
+                                .then((_) {
+                              setState(() {});
+                            }),
                     icon: const Icon(
                       FluentIcons.edit_24_filled,
                       color: Colors.white,
@@ -337,25 +419,26 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(150, 50),
-              backgroundColor: pallet?.palletLocation == "outbound"
+              backgroundColor: pallet == null
                   ? AppColor().greyGoose.withOpacity(0.8)
-                  : AppColor().blueZodiac,
-              elevation: pallet?.palletLocation == "outbound" ? 0 : 3,
+                  : pallet?.palletLocation == "outbound"
+                      ? AppColor().greyGoose.withOpacity(0.8)
+                      : AppColor().blueZodiac,
+              elevation: pallet == null
+                  ? 0
+                  : pallet?.palletLocation == "outbound"
+                      ? 0
+                      : 3,
             ),
             onPressed: pallet == null
                 ? null
                 : pallet!.palletLocation == "outbound"
-                    ? () {
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content:
-                                const Text('This pallet is already outBound.'),
-                            backgroundColor: Colors.grey.shade600,
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      }
+                    ? () => customShowToast(
+                          context,
+                          'This pallet is already outBound.',
+                          AppColor().gamboge,
+                          dismiss: true,
+                        )
                     : _movePallet,
             icon: const Icon(
               Icons.compare_arrows_sharp,
@@ -383,18 +466,23 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
             ),
             onPressed: pallet == null
                 ? null
-                : (pallet!.assignByUserName != '')
-                    ? () {
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: const Text(
-                            'This pallet is already been assigned.',
-                          ),
-                          backgroundColor: Colors.grey.shade600,
-                          duration: const Duration(seconds: 2),
-                        ));
-                      }
-                    : _assignJob,
+                : (pallet!.palletLocation != 'inbound')
+                    ? (pallet!.assignByUserName != '')
+                        ? () {
+                            customShowToast(
+                              context,
+                              'This pallet is already been assigned.',
+                              AppColor().gamboge,
+                              dismiss: true,
+                            );
+                          }
+                        : _assignJob
+                    : () => customShowToast(
+                          context,
+                          'Please move this pallet to outBound',
+                          AppColor().gamboge,
+                          dismiss: true,
+                        ),
             icon: const Icon(
               FluentIcons.person_add_24_filled,
               color: Colors.white,
@@ -417,22 +505,31 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                 borderRadius: BorderRadius.circular(10),
               ),
               minimumSize: const Size(140, 50),
-              backgroundColor: (pallet?.status != 'Loading To Truck')
+              backgroundColor: pallet == null
                   ? AppColor().greyGoose.withOpacity(0.8)
-                  : AppColor().blueZodiac,
-              elevation: pallet?.status != 'Loading To Truck' ? 0 : 3,
+                  : pallet?.status != 'Loading To Truck'
+                      ? AppColor().greyGoose.withOpacity(0.8)
+                      : AppColor().blueZodiac,
+              elevation: pallet == null
+                  ? 0
+                  : pallet?.status != 'Loading To Truck'
+                      ? 0
+                      : 3,
             ),
             onPressed: pallet?.status == 'Loading To Truck'
-                ? _signatureBox
+                ? () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => PalletSignature(
+                          palletNo: pallet!.palletNo,
+                          palletActivityId: pallet!.palletActivityId),
+                    ));
+                  }
                 : () {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
-                            'This pallet status need to be --Loading To Truck--'),
-                        backgroundColor: Colors.grey.shade600,
-                        duration: const Duration(seconds: 2),
-                      ),
+                    customShowToast(
+                      context,
+                      'The pallet status need to be "Loading To Truck"',
+                      AppColor().gamboge,
+                      dismiss: true,
                     );
                   },
             icon: const Icon(
@@ -457,7 +554,24 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
               backgroundColor: AppColor().blueZodiac,
               elevation: 3,
             ),
-            onPressed: pallet == null ? null : () {},
+            onPressed: pallet == null
+                ? null
+                : () {
+                    if (pallet?.palletType == 'palletise') {
+                      // Print 'palletise' using BLE printer
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(
+                              builder: (context) =>
+                                  BLEPalletPrintView(pallet: pallet!)))
+                          .then(
+                            (value) => ScaffoldMessenger.of(context)
+                                .hideCurrentSnackBar(),
+                          );
+                    } else {
+                      // Print 'loose' using Wifi printer
+                      printReceiptDialog();
+                    }
+                  },
             icon: const Icon(Icons.print_outlined, color: Colors.white),
             label: const Text(
               'Print',
@@ -473,34 +587,36 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     );
 
     return Scaffold(
-      appBar: customAppBar("Pallet Details"),
-      backgroundColor: AppColor().milkWhite,
-      body: Stack(children: [
-        SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 10, 8, 0),
-            child: Column(children: [
-              // Show pallet general info
-              palletDetails,
+        appBar: customAppBar("Pallet Details"),
+        backgroundColor: AppColor().milkWhite,
+        body: Consumer<PalletNotifier>(builder: (context, value, child) {
+          return Stack(children: [
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 10, 8, 0),
+                child: Column(children: [
+                  // Show pallet general info
+                  palletDetails,
 
-              // Show PIC Signature
-              signatureArea,
+                  // Show PIC Signature
+                  signatureArea,
 
-              // Show pallet item table info
-              palletItemsArea,
+                  // Show pallet item table info
+                  palletItemsArea,
 
-              // Show function button info
-              displayButton,
-            ]),
-          ),
-        ),
-        if (reqLoading)
-          Container(
-            color: const Color.fromRGBO(255, 255, 255, .8),
-            child: const Center(child: CircularProgressIndicator.adaptive()),
-          )
-      ]),
-    );
+                  // Show function button info
+                  displayButton,
+                ]),
+              ),
+            ),
+            if (reqLoading)
+              Container(
+                color: const Color.fromRGBO(255, 255, 255, .8),
+                child:
+                    const Center(child: CircularProgressIndicator.adaptive()),
+              )
+          ]);
+        }));
   }
 
   void _movePallet() {
@@ -623,42 +739,35 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
   }
 
   movePalletToOutBound() {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: const Text('Sending request...'),
-      backgroundColor: Colors.blue.shade300,
-      duration: const Duration(seconds: 5),
-    ));
-
     setState(() {
       reqLoading = true;
     });
 
     ApiServices.pallet.move(pallet!.palletActivityId).then((value) {
       if (!value) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: const Text(
-            'Move pallet request failed. Please try again.',
-          ),
-          backgroundColor: Colors.red.shade300,
-          duration: const Duration(seconds: 5),
-        ));
+        customShowToast(
+          context,
+          'Move pallet request failed. Please try again.',
+          Colors.red.shade300,
+        );
       } else {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Move pallet request successfull.'),
-            backgroundColor: Colors.blue.shade300,
-            duration: const Duration(seconds: 5),
-          ),
+        customShowToast(
+          context,
+          'Move pallet request successfull.',
+          Colors.blue.shade300,
         );
       }
 
       setState(() {
         reqLoading = false;
+
+        Provider.of<PalletNotifier>(context, listen: false)
+            .update(pallet!.palletActivityId);
       });
     });
+
+    Provider.of<PalletNotifier>(context, listen: false)
+        .move(pallet!.palletActivityId);
   }
 
   void _assignJob() {
@@ -764,178 +873,80 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     );
   }
 
-  // Create Signature pop up box
-  Future<void> _signatureBox() {
-    return showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: '',
-      pageBuilder: (context, animation1, animation2) {
-        return Container();
-      },
-      transitionBuilder: (context, a1, a2, widget) {
-        return ScaleTransition(
-          scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
-          child: FadeTransition(
-            opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
-            child: AlertDialog(
-              elevation: 3.0,
-              backgroundColor: AppColor().milkWhite,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(10),
-                ),
+  printReceiptDialog() => showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return AlertDialog(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            backgroundColor: Colors.white,
+            elevation: 3.0,
+            title: const Text(
+              'Confirm to print pallet receipt?',
+              style: TextStyle(
+                fontSize: 16,
               ),
-              title: const Center(
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
                 child: Text(
-                  'Pallet Signature',
+                  'Cancel',
                   style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
+                    color: AppColor().yaleBlue,
                   ),
                 ),
               ),
-              content: SizedBox(
-                height: 280,
-                width: double.maxFinite,
-                child: SfSignaturePad(
-                  key: signaturePadKey,
-                  minimumStrokeWidth: 1,
-                  maximumStrokeWidth: 3,
-                  strokeColor: Colors.blue,
-                  backgroundColor: Colors.white,
-                  onDrawEnd: () {
-                    _signature = true;
-                  },
+              TextButton(
+                onPressed: () => printReceipt(),
+                child: Text(
+                  'Confirm',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: AppColor().yaleBlue,
+                  ),
                 ),
               ),
-              actions: <Widget>[
-                Column(
-                  children: [
-                    ListTile(
-                      title: Text('Clear Signature',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.blue.shade500,
-                            fontWeight: FontWeight.w600,
-                          )),
-                      onTap: () {
-                        _signature = false;
-                        signaturePadKey.currentState!.clear();
-                      },
-                    ),
-                    Divider(
-                      thickness: 2.0,
-                      indent: 20.0,
-                      endIndent: 20.0,
-                      height: 0.1,
-                      color: Colors.grey.shade300,
-                    ),
-                    ListTile(
-                      title: Text(
-                        'Submit Signature',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 17,
-                          color: Colors.blue.shade500,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      onTap: () async {
-                        if (_signature) {
-                          await _sendSignature(pallet!.palletActivityId);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text(
-                                  'Please sign the pallet before submit.'),
-                              backgroundColor: Colors.red.shade300,
-                              duration: const Duration(seconds: 5),
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    Divider(
-                      thickness: 2.0,
-                      indent: 20.0,
-                      endIndent: 20.0,
-                      height: 0.1,
-                      color: Colors.grey.shade300,
-                    ),
-                    ListTile(
-                      title: const Text(
-                        'Cancel',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                        _signature = false;
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
+            ],
+          );
+        },
+      );
 
-  _sendSignature(int palletActivityId) async {
-    Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Sending the signature..'),
-        backgroundColor: Colors.blue.shade300,
-        duration: const Duration(seconds: 5),
-      ),
-    );
+  printReceipt() async {
+    Navigator.pop(context);
 
-    // Save the signature as a file
-    ui.Image signature = await signaturePadKey.currentState!.toImage();
+    setState(() {
+      reqLoading = true;
+    });
 
-    ByteData? byteData =
-        await signature.toByteData(format: ui.ImageByteFormat.png);
-    Uint8List signatureBytes = byteData!.buffer.asUint8List();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: const Text('Connecting to printer...'),
+      backgroundColor: Colors.blue.shade400,
+      duration: const Duration(seconds: 20),
+    ));
 
-    //Create temporary directory to store the signature image
-    final tempDir = await getTemporaryDirectory();
-    File signatureFile = File('${tempDir.path}/${pallet!.palletNo}.jpeg');
-    await signatureFile.writeAsBytes(signatureBytes);
+    var receipt = await NetworkPrinter().testTicket(pallet!, itemTotal);
 
-    var res = await ApiServices.signature
-        .sendSignature(palletActivityId, signatureFile, isAccess);
+    await NetworkPrinter().printTicket(receipt).then((value) {
+      ScaffoldMessenger.of(context).clearSnackBars();
 
-    if (mounted) {
-      if (res.statusCode != HttpStatus.ok) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Failed to send signature. Please try again.'),
-            backgroundColor: Colors.red.shade300,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-        return;
-      } else {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Successfully sign the pallet.'),
-            backgroundColor: Colors.green.shade300,
-            duration: const Duration(seconds: 5),
-          ),
-        );
+      if (value != "Success Print") {
+        setState(() {
+          reqLoading = false;
+        });
+
+        customShowToast(context, value, Colors.red.shade300);
+
         return;
       }
-    }
+
+      customShowToast(context, value, Colors.green.shade300);
+
+      setState(() {
+        reqLoading = false;
+      });
+    });
   }
 }

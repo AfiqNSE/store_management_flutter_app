@@ -7,6 +7,8 @@ import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 
+//TODO: Change Snackbar to customToast
+
 class PalletFormView extends StatefulWidget {
   const PalletFormView({super.key});
 

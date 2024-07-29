@@ -1,20 +1,14 @@
-import 'dart:io';
-import 'dart:ui' as ui;
-
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_styled_toast/flutter_styled_toast.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:store_management_system/components/pallet_components.dart';
+import 'package:provider/provider.dart';
+import 'package:store_management_system/components/pallet_signature_component.dart';
+import 'package:store_management_system/components/search_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 import 'package:syncfusion_flutter_signaturepad/signaturepad.dart';
-
-//TODO: Amend signature validation
 
 class JobView extends StatefulWidget {
   const JobView({super.key});
@@ -25,61 +19,32 @@ class JobView extends StatefulWidget {
 
 class _JobViewState extends State<JobView> with TickerProviderStateMixin {
   final GlobalKey<SfSignaturePadState> signaturePadKey = GlobalKey();
-  final ValueNotifier<bool> _signatureValidNotifier = ValueNotifier<bool>(true);
 
-  List<Pallet> jobAssignedList = List.empty(growable: true);
-  List<Pallet> jobConfirmList = List.empty(growable: true);
-  List<Pallet> jobLoadingList = List.empty(growable: true);
+  TextEditingController searchController = TextEditingController();
 
-  String signatureErr = "";
+  late List<Pallet> jobAssignedList;
+  late List<Pallet> jobConfirmList;
+  late List<Pallet> jobLoadingList;
+
+  //Store only palletNo for search functionality
+  late List<String> allPalletNoList;
+
   late TabController _tabController;
-  bool? _signature;
   bool isAccess = true;
+  bool searchMode = false;
+
+  late String _searchValue = "";
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    getAssignedJob();
-    getConfirmJob();
-    getJobLoads();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    _signatureValidNotifier.dispose();
     super.dispose();
-  }
-
-  getAssignedJob() async {
-    List<dynamic>? res = await ApiServices.pallet.fetchAssignedJob();
-
-    if (res != null && res.isNotEmpty) {
-      jobAssignedList = res.map((e) => Pallet.fromMap(e)).toList();
-    }
-
-    setState(() {});
-  }
-
-  getConfirmJob() async {
-    List<dynamic>? res = await ApiServices.pallet.fetchConfirmedJob();
-
-    if (res != null && res.isNotEmpty) {
-      jobConfirmList = res.map((e) => Pallet.fromMap(e)).toList();
-    }
-
-    setState(() {});
-  }
-
-  getJobLoads() async {
-    List<dynamic>? res = await ApiServices.pallet.fetchLoadingJob();
-
-    if (res != null && res.isNotEmpty) {
-      jobLoadingList = res.map((e) => Pallet.fromMap(e)).toList();
-    }
-
-    setState(() {});
   }
 
   confirmJob(int palletActivityId) async {
@@ -90,7 +55,6 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
           context,
           "Failed to confirm the job. Please try again.",
           Colors.red.shade300,
-          false,
         );
         return;
       }
@@ -98,10 +62,12 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
         context,
         "Job confirmation successful.",
         Colors.blue.shade300,
-        false,
       );
+      setState(() {});
+
+      Provider.of<PalletNotifier>(context, listen: false)
+          .confirm(palletActivityId);
     }
-    setState(() {});
   }
 
   loadJob(int palletActivityId) async {
@@ -112,7 +78,6 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
           context,
           "Failed to load the pallet onto the truck. Please try again",
           Colors.red.shade300,
-          false,
         );
         return;
       }
@@ -120,33 +85,22 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
         context,
         "Loading this pallet onto the truck.",
         Colors.blue.shade300,
-        false,
       );
+
+      setState(() {});
+
+      Provider.of<PalletNotifier>(context, listen: false)
+          .load(palletActivityId);
     }
-    setState(() {});
   }
 
-  closePallet(int palletActivityId) async {
-    bool res = await ApiServices.pallet.close(palletActivityId);
-    if (mounted) {
-      if (res != true) {
-        customShowToast(
-          context,
-          "Failed to close the pallet. Please try again.",
-          Colors.red.shade300,
-          true,
-        );
-        return;
-      }
-      showToast('').dismiss();
-      customShowToast(
-        context,
-        "Pallet closed successfully.",
-        Colors.blue.shade300,
-        true,
-      );
+  searchJobs(List<String> palletNoList, String value) {
+    if (palletNoList.contains(value)) {
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => PalletDetailsView(palletNo: value)));
+    } else {
+      customShowToast(context, "No Job Found", Colors.red.shade300);
     }
-    setState(() {});
   }
 
   @override
@@ -256,9 +210,8 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                         builder: (context) => PalletDetailsView(
-                              palletActivityId:
-                                  jobLoadingList[index].palletActivityId,
-                            )),
+                            palletActivityId:
+                                jobLoadingList[index].palletActivityId)),
                   );
                 },
                 title: Text(
@@ -276,7 +229,14 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
                   maxLines: 3,
                 ),
                 trailing: IconButton(
-                  onPressed: () => closePalletDialogBox(index),
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => PalletSignature(
+                              palletNo: jobLoadingList[index].palletNo,
+                              palletActivityId:
+                                  jobLoadingList[index].palletActivityId,
+                            )));
+                  },
                   icon: const Icon(
                     FluentIcons.clipboard_more_24_filled,
                     size: 40,
@@ -285,14 +245,24 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
           ),
         );
 
-    // Create Tab categories; Assigned, Confirmed, Loadin/loaded
+    // Create Tab categories; Assigned, Confirmed, Loading
     Widget palletCategories() {
       Widget appBarTitle = const Text(
-        "Today's Jobs",
+        "Today's Job List",
         style: TextStyle(
-          fontSize: 20,
+          fontSize: 22,
           fontWeight: FontWeight.w600,
         ),
+      );
+
+      Widget search = PalletSearch(
+        activePalletOnly: true,
+        padding: const EdgeInsets.only(left: NavigationToolbar.kMiddleSpacing),
+        controller: searchController,
+        onSearch: (value) async {
+          _searchValue = value;
+          await searchJobs(allPalletNoList, _searchValue.toUpperCase());
+        },
       );
 
       return DefaultTabController(
@@ -300,11 +270,33 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
         length: 2,
         child: Scaffold(
           appBar: AppBar(
+            scrolledUnderElevation: 0.0,
             title: Padding(
               padding: const EdgeInsets.only(left: 5.0),
-              child: appBarTitle,
+              child: searchMode ? search : appBarTitle,
             ),
             backgroundColor: AppColor().milkWhite,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: (!searchMode)
+                    ? IconButton(
+                        onPressed: () => setState(() => searchMode = true),
+                        icon:
+                            const Icon(FluentIcons.search_24_filled, size: 28),
+                      )
+                    : TextButton(
+                        onPressed: () => setState(() => searchMode = false),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: AppColor().yaleBlue,
+                          ),
+                        ),
+                      ),
+              ),
+            ],
             bottom: TabBar(
               controller: _tabController,
               labelColor: AppColor().blueZodiac,
@@ -340,46 +332,104 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
               ],
             ),
           ),
-          body: TabBarView(
-            controller: _tabController,
-            physics: const NeverScrollableScrollPhysics(),
-            children: <Widget>[
-              Container(
-                color: AppColor().milkWhite,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: jobAssignedList.isEmpty
-                      ? const Center(child: Text('No job assign for today'))
-                      : ListView.builder(
-                          itemCount: jobAssignedList.length,
-                          itemBuilder: ((context, index) =>
-                              jobAssignedContent(index))),
+          body: Consumer<PalletNotifier>(builder: ((context, value, child) {
+            List<Pallet> allJobs =
+                value.pallets.entries.map((e) => e.value).toList();
+
+            jobAssignedList = List.empty(growable: true);
+            jobConfirmList = List.empty(growable: true);
+            jobLoadingList = List.empty(growable: true);
+            allPalletNoList = List.empty(growable: true);
+
+            for (var i = 0; i < allJobs.length; i++) {
+              if (allJobs[i].status == "Load Job Pending") {
+                jobAssignedList.add(allJobs[i]);
+              } else if (allJobs[i].status == "Load Job Confirmed") {
+                jobConfirmList.add(allJobs[i]);
+              } else if (allJobs[i].status == "Loading To Truck") {
+                jobLoadingList.add(allJobs[i]);
+              }
+
+              //Only get the palletNo
+              allPalletNoList.add(allJobs[i].palletNo);
+            }
+
+            return TabBarView(
+              controller: _tabController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: <Widget>[
+                Container(
+                  color: AppColor().milkWhite,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: jobAssignedList.isEmpty
+                        ? Center(
+                            child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/job-done-background.png',
+                                scale: 2.3,
+                              ),
+                              const SizedBox(height: 3),
+                              const Text('No assigned job for today.'),
+                            ],
+                          ))
+                        : ListView.builder(
+                            itemCount: jobAssignedList.length,
+                            itemBuilder: ((context, index) =>
+                                jobAssignedContent(index))),
+                  ),
                 ),
-              ),
-              Container(
-                color: AppColor().milkWhite,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: jobConfirmList.isEmpty
-                      ? const Center(child: Text('No job confirm for today'))
-                      : ListView.builder(
-                          itemCount: jobConfirmList.length,
-                          itemBuilder: ((context, index) =>
-                              confirmJobContent(index))),
+                Container(
+                  color: AppColor().milkWhite,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: jobConfirmList.isEmpty
+                        ? Center(
+                            child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/job-done-background.png',
+                                scale: 2.3,
+                              ),
+                              const SizedBox(height: 3),
+                              const Text('No confirm job for today.'),
+                            ],
+                          ))
+                        : ListView.builder(
+                            itemCount: jobConfirmList.length,
+                            itemBuilder: ((context, index) =>
+                                confirmJobContent(index))),
+                  ),
                 ),
-              ),
-              Container(
-                color: AppColor().milkWhite,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: ListView.builder(
-                      itemCount: jobLoadingList.length,
-                      itemBuilder: ((context, index) =>
-                          jobLoadsContent(index))),
+                Container(
+                  color: AppColor().milkWhite,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: jobLoadingList.isEmpty
+                        ? Center(
+                            child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/job-done-background.png',
+                                scale: 2.3,
+                              ),
+                              const SizedBox(height: 3),
+                              const Text('No loading job for today.'),
+                            ],
+                          ))
+                        : ListView.builder(
+                            itemCount: jobLoadingList.length,
+                            itemBuilder: ((context, index) =>
+                                jobLoadsContent(index))),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            );
+          })),
         ),
       );
     }
@@ -483,187 +533,4 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
           );
         },
       );
-
-  // Create Signature pop up box
-  Future<void> closePalletDialogBox(index) {
-    return showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: '',
-      pageBuilder: (context, animation1, animation2) {
-        return Container();
-      },
-      transitionBuilder: (context, a1, a2, widget) {
-        return ScaleTransition(
-          scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
-          child: FadeTransition(
-            opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
-            child: AlertDialog(
-              elevation: 3.0,
-              backgroundColor: AppColor().milkWhite,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(10),
-                ),
-              ),
-              title: Center(
-                child: Text(
-                  'Sign To Close Pallet: ${jobAssignedList[index].palletNo}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    height: 280,
-                    width: double.maxFinite,
-                    child: SfSignaturePad(
-                      key: signaturePadKey,
-                      minimumStrokeWidth: 1,
-                      maximumStrokeWidth: 3,
-                      strokeColor: Colors.blue,
-                      backgroundColor: Colors.white,
-                      onDrawEnd: () {
-                        _signature = true;
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  //Listen to the signature value
-                  ValueListenableBuilder<bool>(
-                    valueListenable: _signatureValidNotifier,
-                    builder: (context, signatureValid, _) {
-                      return AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        child: signatureValid
-                            ? const SizedBox.shrink()
-                            : customTextErr(signatureErr),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              actions: <Widget>[
-                Column(
-                  children: [
-                    ListTile(
-                      title: Text('Clear Signature',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.blue.shade500,
-                            fontWeight: FontWeight.w600,
-                          )),
-                      onTap: () {
-                        _signature = null;
-                        signaturePadKey.currentState!.clear();
-                      },
-                    ),
-                    Divider(
-                      thickness: 2.0,
-                      indent: 20.0,
-                      endIndent: 20.0,
-                      height: 0.1,
-                      color: Colors.grey.shade300,
-                    ),
-                    ListTile(
-                      title: Text(
-                        'Submit Signature',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 17,
-                          color: Colors.blue.shade500,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      onTap: () => validateSignature(index),
-                    ),
-                    Divider(
-                      thickness: 2.0,
-                      indent: 20.0,
-                      endIndent: 20.0,
-                      height: 0.1,
-                      color: Colors.grey.shade300,
-                    ),
-                    ListTile(
-                      title: const Text(
-                        'Cancel',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.pop(context);
-                        _signatureValidNotifier.value = true;
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void validateSignature(index) async {
-    if (_signature != null) {
-      await _sendSignature(jobLoadingList[index].palletActivityId).then((_) {
-        Navigator.pop(context);
-      });
-    } else {
-      signatureErr = 'Please sign the pallet before submit.';
-      _signatureValidNotifier.value = false;
-    }
-  }
-
-  _sendSignature(index) async {
-    // Save the signature as a file
-    ui.Image signature = await signaturePadKey.currentState!.toImage();
-
-    ByteData? byteData =
-        await signature.toByteData(format: ui.ImageByteFormat.png);
-    Uint8List signatureBytes = byteData!.buffer.asUint8List();
-
-    //Create temporary directory to store the signature image
-    final tempDir = await getTemporaryDirectory();
-    File signatureFile =
-        File('${tempDir.path}/${jobLoadingList[index].palletNo}.jpeg');
-    await signatureFile.writeAsBytes(signatureBytes);
-
-    var res = await ApiServices.signature.sendSignature(
-        jobLoadingList[index].palletActivityId, signatureFile, isAccess);
-
-    if (mounted) {
-      if (res.statusCode != HttpStatus.ok) {
-        customShowToast(
-          context,
-          'Failed to send signature. Please try again.',
-          Colors.red.shade300,
-          false,
-        );
-        return;
-      } else {
-        customShowToast(
-          context,
-          'Successfully sign the pallet.',
-          Colors.red.shade300,
-          false,
-        );
-
-        // Call the close pallet api
-        closePallet(jobLoadingList[index].palletActivityId);
-        return;
-      }
-    }
-    setState(() {});
-  }
 }

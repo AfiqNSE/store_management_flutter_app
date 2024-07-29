@@ -56,13 +56,15 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
   void initState() {
     super.initState();
     loadPallet().then((value) {
-      if (value != null && value > 0) {
+      if (value > 0) {
         WidgetsBinding.instance.addPostFrameCallback(
-          (_) => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Pallet not found."),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
-          )),
+          (_) => customShowToast(
+            context,
+            "Pallet not found.",
+            Colors.red.shade300,
+            false,
+            onDismiss: () => Navigator.pop(context),
+          ),
         );
       }
     });
@@ -71,10 +73,8 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
   }
 
   // Load pallet when pallectActivityId is not present
-  loadPallet() async {
-    if (widget.palletActivityId != 0) {
-      return;
-    }
+  Future<int> loadPallet() async {
+    if (widget.palletActivityId != 0) return 0;
 
     // Search pallet with palletNo
     Map<String, dynamic> res = await ApiServices.pallet.getByNo(
@@ -110,29 +110,54 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
     Widget palletDetails = Container(
       alignment: Alignment.topCenter,
       width: double.infinity,
-      padding: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
       decoration: BoxDecoration(
         color: AppColor().milkWhite,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(children: [
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Pallet No:',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+      child: Column(children: [
+        const Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'Pallet No:',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+        ),
+        (pallet == null)
+            ? Shimmer.fromColors(
+                baseColor: Colors.grey.shade300,
+                highlightColor: Colors.grey.shade100,
+                child: Container(
+                  width: 200,
+                  height: 45,
+                  margin: const EdgeInsets.only(top: 10, bottom: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              )
+            : Text(
+                pallet!.palletNo,
+                style: TextStyle(
+                  fontSize: 40,
+                  color: AppColor().tealBlue,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+        Divider(color: Colors.grey.shade400, indent: 10, endIndent: 10),
+        Row(children: [
+          const Text(
+            'Status: ',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           (pallet == null)
               ? Shimmer.fromColors(
                   baseColor: Colors.grey.shade300,
                   highlightColor: Colors.grey.shade100,
                   child: Container(
-                    width: 200,
-                    height: 45,
-                    margin: const EdgeInsets.only(top: 10, bottom: 10),
+                    width: 130,
+                    height: 20,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
@@ -140,61 +165,33 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                   ),
                 )
               : Text(
-                  pallet!.palletNo,
+                  pallet!.status,
                   style: TextStyle(
-                    fontSize: 40,
+                    fontSize: 16,
                     color: AppColor().tealBlue,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-          Divider(color: Colors.grey.shade400, indent: 10, endIndent: 10),
-          Row(children: [
-            const Text(
-              'Status: ',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            (pallet == null)
-                ? Shimmer.fromColors(
-                    baseColor: Colors.grey.shade300,
-                    highlightColor: Colors.grey.shade100,
-                    child: Container(
-                      width: 130,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  )
-                : Text(
-                    pallet!.status,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColor().tealBlue,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-            IconButton(
-              onPressed: (pallet == null)
-                  ? null
-                  : () => showQuickPICInfo(context, pallet!),
-              icon: Icon(Icons.info_outline, color: AppColor().tealBlue),
-            )
-          ]),
-          const SizedBox(height: 10),
-          createPalletDetails('Type', pallet?.palletType.capitalize()),
-          const SizedBox(height: 5),
-          createPalletDetails('Destination', pallet?.destination.capitalize()),
-          const SizedBox(height: 5),
-          createPalletDetails('Lorry No', pallet?.lorryNo),
-          const SizedBox(height: 5),
-          createPalletDetails(
-            'Forklift Driver',
-            pallet?.assignToUserName.capitalize(),
-          ),
-          const SizedBox(height: 5),
+          IconButton(
+            onPressed: (pallet == null)
+                ? null
+                : () => showQuickPICInfo(context, pallet!),
+            icon: Icon(Icons.info_outline, color: AppColor().tealBlue),
+          )
         ]),
-      ),
+        const SizedBox(height: 10),
+        createPalletDetails('Type', pallet?.palletType.capitalize()),
+        const SizedBox(height: 5),
+        createPalletDetails('Destination', pallet?.destination.capitalize()),
+        const SizedBox(height: 5),
+        createPalletDetails('Lorry No', pallet?.lorryNo),
+        const SizedBox(height: 5),
+        createPalletDetails(
+          'Forklift Driver',
+          pallet?.assignToUserName.capitalize(),
+        ),
+        const SizedBox(height: 5),
+      ]),
     );
 
     Widget signatureArea = Padding(

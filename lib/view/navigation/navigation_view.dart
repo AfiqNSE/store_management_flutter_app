@@ -5,6 +5,7 @@ import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
+import 'package:store_management_system/models/summary.dart';
 import 'package:store_management_system/view/job/job_view.dart';
 import 'package:store_management_system/view/pallet/pallet_details.dart';
 import 'package:store_management_system/view/pallet/pallet_view.dart';
@@ -32,6 +33,12 @@ class _NavigationTabViewState extends State<NavigationTabView>
     setupInteractedMessage();
     WidgetsBinding.instance.addObserver(this);
     Provider.of<PalletNotifier>(context, listen: false).initialize();
+  }
+
+  void _handleTabSelection() {
+    setState(() {
+      _currentIndex = _tabController.index;
+    });
   }
 
   // Handle notification interaction
@@ -75,13 +82,8 @@ class _NavigationTabViewState extends State<NavigationTabView>
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
       Provider.of<PalletNotifier>(context, listen: false).initialize();
+      Provider.of<SummaryNotifier>(context, listen: false).update();
     }
-  }
-
-  void _handleTabSelection() {
-    setState(() {
-      _currentIndex = _tabController.index;
-    });
   }
 
   @override
@@ -106,57 +108,44 @@ class _NavigationTabViewState extends State<NavigationTabView>
             borderRadius: const BorderRadius.all(Radius.circular(25)),
             color: AppColor().blueZodiac,
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 15,
-              vertical: 10,
-            ),
-            child: GNav(
-              style: GnavStyle.google,
-              curve: Curves.easeInCubic,
-              color: Colors.white,
-              activeColor: Colors.white,
-              tabBackgroundColor: Colors.white24,
-              gap: 5,
-              selectedIndex: _currentIndex,
-              padding: const EdgeInsets.all(11),
-              tabs: [
-                GButton(
-                  icon: Icons.home,
-                  text: 'Home',
-                  onPressed: () {
-                    _tabController.animateTo(0);
-                  },
-                ),
-                GButton(
-                  icon: Icons.format_list_bulleted_outlined,
-                  text: 'Pallets',
-                  onPressed: () {
-                    _tabController.animateTo(1);
-                  },
-                ),
-                GButton(
-                  icon: FluentIcons.clipboard_task_list_rtl_24_filled,
-                  text: 'Jobs',
-                  onPressed: () {
-                    _tabController.animateTo(2);
-                  },
-                ),
-                GButton(
-                  icon: FluentIcons.person_accounts_24_filled,
-                  text: 'Account',
-                  onPressed: () {
-                    _tabController.animateTo(3);
-                  },
-                ),
-              ],
-              onTabChange: (index) {
-                setState(() {
-                  _tabController.animateTo(index);
-                  _currentIndex = index;
-                });
-              },
-            ),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          child: GNav(
+            style: GnavStyle.google,
+            curve: Curves.easeInCubic,
+            color: Colors.white,
+            activeColor: Colors.white,
+            tabBackgroundColor: Colors.white24,
+            gap: 5,
+            selectedIndex: _currentIndex,
+            padding: const EdgeInsets.all(11),
+            tabs: [
+              GButton(
+                icon: Icons.home,
+                text: 'Home',
+                onPressed: () => _tabController.animateTo(0),
+              ),
+              GButton(
+                icon: Icons.format_list_bulleted_outlined,
+                text: 'Pallets',
+                onPressed: () => _tabController.animateTo(1),
+              ),
+              GButton(
+                icon: FluentIcons.clipboard_task_list_rtl_24_filled,
+                text: 'Jobs',
+                onPressed: () => _tabController.animateTo(2),
+              ),
+              GButton(
+                icon: FluentIcons.person_accounts_24_filled,
+                text: 'Account',
+                onPressed: () => _tabController.animateTo(3),
+              ),
+            ],
+            onTabChange: (index) {
+              setState(() {
+                _tabController.animateTo(index);
+                _currentIndex = index;
+              });
+            },
           ),
         ),
       ),

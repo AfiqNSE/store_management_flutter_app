@@ -68,9 +68,11 @@ ToastFuture customShowToast(
   String text,
   Color color, {
   bool dismiss = false,
+  void Function()? onDismiss,
 }) =>
     showToast(
       dismissOtherToast: dismiss,
+      onDismiss: onDismiss,
       text,
       context: context,
       axis: Axis.horizontal,

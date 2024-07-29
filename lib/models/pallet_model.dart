@@ -9,14 +9,14 @@ class Pallet {
   String lorryNo;
   String palletType;
   String destination;
-  String? openPalletDateTime;
+  String openPalletDateTime;
   String openPalletLocation;
   String? openByUserName;
   String? movePalletDateTime;
   String? moveByUserName;
   String? assignPalletDateTime;
   String? assignToUserGuid;
-  String? assignToUserName;
+  String assignToUserName;
   String? assignByUserName;
   String? loadPalletDateTime;
   String? loadByUserName;

@@ -104,14 +104,12 @@ class _HomeViewState extends State<HomeView> {
           mainAxisSpacing: 10,
           scrollDirection: Axis.horizontal,
           crossAxisCount: 1,
-          children: <Widget>[
+          children: [
             createQuickAction(
               'Open Forms',
-              onTap: () => {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (contex) => const PalletFormView(),
-                ))
-              },
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (contex) => const PalletFormView(),
+              )),
               icon: FluentIcons.form_new_24_filled,
             ),
             createQuickAction(
@@ -122,7 +120,8 @@ class _HomeViewState extends State<HomeView> {
             createQuickAction(
               'Search',
               onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const SearchPalletView())),
+                builder: (context) => const SearchPalletView(),
+              )),
               icon: FluentIcons.search_24_filled,
             ),
             createQuickAction(
@@ -196,70 +195,59 @@ class _HomeViewState extends State<HomeView> {
                 color: AppColor().blueZodiac,
               )),
             ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
-                      child: Text(
-                        'What would you like to do today?',
-                        style: TextStyle(
-                          color: Color.fromRGBO(40, 40, 43, 1),
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
+            padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                    child: Text(
+                      'What would you like to do today?',
+                      style: TextStyle(
+                        color: Color.fromRGBO(40, 40, 43, 1),
+                        fontSize: 17,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  quickbar,
+                  Divider(color: Colors.grey.shade400, indent: 8, endIndent: 8),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Pallet's Summary",
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
+                        IconButton(
+                          onPressed: refreshSummary,
+                          icon: const Icon(Icons.refresh_outlined, size: 30),
+                        )
+                      ],
                     ),
-                    quickbar,
-                    Divider(
-                      color: Colors.grey.shade400,
-                      indent: 8,
-                      endIndent: 8,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(8, 5, 8, 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Pallet's Summary",
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: refreshSummary,
-                            icon: const Icon(
-                              Icons.refresh_outlined,
-                              size: 30,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    Consumer<SummaryNotifier>(
-                      builder: (context, summary, child) {
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 5, 8, 90),
-                          child: SingleChildScrollView(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                createSummaryCard("Pallets", summary.pallets),
-                                createSummaryCard("inbound", summary.inBound),
-                                createSummaryCard("outbound", summary.outBound),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                  ),
+                  Consumer<SummaryNotifier>(
+                    builder: (context, summary, child) {
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 5, 8, 90),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            createSummaryCard("Pallets", summary.pallets),
+                            createSummaryCard("inbound", summary.inBound),
+                            createSummaryCard("outbound", summary.outBound),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ),
@@ -279,30 +267,14 @@ class _HomeViewState extends State<HomeView> {
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: AppColor().milkWhite,
-              width: 1.2,
-            ),
-            borderRadius: BorderRadius.circular(15),
-            color: Colors.white,
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Icon(icon, size: 28, color: Colors.grey.shade800),
+          const SizedBox(height: 10),
+          Text(
+            text,
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 28, color: Colors.grey.shade800),
-              const SizedBox(height: 10),
-              Text(
-                text,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
+        ]),
       ),
     );
   }
@@ -325,18 +297,12 @@ class _HomeViewState extends State<HomeView> {
           Colors.red.shade300,
         );
       }
+
       barcodeScanRes = '-1';
     }
 
-    if (barcodeScanRes == '-1') {
-      return;
-    }
-
-    Pallet? pallet;
-
-    Map<String, dynamic> res = await ApiServices.pallet.getByNo(
-      barcodeScanRes,
-    );
+    if (barcodeScanRes == '-1') return;
+    Map<String, dynamic> res = await ApiServices.pallet.getByNo(barcodeScanRes);
 
     if (mounted) {
       if (res.containsKey("err")) {
@@ -347,13 +313,12 @@ class _HomeViewState extends State<HomeView> {
           dismiss: true,
         );
       } else {
-        pallet = Pallet.fromMap(res);
-        Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (context) => PalletDetailsView(
-                    palletActivityId: pallet!.palletActivityId,
-                  )),
-        );
+        Pallet pallet = Pallet.fromMap(res);
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => PalletDetailsView(
+            palletActivityId: pallet.palletActivityId,
+          ),
+        ));
       }
     }
   }
@@ -395,39 +360,39 @@ class _HomeViewState extends State<HomeView> {
             borderRadius: BorderRadius.circular(10),
             color: customCardColor(text),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                RichText(
-                  text: TextSpan(
-                      text: 'Total:\n',
-                      style: TextStyle(
-                        fontSize: 17,
-                        color: Colors.grey.shade800,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      children: <TextSpan>[
-                        TextSpan(
-                            text: text.toUpperCase(),
-                            style: TextStyle(
-                              color: AppColor().matteBlack,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w500,
-                            )),
-                      ]),
-                ),
-                Text(
-                  '$value',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 35,
+          padding: const EdgeInsets.all(10.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              RichText(
+                text: TextSpan(
+                  text: 'Total:\n',
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Colors.grey.shade800,
+                    fontWeight: FontWeight.w600,
                   ),
+                  children: [
+                    TextSpan(
+                      text: text.toUpperCase(),
+                      style: TextStyle(
+                        color: AppColor().matteBlack,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Text(
+                '$value',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 35,
+                ),
+              ),
+            ],
           ),
         ),
       ),

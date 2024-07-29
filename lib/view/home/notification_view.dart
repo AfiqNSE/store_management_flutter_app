@@ -66,7 +66,7 @@ class _NotificationViewState extends State<NotificationView>
         body: TabBarView(
           controller: _tabController,
           physics: const NeverScrollableScrollPhysics(),
-          children: <Widget>[
+          children: [
             Container(
               color: AppColor().milkWhite,
               child: Consumer<NotifNotifier>(
@@ -153,9 +153,7 @@ class _NotificationViewState extends State<NotificationView>
       subtitle: Text(subtitle),
       trailing: Text(time),
       onTap: () => Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => PalletDetailsView(
-          palletNo: notif.palletNo,
-        ),
+        builder: (context) => PalletDetailsView(palletNo: notif.palletNo),
       )),
     );
   }

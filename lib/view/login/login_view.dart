@@ -16,8 +16,8 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController username = TextEditingController();
-  TextEditingController password = TextEditingController();
+  final TextEditingController username = TextEditingController();
+  final TextEditingController password = TextEditingController();
 
   bool loading = true;
 
@@ -56,12 +56,7 @@ class _LoginViewState extends State<LoginView> {
       return loggedin;
     }
 
-    try {
-      loggedin = await ApiServices.user.authorized();
-    } catch (e) {
-      debugPrint("Error: [Login] ${e.toString()}");
-    }
-
+    loggedin = await ApiServices.user.authorized();
     if (!loggedin) {
       debugPrint("[Login] User is NOT logged in");
       setState(() {
@@ -207,51 +202,48 @@ class _LoginViewState extends State<LoginView> {
     // Bottom component: Login button, app name & version
     Widget bottomComponent = Padding(
       padding: const EdgeInsets.fromLTRB(35, 0, 35, 15),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Column(children: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                minimumSize: const Size(120, 50),
-                backgroundColor: AppColor().blueZodiac,
-                disabledBackgroundColor: const Color.fromRGBO(31, 48, 94, .5),
-                elevation: 3,
+      child: Column(children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
               ),
-              onPressed: (loading) ? null : () => submit(),
-              child: const Text(
-                'Login',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w400,
-                ),
+              minimumSize: const Size(120, 50),
+              backgroundColor: AppColor().blueZodiac,
+              disabledBackgroundColor: const Color.fromRGBO(31, 48, 94, .5),
+              elevation: 3,
+            ),
+            onPressed: (loading) ? null : () => submit(),
+            child: const Text(
+              'Login',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ),
-          const SizedBox(height: 15),
-          Text(
-            "Store Management Application",
-            style: TextStyle(
-              fontSize: 15,
-              color: Colors.grey.shade700,
-              fontWeight: FontWeight.w700,
-            ),
+        ),
+        const SizedBox(height: 15),
+        Text(
+          "Store Management Application",
+          style: TextStyle(
+            fontSize: 15,
+            color: Colors.grey.shade700,
+            fontWeight: FontWeight.w700,
           ),
-          Text(
-            "v1.0.0",
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade700,
-              fontWeight: FontWeight.w700,
-            ),
+        ),
+        Text(
+          "v1.0.0",
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.grey.shade700,
+            fontWeight: FontWeight.w700,
           ),
-        ]),
-      ),
+        ),
+      ]),
     );
 
     return GestureDetector(

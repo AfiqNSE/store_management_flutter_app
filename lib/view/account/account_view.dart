@@ -51,7 +51,7 @@ class _AccountViewState extends State<AccountView> {
         elevation: 0.0,
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 25.0),
+            padding: const EdgeInsets.only(right: 10.0),
             child: IconButton(
               onPressed: () => _logout(),
               icon: const Icon(

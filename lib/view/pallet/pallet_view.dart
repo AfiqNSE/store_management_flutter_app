@@ -78,18 +78,18 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
     );
 
     Widget createTab(text, value) => Tab(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Stack(
             children: [
-              Text(
-                text,
-                style:
-                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              Center(
+                child: Text(
+                  text,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 13),
+                ),
               ),
-              const SizedBox(width: 5),
               value != 0
                   ? Align(
-                      alignment: Alignment.topCenter,
+                      alignment: Alignment.topRight,
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.red.shade300,
@@ -118,167 +118,171 @@ class _PalletViewState extends State<PalletView> with TickerProviderStateMixin {
       initialIndex: 0,
       length: 2,
       child: Scaffold(
-        appBar: AppBar(
-          title: Padding(
-            padding: const EdgeInsets.only(left: 5.0),
-            child: searchMode ? search : appBarTitle,
-          ),
-          backgroundColor: AppColor().milkWhite,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: (!searchMode)
-                  ? IconButton(
-                      onPressed: () => setState(() => searchMode = true),
-                      icon: const Icon(FluentIcons.search_24_filled, size: 28),
-                    )
-                  : TextButton(
-                      onPressed: () => setState(() => searchMode = false),
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: AppColor().yaleBlue,
-                        ),
-                      ),
-                    ),
-            ),
-          ],
-          bottom: TabBar(
-            labelColor: AppColor().blueZodiac,
-            indicatorColor: AppColor().blueZodiac,
-            controller: _tabController,
-            tabs: <Widget>[
-              Consumer<SummaryNotifier>(builder: (context, value, child) {
-                return createTab('All', value.pallets);
-              }),
-              Consumer<SummaryNotifier>(builder: (context, value, child) {
-                return createTab('InBound', value.inBound);
-              }),
-              Consumer<SummaryNotifier>(builder: (context, value, child) {
-                return createTab('OutBound', value.outBound);
-              })
-            ],
-          ),
-        ),
-        body: Consumer<PalletNotifier>(
-          builder: (context, value, child) {
-            List<Pallet> allPalletList =
-                value.pallets.entries.map((e) => e.value).toList();
-
-            if (allPalletList.isNotEmpty) {
-              isLoading = true;
-            }
-
-            List<Pallet> inBoundPalletList = List.empty(growable: true);
-            List<Pallet> outBoundPalletList = List.empty(growable: true);
-
-            for (var i = 0; i < allPalletList.length; i++) {
-              if (allPalletList[i].palletLocation == "inbound") {
-                inBoundPalletList.add(allPalletList[i]);
-              }
-              if (allPalletList[i].palletLocation == "outbound") {
-                outBoundPalletList.add(allPalletList[i]);
-              }
-            }
-
-            if (isLoading == true) {
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Center(
-                    child: CircularProgressIndicator(
-                      color: AppColor().blueZodiac,
-                    ),
+        body: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverAppBar(
+                backgroundColor: AppColor().milkWhite,
+                title: searchMode ? search : appBarTitle,
+                pinned: true,
+                floating: true,
+                forceElevated: innerBoxIsScrolled,
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: (!searchMode)
+                        ? IconButton(
+                            onPressed: () => setState(() => searchMode = true),
+                            icon: const Icon(FluentIcons.search_24_filled,
+                                size: 28),
+                          )
+                        : TextButton(
+                            onPressed: () => setState(() => searchMode = false),
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: AppColor().yaleBlue,
+                              ),
+                            ),
+                          ),
                   ),
-                  const SizedBox(height: 10),
-                  const Text('Loading data...'),
                 ],
-              );
-            }
-
-            return TabBarView(
-              controller: _tabController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: <Widget>[
-                Container(
-                  color: AppColor().milkWhite,
-                  padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                  child: allPalletList.isEmpty
-                      ? Center(
-                          child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/images/pallet-background.png',
-                              scale: 2.3,
-                            ),
-                            const SizedBox(height: 5),
-                            const Text('No pallet for today.'),
-                          ],
-                        ))
-                      : ListView.builder(
-                          itemCount: allPalletList.length,
-                          itemBuilder: ((context, index) => Padding(
-                                padding: const EdgeInsets.only(bottom: 5),
-                                child: createPalletCard(
-                                    context, allPalletList[index]),
-                              )),
-                        ),
+                bottom: TabBar(
+                  labelColor: AppColor().blueZodiac,
+                  indicatorColor: AppColor().blueZodiac,
+                  controller: _tabController,
+                  tabs: <Widget>[
+                    Consumer<SummaryNotifier>(builder: (context, value, child) {
+                      return createTab('All', value.pallets);
+                    }),
+                    Consumer<SummaryNotifier>(builder: (context, value, child) {
+                      return createTab('InBound', value.inBound);
+                    }),
+                    Consumer<SummaryNotifier>(builder: (context, value, child) {
+                      return createTab('OutBound', value.outBound);
+                    })
+                  ],
                 ),
-                Container(
-                  color: AppColor().milkWhite,
-                  padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                  child: inBoundPalletList.isEmpty
-                      ? Center(
-                          child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/images/inbound-background.png',
-                              scale: 1.8,
-                            ),
-                            const SizedBox(height: 3),
-                            const Text('No inbound pallet for today.'),
-                          ],
-                        ))
-                      : ListView.builder(
-                          itemCount: inBoundPalletList.length,
-                          itemBuilder: ((context, index) => Padding(
-                                padding: const EdgeInsets.only(bottom: 5),
-                                child: createPalletCard(
-                                    context, inBoundPalletList[index]),
-                              )),
-                        ),
-                ),
-                Container(
-                  color: AppColor().milkWhite,
-                  padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
-                  child: outBoundPalletList.isEmpty
-                      ? Center(
-                          child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/images/outbound-background.png',
-                              scale: 1.8,
-                            ),
-                            const SizedBox(height: 3),
-                            const Text('No outbound pallet for today.'),
-                          ],
-                        ))
-                      : ListView.builder(
-                          itemCount: outBoundPalletList.length,
-                          itemBuilder: ((context, index) => Padding(
-                                padding: const EdgeInsets.only(bottom: 5),
-                                child: createPalletCard(
-                                    context, outBoundPalletList[index]),
-                              )),
-                        ),
-                ),
-              ],
-            );
+              ),
+            ];
           },
+          body: Consumer<PalletNotifier>(
+            builder: (context, value, child) {
+              List<Pallet> allPalletList =
+                  value.pallets.entries.map((e) => e.value).toList();
+
+              if (allPalletList.isNotEmpty) {
+                isLoading = true;
+              }
+
+              List<Pallet> inBoundPalletList = List.empty(growable: true);
+              List<Pallet> outBoundPalletList = List.empty(growable: true);
+
+              for (var i = 0; i < allPalletList.length; i++) {
+                if (allPalletList[i].palletLocation == "inbound") {
+                  inBoundPalletList.add(allPalletList[i]);
+                }
+                if (allPalletList[i].palletLocation == "outbound") {
+                  outBoundPalletList.add(allPalletList[i]);
+                }
+              }
+
+              if (isLoading == true) {
+                Container(
+                  color: const Color.fromRGBO(255, 255, 255, .8),
+                  child:
+                      const Center(child: CircularProgressIndicator.adaptive()),
+                );
+              }
+
+              return MediaQuery.removePadding(
+                removeTop: true,
+                context: context,
+                child: TabBarView(
+                  controller: _tabController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: <Widget>[
+                    Container(
+                      color: AppColor().milkWhite,
+                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                      child: allPalletList.isEmpty
+                          ? Center(
+                              child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/pallet-background.png',
+                                  scale: 2.3,
+                                ),
+                                const SizedBox(height: 5),
+                                const Text('No pallet for today.'),
+                              ],
+                            ))
+                          : ListView.builder(
+                              itemCount: allPalletList.length,
+                              itemBuilder: ((context, index) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 5),
+                                    child: createPalletCard(
+                                        context, allPalletList[index]),
+                                  )),
+                            ),
+                    ),
+                    Container(
+                      color: AppColor().milkWhite,
+                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                      child: inBoundPalletList.isEmpty
+                          ? Center(
+                              child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/inbound-background.png',
+                                  scale: 1.8,
+                                ),
+                                const SizedBox(height: 3),
+                                const Text('No inbound pallet for today.'),
+                              ],
+                            ))
+                          : ListView.builder(
+                              itemCount: inBoundPalletList.length,
+                              itemBuilder: ((context, index) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 5),
+                                    child: createPalletCard(
+                                        context, inBoundPalletList[index]),
+                                  )),
+                            ),
+                    ),
+                    Container(
+                      color: AppColor().milkWhite,
+                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                      child: outBoundPalletList.isEmpty
+                          ? Center(
+                              child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/outbound-background.png',
+                                  scale: 1.8,
+                                ),
+                                const SizedBox(height: 3),
+                                const Text('No outbound pallet for today.'),
+                              ],
+                            ))
+                          : ListView.builder(
+                              itemCount: outBoundPalletList.length,
+                              itemBuilder: ((context, index) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 5),
+                                    child: createPalletCard(
+                                        context, outBoundPalletList[index]),
+                                  )),
+                            ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

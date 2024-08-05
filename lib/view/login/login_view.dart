@@ -364,8 +364,6 @@ class _LoginViewState extends State<LoginView> {
     Storage.instance.setAccessToken(res["token"]["access"]);
     Storage.instance.setRefreshToken(res["token"]["refresh"]);
 
-    print(res["user"]["userType"]);
-
     return 0;
   }
 }

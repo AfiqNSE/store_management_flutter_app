@@ -10,6 +10,7 @@ import 'package:store_management_system/components/print_BLE_components.dart';
 import 'package:store_management_system/components/print_Wifi_components.dart';
 import 'package:store_management_system/models/color_model.dart';
 import 'package:store_management_system/models/pallet_model.dart';
+import 'package:store_management_system/models/summary.dart';
 import 'package:store_management_system/services/api_services.dart';
 import 'package:store_management_system/utils/main_utils.dart';
 import 'package:store_management_system/components/pallet_components.dart';
@@ -286,7 +287,8 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                const Text('Signed by: '),
+                                Text(
+                                    'Signed by: ${pallet!.signature.createdByUserName!.capitalize()}'),
                               ],
                             );
                           }
@@ -761,13 +763,12 @@ class _PalletDetailsViewState extends State<PalletDetailsView> {
       setState(() {
         reqLoading = false;
 
+        Provider.of<SummaryNotifier>(context, listen: false).update();
+
         Provider.of<PalletNotifier>(context, listen: false)
             .update(pallet!.palletActivityId);
       });
     });
-
-    Provider.of<PalletNotifier>(context, listen: false)
-        .move(pallet!.palletActivityId);
   }
 
   void _assignJob() {

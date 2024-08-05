@@ -51,6 +51,8 @@ class _PalletSignatureState extends State<PalletSignature> {
 
       Provider.of<PalletNotifier>(context, listen: false)
           .close(palletActivityId);
+
+      Provider.of<PalletNotifier>(context, listen: false).initialize();
     }
   }
 
@@ -204,7 +206,7 @@ class _PalletSignatureState extends State<PalletSignature> {
   }
 
   _sendSignature(index) async {
-    // Save the signature as a file
+    // Save the signature as a img
     ui.Image signature = await signaturePadKey.currentState!.toImage();
 
     ByteData? byteData =
@@ -238,6 +240,7 @@ class _PalletSignatureState extends State<PalletSignature> {
         await closePallet(widget.palletActivityId).then((_) {
           Navigator.pop(context);
         });
+
         return;
       }
     }

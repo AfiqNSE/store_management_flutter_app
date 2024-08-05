@@ -32,6 +32,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
   late TabController _tabController;
   bool isAccess = true;
   bool searchMode = false;
+  bool isLoading = false;
 
   late String _searchValue = "";
 
@@ -39,6 +40,7 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    Provider.of<PalletNotifier>(context, listen: false).initialize();
   }
 
   @override
@@ -67,6 +69,8 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
 
       Provider.of<PalletNotifier>(context, listen: false)
           .confirm(palletActivityId);
+
+      Provider.of<PalletNotifier>(context, listen: false).initialize();
     }
   }
 
@@ -91,6 +95,8 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
 
       Provider.of<PalletNotifier>(context, listen: false)
           .load(palletActivityId);
+
+      Provider.of<PalletNotifier>(context, listen: false).initialize();
     }
   }
 
@@ -265,171 +271,215 @@ class _JobViewState extends State<JobView> with TickerProviderStateMixin {
         },
       );
 
+      Widget createTab(text, value) => Tab(
+            child: Stack(
+              children: [
+                Center(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: value != 0 ? 11 : 13),
+                  ),
+                ),
+                value != 0
+                    ? Align(
+                        alignment: Alignment.topRight,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade300,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Text(
+                              value.toString(),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                  color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ],
+            ),
+          );
+
       return DefaultTabController(
         initialIndex: 0,
         length: 2,
         child: Scaffold(
-          appBar: AppBar(
-            scrolledUnderElevation: 0.0,
-            title: Padding(
-              padding: const EdgeInsets.only(left: 5.0),
-              child: searchMode ? search : appBarTitle,
-            ),
-            backgroundColor: AppColor().milkWhite,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: (!searchMode)
-                    ? IconButton(
-                        onPressed: () => setState(() => searchMode = true),
-                        icon:
-                            const Icon(FluentIcons.search_24_filled, size: 28),
-                      )
-                    : TextButton(
-                        onPressed: () => setState(() => searchMode = false),
-                        child: Text(
-                          'Cancel',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: AppColor().yaleBlue,
-                          ),
+          body: NestedScrollView(
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                SliverAppBar(
+                  backgroundColor: AppColor().milkWhite,
+                  title: searchMode ? search : appBarTitle,
+                  pinned: true,
+                  floating: true,
+                  forceElevated: innerBoxIsScrolled,
+                  actions: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: (!searchMode)
+                          ? IconButton(
+                              onPressed: () =>
+                                  setState(() => searchMode = true),
+                              icon: const Icon(FluentIcons.search_24_filled,
+                                  size: 28),
+                            )
+                          : TextButton(
+                              onPressed: () =>
+                                  setState(() => searchMode = false),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColor().yaleBlue,
+                                ),
+                              ),
+                            ),
+                    ),
+                  ],
+                  bottom: TabBar(
+                    labelColor: AppColor().blueZodiac,
+                    indicatorColor: AppColor().blueZodiac,
+                    controller: _tabController,
+                    tabs: <Widget>[
+                      Consumer<PalletNotifier>(
+                          builder: (context, value, child) {
+                        return createTab('Job Assigned', value.assignedJob);
+                      }),
+                      Consumer<PalletNotifier>(
+                          builder: (context, value, child) {
+                        return createTab('Confirm Job', value.confirmJob);
+                      }),
+                      Consumer<PalletNotifier>(
+                          builder: (context, value, child) {
+                        return createTab('Loading Pallet', value.loadingJob);
+                      }),
+                    ],
+                  ),
+                ),
+              ];
+            },
+            body: Consumer<PalletNotifier>(
+              builder: ((context, value, child) {
+                List<Pallet> allJobs =
+                    value.pallets.entries.map((e) => e.value).toList();
+
+                jobAssignedList = List.empty(growable: true);
+                jobConfirmList = List.empty(growable: true);
+                jobLoadingList = List.empty(growable: true);
+                allPalletNoList = List.empty(growable: true);
+
+                for (var i = 0; i < allJobs.length; i++) {
+                  if (allJobs[i].status == "Load Job Pending") {
+                    jobAssignedList.add(allJobs[i]);
+                  } else if (allJobs[i].status == "Load Job Confirmed") {
+                    jobConfirmList.add(allJobs[i]);
+                  } else if (allJobs[i].status == "Loading To Truck") {
+                    jobLoadingList.add(allJobs[i]);
+                  }
+
+                  //Only get the palletNo
+                  allPalletNoList.add(allJobs[i].palletNo);
+                }
+
+                if (isLoading == true) {
+                  Container(
+                    color: const Color.fromRGBO(255, 255, 255, .8),
+                    child: const Center(
+                        child: CircularProgressIndicator.adaptive()),
+                  );
+                }
+
+                return MediaQuery.removePadding(
+                  removeTop: true,
+                  context: context,
+                  child: TabBarView(
+                    controller: _tabController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: <Widget>[
+                      Container(
+                        color: AppColor().milkWhite,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: jobAssignedList.isEmpty
+                              ? Center(
+                                  child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/job-done-background.png',
+                                      scale: 2.3,
+                                    ),
+                                    const SizedBox(height: 3),
+                                    const Text('No assigned job for today.'),
+                                  ],
+                                ))
+                              : ListView.builder(
+                                  itemCount: jobAssignedList.length,
+                                  itemBuilder: ((context, index) =>
+                                      jobAssignedContent(index))),
                         ),
                       ),
-              ),
-            ],
-            bottom: TabBar(
-              controller: _tabController,
-              labelColor: AppColor().blueZodiac,
-              indicatorColor: AppColor().blueZodiac,
-              tabs: const <Widget>[
-                Tab(
-                  child: Text(
-                    'Job Assigned',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
+                      Container(
+                        color: AppColor().milkWhite,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: jobConfirmList.isEmpty
+                              ? Center(
+                                  child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/job-done-background.png',
+                                      scale: 2.3,
+                                    ),
+                                    const SizedBox(height: 3),
+                                    const Text('No confirm job for today.'),
+                                  ],
+                                ))
+                              : ListView.builder(
+                                  itemCount: jobConfirmList.length,
+                                  itemBuilder: ((context, index) =>
+                                      confirmJobContent(index))),
+                        ),
+                      ),
+                      Container(
+                        color: AppColor().milkWhite,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: jobLoadingList.isEmpty
+                              ? Center(
+                                  child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/job-done-background.png',
+                                      scale: 2.3,
+                                    ),
+                                    const SizedBox(height: 3),
+                                    const Text('No loading job for today.'),
+                                  ],
+                                ))
+                              : ListView.builder(
+                                  itemCount: jobLoadingList.length,
+                                  itemBuilder: ((context, index) =>
+                                      jobLoadsContent(index))),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Tab(
-                  child: Text(
-                    'Confirm Job',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-                Tab(
-                  child: Text(
-                    'Loading Pallet',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-              ],
+                );
+              }),
             ),
           ),
-          body: Consumer<PalletNotifier>(builder: ((context, value, child) {
-            List<Pallet> allJobs =
-                value.pallets.entries.map((e) => e.value).toList();
-
-            jobAssignedList = List.empty(growable: true);
-            jobConfirmList = List.empty(growable: true);
-            jobLoadingList = List.empty(growable: true);
-            allPalletNoList = List.empty(growable: true);
-
-            for (var i = 0; i < allJobs.length; i++) {
-              if (allJobs[i].status == "Load Job Pending") {
-                jobAssignedList.add(allJobs[i]);
-              } else if (allJobs[i].status == "Load Job Confirmed") {
-                jobConfirmList.add(allJobs[i]);
-              } else if (allJobs[i].status == "Loading To Truck") {
-                jobLoadingList.add(allJobs[i]);
-              }
-
-              //Only get the palletNo
-              allPalletNoList.add(allJobs[i].palletNo);
-            }
-
-            return TabBarView(
-              controller: _tabController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: <Widget>[
-                Container(
-                  color: AppColor().milkWhite,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: jobAssignedList.isEmpty
-                        ? Center(
-                            child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/images/job-done-background.png',
-                                scale: 2.3,
-                              ),
-                              const SizedBox(height: 3),
-                              const Text('No assigned job for today.'),
-                            ],
-                          ))
-                        : ListView.builder(
-                            itemCount: jobAssignedList.length,
-                            itemBuilder: ((context, index) =>
-                                jobAssignedContent(index))),
-                  ),
-                ),
-                Container(
-                  color: AppColor().milkWhite,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: jobConfirmList.isEmpty
-                        ? Center(
-                            child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/images/job-done-background.png',
-                                scale: 2.3,
-                              ),
-                              const SizedBox(height: 3),
-                              const Text('No confirm job for today.'),
-                            ],
-                          ))
-                        : ListView.builder(
-                            itemCount: jobConfirmList.length,
-                            itemBuilder: ((context, index) =>
-                                confirmJobContent(index))),
-                  ),
-                ),
-                Container(
-                  color: AppColor().milkWhite,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: jobLoadingList.isEmpty
-                        ? Center(
-                            child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/images/job-done-background.png',
-                                scale: 2.3,
-                              ),
-                              const SizedBox(height: 3),
-                              const Text('No loading job for today.'),
-                            ],
-                          ))
-                        : ListView.builder(
-                            itemCount: jobLoadingList.length,
-                            itemBuilder: ((context, index) =>
-                                jobLoadsContent(index))),
-                  ),
-                ),
-              ],
-            );
-          })),
         ),
       );
     }

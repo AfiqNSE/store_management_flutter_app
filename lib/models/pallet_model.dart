@@ -246,17 +246,43 @@ class Attachment {
 }
 
 class PalletNotifier extends ChangeNotifier {
+  late int _assignedJob;
+  late int _confirmJob;
+  late int _loadingJob;
+
   Map<int, Pallet> _pallets = {};
 
   Map<int, Pallet> get pallets => _pallets;
+  int get assignedJob => _assignedJob;
+  int get confirmJob => _confirmJob;
+  int get loadingJob => _loadingJob;
 
   initialize() async {
+    _assignedJob = 0;
+    _confirmJob = 0;
+    _loadingJob = 0;
+
     List<dynamic> res = await ApiServices.pallet.all();
 
     if (res.isEmpty) {
       _pallets = {};
     } else {
-      _pallets = {for (var v in res) v["palletActivityId"]: Pallet.fromMap(v)};
+      for (final item in res) {
+        _pallets[item["palletActivityId"]] = Pallet.fromMap(item);
+
+        if (item["status"] == "Load Job Pending") {
+          _assignedJob++;
+        }
+
+        if (item["status"] == "Load Job Confirmed") {
+          _confirmJob++;
+        }
+
+        if (item["status"] == "Loading To Truck") {
+          _loadingJob++;
+        }
+      }
+      // _pallets = {for (var v in res) v["palletActivityId"]: Pallet.fromMap(v)};
     }
 
     notifyListeners();
